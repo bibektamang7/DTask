@@ -1,6 +1,17 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
-const userSchema = new Schema(
+export interface User extends Document{
+  _id: mongoose.Types.ObjectId,
+  username: string;
+  avatar: string;
+  email: string;
+  password: string;
+  workspaces: mongoose.Types.ObjectId[];
+  assignedTasks: mongoose.Types.ObjectId[];
+  createdTasks: mongoose.Types.ObjectId[];
+}
+
+const userSchema = new Schema<User>(
   {
     username: {
       type: String,
@@ -8,6 +19,7 @@ const userSchema = new Schema(
       unique: true,
       index: true,
     },
+    avatar: String,
     email: {
       type: String,
       unique: true,

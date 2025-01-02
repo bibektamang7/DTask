@@ -1,5 +1,5 @@
 import { Router } from "express";
-
+import { workspaceEditor } from "../middlewares/workspaceAuth";
 import {
   createWorkspace,
   deleteWorkspace,
@@ -9,9 +9,10 @@ import {
   getAllMembersFromWorkspace,
   deleteMemberFromWorkspace,
 } from "../controllers/workspace.controller";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router();
-
+router.use(authMiddleware);
 //still need to consider getAllmembers routes
 
 
@@ -24,7 +25,7 @@ router
 
 router
   .route("/members")
-  .post(addMemeberInWorkspace)
-  .delete(deleteMemberFromWorkspace);
+  .post(workspaceEditor,addMemeberInWorkspace)
+  .delete(workspaceEditor,deleteMemberFromWorkspace);
 
 export default router;

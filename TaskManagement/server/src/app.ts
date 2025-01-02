@@ -4,7 +4,7 @@ import cors from "cors"
 const app = express();
 
 cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CORS_ORIGIN,
 })
 
 app.use(express.urlencoded({ extended: true, limit: "20kb" }));
@@ -18,6 +18,6 @@ app.use("/api/v1/tasks", TaskRouter);
 app.use("/api/v1/workspaces", WorkspaceRouter);
 
 
-
+app.on("upgrade", () => {})
 
 export default app;

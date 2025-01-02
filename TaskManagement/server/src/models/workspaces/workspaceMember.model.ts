@@ -1,10 +1,20 @@
-import mongoose, {Schema} from "mongoose";
+import mongoose, {Schema, Document} from "mongoose";
 
-const workspaceMemberSchema = new Schema({
+type Role = "Member" | "Editor" | "Admin"
+
+export interface WorkspaceMember extends Document{
+    _id: mongoose.Types.ObjectId,
+    role: Role;
+    isJoined: boolean;
+    workspace: mongoose.Types.ObjectId;
+    userId: mongoose.Types.ObjectId
+}
+
+const workspaceMemberSchema = new Schema<WorkspaceMember>({
     role: {
         type: String,
         required: true,
-        enum: ["Editor", "Member"],
+        enum: ["Editor", "Member", "Admin"],
         default: "Member",
     },
     isJoined: {

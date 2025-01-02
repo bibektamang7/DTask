@@ -8,12 +8,20 @@ import {
   getTasks,
   updateTask,
 } from "../controllers/task.controller";
+import { workspaceEditor } from "../middlewares/workspaceAuth";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router();
 
 //not sure about get tasks and update task, need to review this route futher
-
-router.route("/").post(createTask).get(getTask).delete(deleteTask);
-router.route("/attachments").post(addAttachmentInTask).delete(deleteAttachmentFromTask)
+router.use(authMiddleware);
+router.route("/")
+  .post(workspaceEditor,createTask)
+  .get(getTask)
+  .delete(workspaceEditor ,deleteTask);
+router
+  .route("/attachments")
+  .post(workspaceEditor,addAttachmentInTask)
+  .delete(workspaceEditor,deleteAttachmentFromTask);
 
 export default router;
