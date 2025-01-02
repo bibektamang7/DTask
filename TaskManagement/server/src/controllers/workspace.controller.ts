@@ -48,12 +48,23 @@ const deleteWorkspace = asyncHandler(async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-
     await Promise.all([
-      AttachmentModel.deleteMany({ taskId: { $in: workspace.tasks } }, { session: session }),
-      CommentModel.deleteMany({ taskId: { $in: workspace.tasks } }, { session: session }),
-      TaskModel.deleteMany({ _id: { $in: workspace.tasks } }, { session: session }),
-      WorkspaceMemberModel.deleteMany({workspace: workspace._id}, {session: session}),
+      AttachmentModel.deleteMany(
+        { taskId: { $in: workspace.tasks } },
+        { session: session }
+      ),
+      CommentModel.deleteMany(
+        { taskId: { $in: workspace.tasks } },
+        { session: session }
+      ),
+      TaskModel.deleteMany(
+        { _id: { $in: workspace.tasks } },
+        { session: session }
+      ),
+      WorkspaceMemberModel.deleteMany(
+        { workspace: workspace._id },
+        { session: session }
+      ),
     ]);
 
     await WorkspaceModel.deleteOne({ _id: workspace._id }).session(session);
@@ -188,7 +199,8 @@ const addMemeberInWorkspace = asyncHandler(async (req, res) => {
   }
   if (
     parsedData.data.member.role === "Editor" &&
-    req.workspaceMember.role !== "Admin"
+    (req.workspaceMember.role !== "Admin" ||
+      req.workspaceMember.role === "Editor")
   ) {
     throw new ApiError(403, "Unauthorized to add editor");
   }

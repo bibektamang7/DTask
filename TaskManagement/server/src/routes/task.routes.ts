@@ -15,13 +15,15 @@ const router = Router();
 
 //not sure about get tasks and update task, need to review this route futher
 router.use(authMiddleware);
-router.route("/")
-  .post(workspaceEditor,createTask)
+router
+  .route("/")
+  .post(workspaceEditor, createTask)
   .get(getTask)
-  .delete(workspaceEditor ,deleteTask);
+  .delete(workspaceEditor, deleteTask);
 router
   .route("/attachments")
-  .post(workspaceEditor,addAttachmentInTask)
-  .delete(workspaceEditor,deleteAttachmentFromTask);
+  .post(workspaceEditor, addAttachmentInTask)
+  .delete(workspaceEditor, deleteAttachmentFromTask);
 
+router.route("/comments");
 export default router;

@@ -4,7 +4,6 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
 import { createTaskSchema } from "../helpers/validation";
-import { taskManager } from "../socket/services/tasks/taskManager";
 import mongoose from "mongoose";
 import { CommentModel } from "../models/tasks/comment.model";
 
@@ -13,7 +12,10 @@ const createTask = asyncHandler(async (req, res) => {
   if (!parsedData.success) {
     throw new ApiError(400, "Validation error");
   }
-  const task = await TaskModel.create(parsedData.data);
+  const task = await TaskModel.create({
+    ...parsedData.data,
+    createdBy: req.user?._id,
+  });
   if (!task) {
     throw new ApiError(500, "Internal server error");
   }
@@ -132,7 +134,6 @@ const getTask = asyncHandler(async (req, res) => {
 const updateTask = asyncHandler(async (req, res) => {});
 
 const deleteTask = asyncHandler(async (req, res) => {
-  //TODO: need to delete information related to task such as comments, attachments
 
   const { taskId } = req.params;
   if (!taskId) {

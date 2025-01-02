@@ -17,14 +17,13 @@ const addMemeberInWorkspaceSchema = z.object({
 });
 
 const createTaskSchema = z.object({
-    createdBy: z.string(),
     workspaceId: z.string(),
     title: z.string(),
     status: z.enum(["Done", "Todo", "In-Progress"]),
     description: z.string(),
     priority: z.enum(["Low", "Medium", "High", "Urgent"]),
     dueDate: z.date(), //TODO:need to recheck this validation
-    assignees: z.array(z.string()),
+    assignees: z.array(z.string()).min(1),
     // attachments?: z.array() //TODO:Not sure 
 });
 
