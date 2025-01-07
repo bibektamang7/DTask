@@ -7,6 +7,8 @@ import {
   getTask,
   getTasks,
   updateTask,
+  createComment,
+  deleteComment,
 } from "../controllers/task.controller";
 import { workspaceEditor } from "../middlewares/workspaceAuth";
 import { authMiddleware } from "../middlewares/auth.middleware";
@@ -25,5 +27,10 @@ router
   .post(workspaceEditor, addAttachmentInTask)
   .delete(workspaceEditor, deleteAttachmentFromTask);
 
-router.route("/comments");
+router
+  .route("/comments")
+  .post(createComment)
+  .delete(deleteComment)
+
+
 export default router;

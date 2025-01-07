@@ -37,7 +37,22 @@ const deleteAttachmentSchema = z.object({
     workspaceId: z.string(),
 });
 
+
+const createCommentSchema = z.object({
+    message: z.string(),
+    taskId: z.string(),
+    createdBy: z.string(),
+    workspaceId: z.string(),
+})
+
+const deleteCommentSchema = z.object({
+    workspaceId: z.string(),
+    taskId: z.string(),
+})
+
 export {
+    deleteCommentSchema,
+    createCommentSchema,
     createTaskSchema,
     addAttachmentSchema,
     addMemeberInWorkspaceSchema,

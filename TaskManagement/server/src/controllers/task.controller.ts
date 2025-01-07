@@ -3,7 +3,7 @@ import { TaskModel } from "../models/tasks/task.model";
 import { asyncHandler } from "../utils/asyncHandler";
 import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
-import { createTaskSchema } from "../helpers/validation";
+import { createCommentSchema, createTaskSchema, deleteCommentSchema } from "../helpers/validation";
 import mongoose from "mongoose";
 import { CommentModel } from "../models/tasks/comment.model";
 
@@ -263,6 +263,76 @@ const deleteAttachmentFromTask = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, {}, "Attachment deleted"));
 });
 
+// comments handlers
+const createComment = asyncHandler(async (req, res) => {
+  const parsedData = createCommentSchema.safeParse(req.body);
+  if (!parsedData.success) {
+    throw new ApiError(400, "Validation Error");
+  }
+  const task = await TaskModel.findById(parsedData.data.taskId);
+  
+  if (!task) {
+    throw new ApiError(400, "Task not found");
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    //TODO:this is not complete so consider it
+    const comment = await CommentModel.create([parsedData], {session: session});
+    if (!comment) {
+      throw new ApiError(500, "Failed to create comment");
+    }
+    const updatedTask = await TaskModel.findByIdAndUpdate(task._id, {
+      $push: {
+        comments: comment[0]._id,
+      },
+    }, { session: session, new: true });
+    if (!updatedTask) {
+      throw new ApiError(500, "Failed to add comment")
+    }
+    session.commitTransaction();
+    //TODO:emit socket event
+    res.status(200).json(new ApiResponse(200, {}, "Comment created successfully"));
+  } catch (error) {
+    session.abortTransaction();
+  } finally {
+    session.endSession();
+  }
+})
+const deleteComment = asyncHandler(async (req, res) => {
+  const { commentId } = req.params;
+  if (!commentId) {
+    throw new ApiError(400, "Comment id required");
+  }
+  const parsedData = deleteCommentSchema.safeParse(req.body);
+  if (!parsedData.success) {
+    throw new ApiError(400, "Validation Error");
+  }
+  const comment = await CommentModel.findById(commentId);
+  if (!comment) {
+    throw new ApiError(400, "Comment not found");
+  }
+  //TODO:create logic for admin be able to delete
+  if (comment.createdBy !== req.user?._id) {
+    throw new ApiError(403, "Unauthorized to delete comment");
+  }
+  //TODO:make it atomic
+  if (comment.attachments) {
+    const deleteAttachment = await AttachmentModel.findByIdAndDelete(comment.attachments);
+    if (!deleteAttachment) {
+      throw new ApiError(500, "Failed to delete attachment")
+    }
+  }
+
+  const deleteComment = await CommentModel.findByIdAndDelete(comment._id);
+  if (!deleteComment) {
+    throw new ApiError(500, "Failed to delete comment");
+  }
+
+  res.status(200).json(new ApiResponse(200, {}, "Comment Deleted successfully"));
+})
+
 export {
   createTask,
   getTasks,
@@ -271,4 +341,6 @@ export {
   deleteTask,
   addAttachmentInTask,
   deleteAttachmentFromTask,
+  createComment,
+  deleteComment
 };
