@@ -1,5 +1,20 @@
 import z from "zod";
 
+const signupSchema = z.object({
+    email: z.string(),
+    password: z.string(),
+})
+
+const setUsernameSchema = z.object({
+    email: z.string(),
+    username: z.string().min(6).max(20),
+})
+
+const userLoginWithEmailAndPasswordSchema = z.object({
+    email: z.string(),
+    password: z.string(),
+})
+
 const createWorkspaceSchema = z.object({
 ownerId: z.string(),
     workspaceName: z.string(), // consider min and max value of workspace name
@@ -60,4 +75,7 @@ export {
     deleteAttachmentSchema,
     deleteTaskSchema,
     updateWorkspaceNameSchema,
+    setUsernameSchema,
+    signupSchema,
+    userLoginWithEmailAndPasswordSchema
 }

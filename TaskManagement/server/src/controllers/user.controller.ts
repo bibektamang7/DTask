@@ -4,6 +4,13 @@ import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
 import jwt from "jsonwebtoken";
+import { setUsernameSchema, signupSchema, userLoginWithEmailAndPasswordSchema } from "../helpers/validation";
+import bcrypt from "bcryptjs";
+
+const encryptPassword = (password: string) => {
+  const hashedPassword = bcrypt.hash(password, 10);
+  return hashedPassword;
+}
 
 const generateAccessAndRefreshToken = (id: string) => {
   const accessToken = jwt.sign({ _id: id }, process.env.ACCESS_TOKEN_SECRET!, {
@@ -19,6 +26,81 @@ const generateAccessAndRefreshToken = (id: string) => {
 
   return { accessToken, refreshToken };
 };
+
+const registerUser = asyncHandler(async (req, res) => {
+  const parsedData = signupSchema.safeParse(req.body);
+  if(!parsedData.success) {
+    throw new ApiError(400, "Invalid credentials");
+  }
+  const user = await UserModel.findOne({
+    email: parsedData.data.email,
+  });
+
+  
+  if(user) {
+    throw new ApiError(400, "Email already exists");
+  }
+  
+  
+  const password = encryptPassword(parsedData.data.password);
+
+  const createdUser = await UserModel.create({
+    email: parsedData.data.email,
+    password,
+  });
+  if(!createdUser) {
+    throw new ApiError(400, 'Failed to register user');
+  }
+
+  res.status(200).json(new ApiResponse(200, {}, "User registered successfully"));
+})
+
+const setUsername = asyncHandler(async (req, res) => {
+  const parsedData = setUsernameSchema.safeParse(req.body);
+  if(!parsedData.success) {
+    throw new ApiError(400, "Validation error");
+  }
+  const user = await UserModel.findOne({
+    username: parsedData.data.username,
+  });
+  if(user) {
+    throw new ApiError(400, "Username already exists");
+  }
+
+  const createdUser = await UserModel.findOneAndUpdate({email: parsedData.data.email},
+    {
+      $set:{
+        username: parsedData.data.username,
+      }
+    }
+  )
+  if(!createdUser) {
+    throw new ApiError(500, "Failed to register username")
+  }
+  res.status(200).json(new ApiResponse(200, {}, "Username is set successfully"));
+  
+})
+
+const userLoginWithEmailAndPassword = asyncHandler(async (req, res) => {
+  const parsedData = userLoginWithEmailAndPasswordSchema.safeParse(req.body);
+  if(!parsedData.success) {
+    throw new ApiError(400, "Validation Error");
+  }
+  const user = await UserModel.findOne({
+    email: parsedData.data.email,
+  });
+  if(!user) {
+    throw new ApiError(400, "User not found!");
+  }
+  if(!user.username) {
+    res.status(200).json(new ApiResponse(200, {}, "Username is not set"));
+  }
+
+  //TODO: need to extract workspace releted data
+
+  res.status(200).json(new ApiResponse(200, user, "Logged in successfully"));
+})
+
 
 const userSignIn = asyncHandler(async (req, res) => {
   const { user } = req.user as { user: User };
@@ -164,4 +246,7 @@ export {
   userSignIn,
   logout,
   refreshToken,
+  registerUser,
+  setUsername,
+  userLoginWithEmailAndPassword,
 };
