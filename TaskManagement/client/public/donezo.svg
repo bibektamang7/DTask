@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60" role="img" aria-labelledby="logoTitle logoDesc">
+  <title id="logoTitle">Donezo Logo</title>
+  <desc id="logoDesc">A simple logo with the word Donezo in Roboto font with a larger stroke and increased letter spacing</desc>
+  <text x="10" y="40" font-family="Roboto" font-size="40" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="4" letter-spacing="5">Donezo</text>
+</svg>

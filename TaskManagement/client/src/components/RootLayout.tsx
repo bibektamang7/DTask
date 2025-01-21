@@ -6,10 +6,10 @@ import Footer from "./landing_page/Footer";
 const RootLayout = () => {
   
   return (
-    <div className="min-w-max min-h-screen">
+    <div className="min-w-full min-h-screen">
       <Header />
       <Outlet/>
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

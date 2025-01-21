@@ -6,6 +6,7 @@ import {
   RouterProvider,
 } from "react-router";
 import Not_Fount from "./components/Not_Fount";
+
 import Error from "./components/Error";
 import RootLayout from "./components/RootLayout";
 import Home from "./pages/Home";
