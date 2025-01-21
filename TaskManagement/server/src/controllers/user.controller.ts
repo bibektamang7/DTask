@@ -12,6 +12,11 @@ const encryptPassword = (password: string) => {
   return hashedPassword;
 }
 
+const decryptPassword = (password: string, savedPassword: string) => {
+  const pass = bcrypt.compare(savedPassword, password);
+  return pass;
+}
+
 const generateAccessAndRefreshToken = (id: string) => {
   const accessToken = jwt.sign({ _id: id }, process.env.ACCESS_TOKEN_SECRET!, {
     expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
@@ -89,8 +94,12 @@ const userLoginWithEmailAndPassword = asyncHandler(async (req, res) => {
   const user = await UserModel.findOne({
     email: parsedData.data.email,
   });
-  if(!user) {
+  if(!user || !user.password) {
     throw new ApiError(400, "User not found!");
+  }
+  const isPasswordCorrect = decryptPassword(parsedData.data.password, user.password);
+  if(!isPasswordCorrect) {
+    throw new ApiError(400, "Incorrect password");
   }
   if(!user.username) {
     res.status(200).json(new ApiResponse(200, {}, "Username is not set"));
