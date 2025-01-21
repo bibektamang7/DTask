@@ -17,7 +17,6 @@ const userSchema = new Schema<User>(
   {
     username: {
       type: String,
-      required: true,
       unique: true,
       index: true,
     },
@@ -33,6 +32,9 @@ const userSchema = new Schema<User>(
       type: String,
       unique: true,
       required: true,
+    },
+    password: {
+      type: String,
     },
     workspaces: [
       {
