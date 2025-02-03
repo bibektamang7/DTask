@@ -5,6 +5,9 @@
     { "path": "./tsconfig.node.json" }
   ],
   "compilerOptions": {
+    "types": [
+      "babel_core"
+    ],
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]

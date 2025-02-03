@@ -1,9 +1,9 @@
 import React, { Suspense } from "react";
 import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  Route,
-  RouterProvider,
+	createBrowserRouter,
+	createRoutesFromElements,
+	Route,
+	RouterProvider,
 } from "react-router";
 import Not_Fount from "./components/Not_Fount";
 
@@ -12,70 +12,82 @@ import RootLayout from "./components/RootLayout";
 import Home from "./pages/Home";
 import ErrorComponent from "./components/ErrorComponent";
 import Loader from "./components/Loader";
-
-
-
-
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import DashboardPage from "./components/workspace/Dashboard";
+import BoardView from "./pages/BoardView";
+import WorkspaceChat from "./pages/Chat";
+import WorkspaceLayout from "./components/workspace/WorkspaceLayout";
+import ChatLayout from "./components/workspace/chats/ChatLayout";
+import TaskLayout from "./components/workspace/tasks/TaskLayout";
+import { Calendar } from "./components/ui/calendar";
 const router = createBrowserRouter(
-  createRoutesFromElements(
-    <React.Fragment>
-      <Route
-        path="/"
-        element={<RootLayout />}
-        errorElement={<Error />}
-      >
-        <Route
-          index
-          element={<Home/>}
-          errorElement={<ErrorComponent />}
-        />
-        <Route
-          path="signup"
-          element={<>SignUp Page</>}
-        />
-        <Route
-          path="login"
-          element={<>Login Page</>}
-        />
-      </Route>
+	createRoutesFromElements(
+		<React.Fragment>
+			<Route
+				path="/"
+				element={<RootLayout />}
+				errorElement={<Error />}>
+				<Route
+					index
+					element={<Home />}
+					errorElement={<ErrorComponent />}
+				/>
+			</Route>
+			<Route
+				path="signup"
+				element={<Signup />}
+				errorElement={<ErrorComponent />}
+			/>
+			<Route
+				path="login"
+				element={<Login />}
+			/>
 
-      <Route
-        path="/w"
-        element={<>Workspace</>}
-      >
-        <Route
-          index
-          element={<>Hello There</>}
-        />
-        <Route
-          path="chats"
-          element={<>Hello Chat</>}
-        >
-          <Route
-            index
-            element={<>This is Chat</>}
-          />
-        </Route>
-        <Route
-          path="tasks"
-          element={<>This is Tasks</>}
-        />
-      </Route>
+			<Route
+				path="/w"
+				element={<WorkspaceLayout />}>
+				<Route
+					index
+					element={<DashboardPage />}
+				/>
+				<Route
+					path="chats"
+					element={<ChatLayout />}>
+					<Route
+						index
+						element={<WorkspaceChat />}
+					/>
+				</Route>
+				<Route
+					path="tasks"
+					element={<TaskLayout />}>
+					<Route
+						index
+						// path="boardview"
+						element={<BoardView />}
+					/>
+				</Route>
+				<Route
+					path="calendar"
+					element={<Calendar/>}
+				/>
+			</Route>
 
-      <Route
-        path="*"
-        element={<Not_Fount />}
-      />
-    </React.Fragment>
-  )
+			<Route
+				path="*"
+				element={<Not_Fount />}
+			/>
+		</React.Fragment>
+	)
 );
 
 const App = () => {
-  return (
-    <Suspense fallback={<Loader/>}>
-      <RouterProvider router={router} />
-    </Suspense>
-  );
+	return (
+		<Suspense fallback={<Loader />}>
+			<RouterProvider router={router} />
+		</Suspense>
+	);
 };
 
 export default App;

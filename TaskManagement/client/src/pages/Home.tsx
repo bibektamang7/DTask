@@ -4,10 +4,13 @@ import React from "react";
 import { Outlet } from "react-router";
 
 import { Button } from "@/components/ui/button";
+import Benifit from "@/components/landing_page/Benifit";
+import ReadyElevate from "@/components/landing_page/ReadyElevate";
+import Features from "@/components/landing_page/Features";
 
 const Home = () => {
   return (
-    <section className="py-12">
+    <section className="py-12 px-4">
       <h2 className="text-4xl font-semibold md:leading-[4.3rem] md:text-6xl text-center">Effortless Task
         <br />
         Management for your Team
@@ -17,9 +20,12 @@ const Home = () => {
         <Button className="tracking-tighter font-semibold bg-gray-900 hover:bg-primary border-gray-500">Get Started</Button>
         <Button className="tracking-tighter font-semibold">Watch Demo</Button>
       </div>
-      <div className="my-12 rounded-lg overflow-hidden lg:mx-60">
+      <div className="my-12 rounded-lg overflow-hidden">
         <img style={{width: "100%", height: "110%"}} src="./home.png" alt="task management dashboard" />
       </div>
+      <Features/>
+      <Benifit/>
+      <ReadyElevate/>
     </section>
   );
 };
