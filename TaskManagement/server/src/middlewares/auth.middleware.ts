@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { UserModel } from "../models/user.model";
+import { User, UserModel } from "../models/user.model";
 import { asyncHandler } from "../utils/asyncHandler";
 import { ApiError } from "../utils/ApiError";
 import { NextFunction, Request } from "express";
@@ -22,7 +22,7 @@ export const authMiddleware = asyncHandler(
         throw new ApiError(400, "Invalid access Token");
       }
     
-      req.user = user;
+      req.member = user;
       next();
     } catch (error: any) {
       throw new ApiError(403, error?.message || "Invalid Access Token");

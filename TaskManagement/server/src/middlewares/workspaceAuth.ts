@@ -11,7 +11,7 @@ export const workspaceEditor = asyncHandler(async (req: Request, _, next: NextFu
 
     const workspaceMember = await WorkspaceMemberModel.findOne({
         workspace: workspaceId,
-        userId: req.user?._id,
+        userId: req.member?._id,
     });
 
     if (!workspaceMember || !workspaceMember.isJoined) {

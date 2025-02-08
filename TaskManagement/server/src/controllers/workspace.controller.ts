@@ -22,7 +22,7 @@ const createWorkspace = asyncHandler(async (req, res) => {
   }
   const workspace = await WorkspaceModel.create({
     name: parsedData.data.workspaceName,
-    owner: (req.user as User)._id,
+    owner: (req.member as User)._id,
   });
   if (!workspace) {
     throw new ApiError(500, "Internal server error");
@@ -30,7 +30,7 @@ const createWorkspace = asyncHandler(async (req, res) => {
   //TODO:Need to handle this logic properly
   
   const workspaceMember = await WorkspaceMemberModel.create({
-    userId: (req.user as User).email,
+    userId: (req.member as User).email,
     workspace: workspace._id,
     role: "Admin",
     isJoined: true,
@@ -59,7 +59,7 @@ const deleteWorkspace = asyncHandler(async (req, res) => {
   if (!workspace) {
     throw new ApiError(400, "workspace not fount");
   }
-  if (workspace.owner !== (req.user as User)._id) {
+  if (workspace.owner !== (req.member as User)._id) {
     throw new ApiError(403, "Unauthorized to delete workspace");
   }
 
@@ -111,7 +111,7 @@ const updateWorkspace = asyncHandler(async (req, res) => {
   if (!workspace) {
     throw new ApiError(400, "Workspace not found");
   }
-  if (workspace.owner !== (req.user as User)._id) {
+  if (workspace.owner !== (req.member as User)._id) {
     throw new ApiError(403, "Unauthorized to edit workspace name");
   }
   const updatedWorkspace = await WorkspaceModel.findByIdAndUpdate(

@@ -1,7 +1,6 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { UserModel } from "../models/user.model";
-import { User } from "../models/user.model";
 
 interface Profile {
   photos?: { value: string }[];
@@ -18,7 +17,6 @@ function getEmail(profile: Profile): string {
     ? profile.emails[0].value
     : "";
 }
-
 passport.use(
   new GoogleStrategy(
     {
