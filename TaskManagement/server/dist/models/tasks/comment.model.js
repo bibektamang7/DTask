@@ -46,7 +46,7 @@ const commentSchema = new mongoose_1.Schema({
     },
     createdBy: {
         type: mongoose_1.Schema.Types.ObjectId,
-        ref: "User",
+        ref: "WorkspaceMember",
         required: true,
     },
     attachments: {

@@ -13,7 +13,6 @@ export interface WorkspaceMember extends Document{
 const workspaceMemberSchema = new Schema<WorkspaceMember>({
     role: {
         type: String,
-        required: true,
         enum: ["Editor", "Member", "Admin"],
         default: "Member",
     },

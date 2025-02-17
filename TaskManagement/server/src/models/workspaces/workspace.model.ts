@@ -1,11 +1,17 @@
 import mongoose, {Schema} from "mongoose";
 
-const workspaceSchema = new Schema({
+export interface WorkspaceProps {
+    name: string;
+    owner: mongoose.Types.ObjectId,
+    members: [mongoose.Types.ObjectId], 
+    tasks: [mongoose.Types.ObjectId], 
+}
+
+
+const workspaceSchema = new Schema<WorkspaceProps>({
     name: {
         type: String,
         required: true,
-        index: true,
-        unique: true,
     },
     owner: {
         type: Schema.Types.ObjectId,

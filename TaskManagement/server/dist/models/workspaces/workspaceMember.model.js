@@ -38,7 +38,6 @@ const mongoose_1 = __importStar(require("mongoose"));
 const workspaceMemberSchema = new mongoose_1.Schema({
     role: {
         type: String,
-        required: true,
         enum: ["Editor", "Member", "Admin"],
         default: "Member",
     },

@@ -30,12 +30,12 @@ const taskSchema = new Schema({
     assignees: [
         {
             type: Schema.Types.ObjectId,
-            ref: "User",
+            ref: "WorkspaceMember",
         }
     ],
     createdBy: {
         type: Schema.Types.ObjectId,
-        ref: "User",
+        ref: "WorkspaceMember",
         required: true,
     },
     attachments: [

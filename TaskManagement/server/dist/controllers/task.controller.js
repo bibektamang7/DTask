@@ -1,4 +1,37 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,9 +41,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteComment = exports.createComment = exports.deleteAttachmentFromTask = exports.addAttachmentInTask = exports.deleteTask = exports.updateTask = exports.getTask = exports.getTasks = exports.createTask = void 0;
 const attachment_model_1 = require("../models/attachment.model");
@@ -19,21 +49,93 @@ const asyncHandler_1 = require("../utils/asyncHandler");
 const ApiError_1 = require("../utils/ApiError");
 const ApiResponse_1 = require("../utils/ApiResponse");
 const validation_1 = require("../helpers/validation");
-const mongoose_1 = __importDefault(require("mongoose"));
+const mongoose_1 = __importStar(require("mongoose"));
 const comment_model_1 = require("../models/tasks/comment.model");
+const fileUpload_cloudinary_1 = require("../helpers/fileUpload.cloudinary");
+// const taskClient = createClient({ url: "redis://localhost:6379" });
+// taskClient.connect().then(() => console.log("Task client connected"));
+const isMemberInWorkspace = (memberId) => __awaiter(void 0, void 0, void 0, function* () {
+    const db = mongoose_1.default.connection.db; // Get the database connection
+    const collection = db === null || db === void 0 ? void 0 : db.collection("workspacemembers"); // Get the collection
+    const member = yield (collection === null || collection === void 0 ? void 0 : collection.findOne({
+        _id: new mongoose_1.default.Types.ObjectId(memberId),
+    }));
+    if (!(member === null || member === void 0 ? void 0 : member.isJoined)) { //TODO:HANDLE THIS LOGIC PROPERLY	
+        return false;
+    }
+    return !!member;
+});
 const createTask = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const parsedData = validation_1.createTaskSchema.safeParse(req.body);
     if (!parsedData.success) {
+        console.log(parsedData.error.message);
         throw new ApiError_1.ApiError(400, "Validation error");
     }
-    const task = yield task_model_1.TaskModel.create(Object.assign(Object.assign({}, parsedData.data), { createdBy: req.member._id }));
+    console.log(req.workspaceMember.workspace);
+    const workspaceMembers = yield Promise.all(parsedData.data.assignees.map((userId) => __awaiter(void 0, void 0, void 0, function* () {
+        const isValid = yield isMemberInWorkspace(userId);
+        if (!isValid) {
+            throw new ApiError_1.ApiError(400, `User ${userId} is not a valid workspace member`);
+        }
+        return userId;
+    })));
+    const task = yield task_model_1.TaskModel.create({
+        workspaceId: parsedData.data.workspaceId,
+        title: parsedData.data.title,
+        status: parsedData.data.status,
+        description: parsedData.data.description,
+        priority: parsedData.data.priority,
+        dueDate: parsedData.data.dueDate,
+        assignees: workspaceMembers,
+        createdBy: req.workspaceMember._id,
+    });
     if (!task) {
         throw new ApiError_1.ApiError(500, "Internal server error");
     }
-    // const socketTask = taskManager.getOrCreateTask(task._id.toString());
+    const createdTask = yield task_model_1.TaskModel.aggregate([
+        {
+            $match: {
+                _id: task._id,
+            },
+        },
+        {
+            $lookup: {
+                from: "WorkspaceMember",
+                localField: "assignees",
+                foreignField: "_id",
+                as: "assignees",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "User",
+                            localField: "userId",
+                            foreignField: "_id",
+                            as: "userId",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        avatar: 1,
+                                        email: 1,
+                                        username: 1,
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ]);
+    // taskClient.publish(
+    // 	"taskCreated",
+    // 	JSON.stringify({
+    // 		task: createdTask[0],
+    // 		assignees: parsedData.data.assignees,
+    // 	})
+    // );
     // TODO:Emit socket emit for task creation
     //Also consider where you need to return created task or not
-    res.status(200).json(new ApiResponse_1.ApiResponse(200, {}, "Task created successfully"));
+    res.status(200).json(new ApiResponse_1.ApiResponse(200, task, "Task created successfully"));
 }));
 exports.createTask = createTask;
 const getTasks = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () { }));
@@ -135,6 +237,8 @@ const getTask = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void 0,
             },
         },
     ]);
+    console.log("This is task here");
+    console.log(task);
     if (!task || task.length < 1) {
         throw new ApiError_1.ApiError(400, "Task not found");
     }
@@ -144,16 +248,24 @@ exports.getTask = getTask;
 const updateTask = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () { }));
 exports.updateTask = updateTask;
 const deleteTask = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { taskId } = req.params;
+    const { taskId } = req.query;
     if (!taskId) {
         throw new ApiError_1.ApiError(400, "Task id required");
     }
-    const task = yield task_model_1.TaskModel.findById(taskId);
+    // TODO: POPULATE THIS LOGIC TO EXTRACT USERID FROM THE ASSIGNEES
+    const task = yield task_model_1.TaskModel.findById(taskId).populate({
+        path: "assignees",
+        populate: {
+            path: "userId",
+            select: "username avatar",
+        },
+    });
     if (!task) {
         throw new ApiError_1.ApiError(400, "Task not found");
     }
-    if (task.workspaceId !== req.workspaceMember.workspace ||
-        (req.member._id !== task.createdBy && req.workspaceMember.role !== "Admin")) {
+    if (task.workspaceId.toString() !== req.workspaceMember.workspace.toString() ||
+        (req.member._id.toString() !== task.createdBy.toString() &&
+            req.workspaceMember.role !== "Admin")) {
         throw new ApiError_1.ApiError(403, "Unauthorized to delete task");
     }
     const session = yield mongoose_1.default.startSession();
@@ -178,6 +290,13 @@ const deleteTask = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void
             throw new ApiError_1.ApiError(500, "Failed to delete comments");
         }
         yield session.commitTransaction();
+        // taskClient.publish(
+        // 	"taskDeleted",
+        // 	JSON.stringify({
+        // 		taskId: task._id,
+        // 		assignees: task.assignees,
+        // 	})
+        // );
     }
     catch (error) {
         yield session.abortTransaction();
@@ -195,12 +314,70 @@ const addAttachmentInTask = (0, asyncHandler_1.asyncHandler)((req, res) => __awa
     if (!taskId) {
         throw new ApiError_1.ApiError(400, "Task id required");
     }
-    const task = yield task_model_1.TaskModel.findById(taskId);
+    const files = req.files;
+    if (!files || files.length < 1) {
+        throw new ApiError_1.ApiError(400, "Attachment is required");
+    }
+    // TODO: EXTRACT USERID FROM ASSIGNEES
+    const task = yield task_model_1.TaskModel.findById(taskId).populate({
+        path: "assignees",
+        populate: {
+            path: "userId",
+            select: "username avatar",
+        },
+    });
     if (!task) {
         throw new ApiError_1.ApiError(400, "Task not found");
     }
     if (task.workspaceId !== req.workspaceMember.workspace) {
         throw new ApiError_1.ApiError(400, "Task not found in workspace");
+    }
+    const session = yield (0, mongoose_1.startSession)();
+    session.startTransaction();
+    try {
+        let attachments;
+        if (files && files.length > 0) {
+            attachments = yield Promise.all(files.map((file) => __awaiter(void 0, void 0, void 0, function* () {
+                const fileUploadResponse = yield (0, fileUpload_cloudinary_1.uploadOnCloudinary)(file.path, `/tasks/${task._id}`);
+                return yield attachment_model_1.AttachmentModel.create([
+                    {
+                        filename: fileUploadResponse === null || fileUploadResponse === void 0 ? void 0 : fileUploadResponse.filename,
+                        fileType: fileUploadResponse === null || fileUploadResponse === void 0 ? void 0 : fileUploadResponse.filename,
+                        publicId: fileUploadResponse === null || fileUploadResponse === void 0 ? void 0 : fileUploadResponse.publicId,
+                        fileUrl: fileUploadResponse === null || fileUploadResponse === void 0 ? void 0 : fileUploadResponse.url,
+                        taskId: task._id,
+                    },
+                ], { session });
+            })));
+        }
+        const updatedTask = yield task_model_1.TaskModel.findByIdAndUpdate(task._id, {
+            $push: {
+                attachments: attachments,
+            },
+        }, {
+            session: session,
+        });
+        if (!updatedTask) {
+            throw new ApiError_1.ApiError(500, "Failed to update attachemnts");
+        }
+        // TODO: CONSIDER SENDING TASK WITH FULL DETAILS
+        // SO THAT ACTIVE USER WILL BE UPDATED AT REAL TIME
+        // taskClient.publish(
+        // 	"AttachmentAdded",
+        // 	JSON.stringify({
+        // 		taskId: updatedTask._id,
+        // 		attachment: updatedTask.attachments,
+        // 		assinees: task.assignees,
+        // 	})
+        // );
+        yield session.commitTransaction();
+    }
+    catch (error) {
+        yield session.abortTransaction();
+        throw new ApiError_1.ApiError(500, "Failed to add attachments");
+    }
+    finally {
+        session.endSession();
     }
     // TODO:not sure about file or files
 }));
@@ -212,7 +389,14 @@ const deleteAttachmentFromTask = (0, asyncHandler_1.asyncHandler)((req, res) => 
     if (!taskId) {
         throw new ApiError_1.ApiError(400, "Task id required");
     }
-    const task = yield task_model_1.TaskModel.findById(taskId);
+    //TODO: EXTRACT USERID FROM ASSIGNEES
+    const task = yield task_model_1.TaskModel.findById(taskId).populate({
+        path: "assignees",
+        populate: {
+            path: "userId",
+            select: "username avatar",
+        },
+    });
     if (!task) {
         throw new ApiError_1.ApiError(400, "Task not found");
     }
@@ -240,6 +424,14 @@ const deleteAttachmentFromTask = (0, asyncHandler_1.asyncHandler)((req, res) => 
             throw new ApiError_1.ApiError(500, "Failed to delete attachment");
         }
         yield session.commitTransaction();
+        // taskClient.publish(
+        // 	"AttachmentDeleted",
+        // 	JSON.stringify({
+        // 		taskId: updatedTask._id,
+        // 		attachmentId: attachment._id,
+        // 		assignees: task.assignees,
+        // 	})
+        // );
     }
     catch (error) {
         yield session.commitTransaction();
@@ -258,15 +450,42 @@ const createComment = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(v
     if (!parsedData.success) {
         throw new ApiError_1.ApiError(400, "Validation Error");
     }
-    const task = yield task_model_1.TaskModel.findById(parsedData.data.taskId);
+    if (!parsedData.data.message && !req.file) {
+        throw new ApiError_1.ApiError(400, "Either message or file is required");
+    }
+    // TODO:EXTRACT USERID FROM ASSIGNEES
+    const task = yield task_model_1.TaskModel.findById(parsedData.data.taskId).populate({
+        path: "assignees",
+        populate: {
+            path: "userId",
+            select: "username avatar",
+        },
+    });
     if (!task) {
         throw new ApiError_1.ApiError(400, "Task not found");
     }
     const session = yield mongoose_1.default.startSession();
     session.startTransaction();
     try {
-        //TODO:this is not complete so consider it
-        const comment = yield comment_model_1.CommentModel.create([parsedData], {
+        let attachment = null;
+        if (req.file) {
+            const fileUploadResponse = yield (0, fileUpload_cloudinary_1.uploadOnCloudinary)(req.file.path, `/tasks/${task._id}`);
+            attachment = yield attachment_model_1.AttachmentModel.create([
+                {
+                    filename: fileUploadResponse === null || fileUploadResponse === void 0 ? void 0 : fileUploadResponse.filename,
+                    fileType: fileUploadResponse === null || fileUploadResponse === void 0 ? void 0 : fileUploadResponse.format,
+                    fileUrl: fileUploadResponse === null || fileUploadResponse === void 0 ? void 0 : fileUploadResponse.url,
+                    taskId: task._id,
+                },
+            ], { session: session });
+            if (!attachment) {
+                throw new ApiError_1.ApiError(500, "Failed to create attachment");
+            }
+        }
+        const comment = yield comment_model_1.CommentModel.create(
+        //TODO:SEE WHAT CAN YOU DO HERE
+        // @ts-ignore
+        [Object.assign(Object.assign({}, parsedData.data), { attachments: (attachment === null || attachment === void 0 ? void 0 : attachment._id) || undefined })], {
             session: session,
         });
         if (!comment) {
@@ -280,14 +499,26 @@ const createComment = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(v
         if (!updatedTask) {
             throw new ApiError_1.ApiError(500, "Failed to add comment");
         }
-        session.commitTransaction();
+        yield session.commitTransaction();
         //TODO:emit socket event
+        console.log("THis is comment created");
+        console.log(updatedTask);
+        // TODO: CONSIDER ADDING FULL DETAILS OF COMMENT SO THAT USER WILL BE UPDATED AT REAL TIEM
+        // taskClient.publish(
+        // 	"madeComment",
+        // 	JSON.stringify({
+        // 		taskId: updatedTask._id,
+        // 		comment: comment,
+        // 		assignees: task.assignees
+        // 	})
+        // );
         res
             .status(200)
-            .json(new ApiResponse_1.ApiResponse(200, {}, "Comment created successfully"));
+            .json(new ApiResponse_1.ApiResponse(200, comment[0], "Comment created successfully"));
     }
     catch (error) {
-        session.abortTransaction();
+        yield session.abortTransaction();
+        throw new ApiError_1.ApiError(500, error.message || "something went wrong while saving comment");
     }
     finally {
         session.endSession();
@@ -295,35 +526,64 @@ const createComment = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(v
 }));
 exports.createComment = createComment;
 const deleteComment = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { commentId } = req.params;
+    const { commentId } = req.query;
+    console.log(commentId);
     if (!commentId) {
         throw new ApiError_1.ApiError(400, "Comment id required");
     }
-    const parsedData = validation_1.deleteCommentSchema.safeParse(req.body);
+    const parsedData = validation_1.deleteCommentSchema.safeParse({
+        workspaceId: req.params.workspaceId,
+        taskId: req.params.taskId,
+    });
     if (!parsedData.success) {
         throw new ApiError_1.ApiError(400, "Validation Error");
+    }
+    //TODO: SAME GOES HERE
+    const task = yield task_model_1.TaskModel.findById(parsedData.data.taskId);
+    if (!task) {
+        throw new ApiError_1.ApiError(400, "Task not found");
     }
     const comment = yield comment_model_1.CommentModel.findById(commentId);
     if (!comment) {
         throw new ApiError_1.ApiError(400, "Comment not found");
     }
     //TODO:create logic for admin be able to delete
-    if (comment.createdBy !== req.member._id) {
+    if (comment.createdBy.toString() !== req.member._id.toString()) {
         throw new ApiError_1.ApiError(403, "Unauthorized to delete comment");
     }
-    //TODO:make it atomic
-    if (comment.attachments) {
-        const deleteAttachment = yield attachment_model_1.AttachmentModel.findByIdAndDelete(comment.attachments);
-        if (!deleteAttachment) {
-            throw new ApiError_1.ApiError(500, "Failed to delete attachment");
+    const session = yield mongoose_1.default.startSession();
+    session.startTransaction();
+    try {
+        if (comment.attachments) {
+            const deleteAttachment = yield attachment_model_1.AttachmentModel.findByIdAndDelete(comment.attachments, { session: session });
+            if (!deleteAttachment) {
+                throw new ApiError_1.ApiError(500, "Failed to delete attachment");
+            }
         }
+        const deletedComment = yield comment_model_1.CommentModel.findByIdAndDelete(comment._id, {
+            session: session,
+        });
+        if (!deletedComment) {
+            throw new ApiError_1.ApiError(500, "Failed to delete comment");
+        }
+        yield session.commitTransaction();
+        // taskClient.publish(
+        // 	"DeletedComment",
+        // 	JSON.stringify({
+        // 		taskId: task._id,
+        // 		commentId: deletedComment._id,
+        // 	})
+        // );
+        res
+            .status(200)
+            .json(new ApiResponse_1.ApiResponse(200, {}, "Comment Deleted successfully"));
     }
-    const deleteComment = yield comment_model_1.CommentModel.findByIdAndDelete(comment._id);
-    if (!deleteComment) {
-        throw new ApiError_1.ApiError(500, "Failed to delete comment");
+    catch (error) {
+        yield session.abortTransaction();
+        throw new ApiError_1.ApiError(500, error.message || "something went wrong while deleting comment");
     }
-    res
-        .status(200)
-        .json(new ApiResponse_1.ApiResponse(200, {}, "Comment Deleted successfully"));
+    finally {
+        session.endSession();
+    }
 }));
 exports.deleteComment = deleteComment;

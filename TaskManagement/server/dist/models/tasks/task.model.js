@@ -65,12 +65,12 @@ const taskSchema = new mongoose_1.Schema({
     assignees: [
         {
             type: mongoose_1.Schema.Types.ObjectId,
-            ref: "User",
+            ref: "WorkspaceMember",
         }
     ],
     createdBy: {
         type: mongoose_1.Schema.Types.ObjectId,
-        ref: "User",
+        ref: "WorkspaceMember",
         required: true,
     },
     attachments: [

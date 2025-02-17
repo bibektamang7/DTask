@@ -48,6 +48,13 @@ const attachmentSchema = new mongoose_1.Schema({
     taskId: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "Task",
+    },
+    chatId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "ChatMessage",
+    },
+    publicId: {
+        type: String,
         required: true,
     }
 });

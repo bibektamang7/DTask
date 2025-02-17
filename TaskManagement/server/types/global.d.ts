@@ -1,10 +1,10 @@
 import { User as IUser } from "src/models/user.model";
-import { WorkspaceMember } from "../models/workspaces/workspaceMember.model";
+import { WorkspaceProps } from "../models/workspaces/workspaceMember.model";
 
 declare global {
 	namespace Express {
 		interface Request {
-			workspaceMember?: WorkspaceMember;
+			workspaceMember?: WorkspaceProps;
 			member?: IUser;
 		}
 	}

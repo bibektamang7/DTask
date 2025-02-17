@@ -12,6 +12,8 @@ import {
 } from "../controllers/user.controller";
 import password from "../helpers/googleAuth";
 import { authMiddleware } from "../middlewares/auth.middleware";
+
+
 const router = Router();
 
 // still need to consider login and signup route

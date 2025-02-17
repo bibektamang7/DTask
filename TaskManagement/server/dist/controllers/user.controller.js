@@ -20,16 +20,19 @@ const asyncHandler_1 = require("../utils/asyncHandler");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const validation_1 = require("../helpers/validation");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
-const encryptPassword = (password) => {
-    const hashedPassword = bcryptjs_1.default.hash(password, 10);
+const mongoose_1 = __importDefault(require("mongoose"));
+const redis_1 = require("redis");
+const userClient = (0, redis_1.createClient)({ url: "redis://localhost:6379" });
+userClient.connect().then(() => console.log("User client is connected"));
+const encryptPassword = (password) => __awaiter(void 0, void 0, void 0, function* () {
+    const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
     return hashedPassword;
-};
+});
 const decryptPassword = (password, savedPassword) => {
     const pass = bcryptjs_1.default.compare(savedPassword, password);
     return pass;
 };
 const generateAccessAndRefreshToken = (id) => {
-    // TODO:NOT SURE ABOUT THIS NOW
     // @ts-ignore
     const accessToken = jsonwebtoken_1.default.sign({ _id: id }, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: process.env.ACCESS_TOKEN_EXPIRY || "1h",
@@ -49,17 +52,64 @@ const registerUser = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(vo
     if (user) {
         throw new ApiError_1.ApiError(400, "Email already exists");
     }
-    const password = encryptPassword(parsedData.data.password);
-    const createdUser = yield user_model_1.UserModel.create({
-        email: parsedData.data.email,
-        password,
-    });
-    if (!createdUser) {
-        throw new ApiError_1.ApiError(400, "Failed to register user");
+    const password = yield encryptPassword(parsedData.data.password);
+    const session = yield mongoose_1.default.startSession();
+    session.startTransaction();
+    try {
+        const createdUser = yield user_model_1.UserModel.create([
+            {
+                email: parsedData.data.email,
+                username: parsedData.data.username,
+                password,
+            },
+        ], { session });
+        yield userClient.publish("createWorkspace", JSON.stringify({
+            owner: createdUser[0]._id,
+            name: parsedData.data.workspace.name,
+            members: parsedData.data.workspace.member,
+        }));
+        console.log("yeat ta aako xa");
+        yield new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+                console.log("Workspace creation timed out.");
+                userClient.unsubscribe("workspace:created");
+                userClient.unsubscribe("workspace:failed");
+                reject(new Error("Workspace creation timeout"));
+            }, 10000);
+            userClient.subscribe("workspace:created", (message) => {
+                console.log("Workspace created:", message);
+                clearTimeout(timeout); // Clear the timeout if workspace creation is successful
+                userClient.unsubscribe("workspace:created"); // Unsubscribe after receiving the message
+                userClient.unsubscribe("workspace:failed"); // Unsubscribe to prevent further listening
+                resolve(message); // Resolve the promise with the message
+            });
+            userClient.subscribe("workspace:failed", () => {
+                clearTimeout(timeout); // Clear timeout if creation fails
+                userClient.unsubscribe("workspace:created");
+                userClient.unsubscribe("workspace:failed");
+                console.log("Workspace creation failed.");
+                reject(new Error("Workspace creation failed"));
+            });
+            req.on("close", () => {
+                clearTimeout(timeout); // Ensure timeout is cleared if the request is closed
+                userClient.unsubscribe("workspace:created");
+                userClient.unsubscribe("workspace:failed");
+            });
+        });
+        yield session.commitTransaction();
+        res.status(200).json(new ApiResponse_1.ApiResponse(200, {}, "Signup successfull"));
     }
-    res
-        .status(200)
-        .json(new ApiResponse_1.ApiResponse(200, {}, "User registered successfully"));
+    catch (error) {
+        console.log(error);
+        console.log("yeta aayeara chai mistake vayecha hai");
+        yield session.abortTransaction();
+        res
+            .status(500)
+            .json(new ApiResponse_1.ApiResponse(500, {}, "Failed to signup, please try again."));
+    }
+    finally {
+        session.endSession();
+    }
 }));
 exports.registerUser = registerUser;
 const setUsername = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -104,8 +154,16 @@ const userLoginWithEmailAndPassword = (0, asyncHandler_1.asyncHandler)((req, res
     if (!user.username) {
         res.status(200).json(new ApiResponse_1.ApiResponse(200, {}, "Username is not set"));
     }
-    //TODO: need to extract workspace releted data
-    res.status(200).json(new ApiResponse_1.ApiResponse(200, user, "Logged in successfully"));
+    const { refreshToken, accessToken } = generateAccessAndRefreshToken(user._id.toString());
+    const options = {
+        httpOnly: true,
+        secure: true,
+    };
+    res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(new ApiResponse_1.ApiResponse(200, { token: accessToken, userId: user._id }, "Logged in successfully"));
 }));
 exports.userLoginWithEmailAndPassword = userLoginWithEmailAndPassword;
 const userSignIn = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {

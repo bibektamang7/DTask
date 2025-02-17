@@ -1,12 +1,17 @@
 import mongoose, { Schema } from "mongoose";
+import { TimeSeriesBucketTimestamp } from "redis";
 
 const messageSchema = new Schema({
     sender: {
         type: Schema.Types.ObjectId,
-        ref: "User",
+        ref: "WorkspaceMember",
         required: true,
     },
-    content: String,
+    content: {
+        type: String,
+        required: true,
+        sparse: true,
+    },
     attachments: [
         {
             type: Schema.Types.ObjectId,
@@ -16,4 +21,4 @@ const messageSchema = new Schema({
 
 }, { timestamps: true }); 
 
-export const MessageSchema = mongoose.model("Message", messageSchema);
+export const ChatMessageModel = mongoose.model("ChatMessage", messageSchema);

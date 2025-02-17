@@ -17,7 +17,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const constant_1 = require("../constant");
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield mongoose_1.default.connect(`${process.env.MONGODB_URL}/${constant_1.DB_NAME}`);
+        yield mongoose_1.default.connect(`${process.env.MONGODB_URL}/${constant_1.DB_NAME}?replicaSet=rs0`);
     }
     catch (error) {
         console.log("Something went wrong while connection MongoDB", error);

@@ -10,9 +10,15 @@ import {
 	userLoginWithEmailAndPasswordSchema,
 } from "../helpers/validation";
 import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
 
-const encryptPassword = (password: string) => {
-	const hashedPassword = bcrypt.hash(password, 10);
+import { createClient } from "redis";
+
+const userClient = createClient({ url: "redis://localhost:6379" });
+userClient.connect().then(() => console.log("User client is connected"));
+
+const encryptPassword = async (password: string) => {
+	const hashedPassword = await bcrypt.hash(password, 10);
 	return hashedPassword;
 };
 
@@ -22,23 +28,17 @@ const decryptPassword = (password: string, savedPassword: string) => {
 };
 
 const generateAccessAndRefreshToken = (id: string) => {
-  // TODO:NOT SURE ABOUT THIS NOW
-  // @ts-ignore
-	const accessToken = jwt.sign(
-		{ _id: id },
-		process.env.ACCESS_TOKEN_SECRET as string,
-		{
-			expiresIn: process.env.ACCESS_TOKEN_EXPIRY || "1h",
-		}
-	);
+	// @ts-ignore
+	const accessToken = jwt.sign({ _id: id }, process.env.ACCESS_TOKEN_SECRET!, {
+		expiresIn: process.env.ACCESS_TOKEN_EXPIRY || "1h",
+	});
 
-  // @ts-ignore
+	// @ts-ignore
 	const refreshToken = jwt.sign(
 		{ _id: id },
-		process.env.REFRESH_TOKEN_SECRET as string,
-		{ expiresIn: process.env.REFRESH_TOKEN_EXPIRY || "7d" } 
+		process.env.REFRESH_TOKEN_SECRET!,
+		{ expiresIn: process.env.REFRESH_TOKEN_EXPIRY || "7d" }
 	);
-
 	return { accessToken, refreshToken };
 };
 
@@ -55,19 +55,73 @@ const registerUser = asyncHandler(async (req, res) => {
 		throw new ApiError(400, "Email already exists");
 	}
 
-	const password = encryptPassword(parsedData.data.password);
+	const password = await encryptPassword(parsedData.data.password);
+	const session = await mongoose.startSession();
+	session.startTransaction();
 
-	const createdUser = await UserModel.create({
-		email: parsedData.data.email,
-		password,
-	});
-	if (!createdUser) {
-		throw new ApiError(400, "Failed to register user");
+	try {
+		const createdUser = await UserModel.create(
+			[
+				{
+					email: parsedData.data.email,
+					username: parsedData.data.username,
+					password,
+				},
+			],
+			{ session }
+		);
+		await userClient.publish(
+			"createWorkspace",
+			JSON.stringify({
+				owner: createdUser[0]._id,
+				name: parsedData.data.workspace.name,
+				members: parsedData.data.workspace.member,
+			})
+		);
+		console.log("yeat ta aako xa");
+		await new Promise((resolve, reject) => {
+			const timeout = setTimeout(() => {
+				console.log("Workspace creation timed out.");
+				userClient.unsubscribe("workspace:created");
+				userClient.unsubscribe("workspace:failed");
+				reject(new Error("Workspace creation timeout"));
+			}, 10000);
+
+			userClient.subscribe("workspace:created", (message) => {
+				console.log("Workspace created:", message);
+				clearTimeout(timeout); // Clear the timeout if workspace creation is successful
+				userClient.unsubscribe("workspace:created"); // Unsubscribe after receiving the message
+				userClient.unsubscribe("workspace:failed"); // Unsubscribe to prevent further listening
+				resolve(message); // Resolve the promise with the message
+			});
+
+			userClient.subscribe("workspace:failed", () => {
+				clearTimeout(timeout); // Clear timeout if creation fails
+				userClient.unsubscribe("workspace:created");
+				userClient.unsubscribe("workspace:failed");
+				console.log("Workspace creation failed.");
+				reject(new Error("Workspace creation failed"));
+			});
+
+			req.on("close", () => {
+				clearTimeout(timeout); // Ensure timeout is cleared if the request is closed
+				userClient.unsubscribe("workspace:created");
+				userClient.unsubscribe("workspace:failed");
+			});
+		});
+
+		await session.commitTransaction();
+		res.status(200).json(new ApiResponse(200, {}, "Signup successfull"));
+	} catch (error) {
+		console.log(error);
+		console.log("yeta aayeara chai mistake vayecha hai");
+		await session.abortTransaction();
+		res
+			.status(500)
+			.json(new ApiResponse(500, {}, "Failed to signup, please try again."));
+	} finally {
+		session.endSession();
 	}
-
-	res
-		.status(200)
-		.json(new ApiResponse(200, {}, "User registered successfully"));
 });
 
 const setUsername = asyncHandler(async (req, res) => {
@@ -103,9 +157,11 @@ const userLoginWithEmailAndPassword = asyncHandler(async (req, res) => {
 	if (!parsedData.success) {
 		throw new ApiError(400, "Validation Error");
 	}
+
 	const user = await UserModel.findOne({
 		email: parsedData.data.email,
 	});
+
 	if (!user || !user.password) {
 		throw new ApiError(400, "User not found!");
 	}
@@ -120,9 +176,26 @@ const userLoginWithEmailAndPassword = asyncHandler(async (req, res) => {
 		res.status(200).json(new ApiResponse(200, {}, "Username is not set"));
 	}
 
-	//TODO: need to extract workspace releted data
+	const { refreshToken, accessToken } = generateAccessAndRefreshToken(
+		user._id.toString()
+	);
 
-	res.status(200).json(new ApiResponse(200, user, "Logged in successfully"));
+	const options = {
+		httpOnly: true,
+		secure: true,
+	};
+
+	res
+		.status(200)
+		.cookie("accessToken", accessToken, options)
+		.cookie("refreshToken", refreshToken, options)
+		.json(
+			new ApiResponse(
+				200,
+				{ token: accessToken, userId: user._id },
+				"Logged in successfully"
+			)
+		);
 });
 
 const userSignIn = asyncHandler(async (req, res) => {

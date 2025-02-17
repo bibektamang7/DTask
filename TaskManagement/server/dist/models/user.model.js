@@ -43,16 +43,22 @@ const userSchema = new mongoose_1.Schema({
     },
     googleId: {
         type: String,
-        required: true,
+        required: function () {
+            return !this.email;
+        },
         index: true,
         unique: true,
+        sparse: true,
     },
     refreshToken: String,
     avatar: String,
     email: {
         type: String,
         unique: true,
-        required: true,
+        sparse: true,
+        required: function () {
+            return !this.googleId;
+        },
     },
     password: {
         type: String,
