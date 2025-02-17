@@ -15,7 +15,7 @@ export const authMiddleware = asyncHandler(
 				req.cookies?.accessToken ||
 				req.header("Authorization")?.split("Bearer")[1].trim();
 			if (!token) {
-				throw new ApiError(403, "Unauthorized access");
+				throw new ApiError(401, "Unauthorized access");
 			}
 			const decodedToken = jwt.verify(
 				token,
@@ -29,7 +29,7 @@ export const authMiddleware = asyncHandler(
 			req.member = user;
 			next();
 		} catch (error: any) {
-			throw new ApiError(403, error?.message || "Invalid Access Token");
+			throw new ApiError(401, error?.message || "Invalid Access Token");
 		}
 	}
 );

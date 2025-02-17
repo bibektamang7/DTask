@@ -21,10 +21,10 @@ export const workspaceEditor = asyncHandler(
 		});
 		console.log("workspace member", workspaceMember);
 		if (!workspaceMember || !workspaceMember.isJoined) {
-			throw new ApiError(403, "Unauthorized member");
+			throw new ApiError(401, "Unauthorized member");
 		}
 		if (workspaceMember.role === "Member") {
-			throw new ApiError(403, "Unauthorized to edit");
+			throw new ApiError(401, "Unauthorized to edit");
 		}
 		req.workspaceMember = workspaceMember;
 		next();

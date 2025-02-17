@@ -157,7 +157,7 @@ const deleteWorkspace = asyncHandler(async (req, res) => {
 	}
 
 	if (workspace.owner.toString() !== req.member._id.toString()) {
-		throw new ApiError(403, "Unauthorized to delete workspace");
+		throw new ApiError(401, "Unauthorized to delete workspace");
 	}
 
 	const session = await mongoose.startSession();
@@ -225,7 +225,7 @@ const updateWorkspace = asyncHandler(async (req, res) => {
 		throw new ApiError(400, "Workspace not found");
 	}
 	if (workspace.owner.toString() !== req.member._id.toString()) {
-		throw new ApiError(403, "Unauthorized to edit workspace name");
+		throw new ApiError(401, "Unauthorized to edit workspace name");
 	}
 	const updatedWorkspace = await WorkspaceModel.findByIdAndUpdate(
 		workspace._id,
@@ -348,7 +348,7 @@ const addMemeberInWorkspace = asyncHandler(async (req, res) => {
 		(req.workspaceMember.role !== "Admin" ||
 			req.workspaceMember.role === "Editor")
 	) {
-		throw new ApiError(403, "Unauthorized to add editor");
+		throw new ApiError(401, "Unauthorized to add editor");
 	}
 	const session = await mongoose.startSession();
 	session.startTransaction();
@@ -444,7 +444,7 @@ const deleteMemberFromWorkspace = asyncHandler(async (req, res) => {
 		req.workspaceMember.role === member.role ||
 		(member.role === "Editor" && req.workspaceMember.role === "Member")
 	) {
-		throw new ApiError(403, "Unauthorized to delete member");
+		throw new ApiError(401, "Unauthorized to delete member");
 	}
 
 	const session = await mongoose.startSession();

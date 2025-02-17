@@ -246,7 +246,7 @@ const deleteTask = asyncHandler(async (req, res) => {
 		(req.member._id.toString() !== task.createdBy.toString() &&
 			req.workspaceMember.role !== "Admin")
 	) {
-		throw new ApiError(403, "Unauthorized to delete task");
+		throw new ApiError(401, "Unauthorized to delete task");
 	}
 
 	const session = await mongoose.startSession();
@@ -584,7 +584,7 @@ const deleteComment = asyncHandler(async (req, res) => {
 	}
 	//TODO:create logic for admin be able to delete
 	if (comment.createdBy.toString() !== req.member._id.toString()) {
-		throw new ApiError(403, "Unauthorized to delete comment");
+		throw new ApiError(401, "Unauthorized to delete comment");
 	}
 	const session = await mongoose.startSession();
 	session.startTransaction();
