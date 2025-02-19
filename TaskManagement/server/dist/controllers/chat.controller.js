@@ -65,10 +65,12 @@ const isMemberInWorkspace = (memberId) => __awaiter(void 0, void 0, void 0, func
 // const chatClient = createClient({ url: "redis://localhost:6379" });
 // chatClient.connect().then(() => console.log("Chat client connected"));
 const createChat = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    if (req.workspaceMember.role === "Member") {
+        throw new ApiError_1.ApiError(401, "Unauthorized to edit");
+    }
     const parsedData = validation_1.createChatSchema.safeParse(req.body);
     const { workspaceId } = req.params;
     if (!parsedData.success) {
-        console.log(parsedData.error.message);
         throw new ApiError_1.ApiError(400, "Validation Error");
     }
     yield Promise.all(parsedData.data.members.map((memberId) => __awaiter(void 0, void 0, void 0, function* () {
@@ -85,6 +87,8 @@ const createChat = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void
     if (!chat) {
         throw new ApiError_1.ApiError(500, "Internal server error");
     }
+    console.log("yeta paxi aako ho");
+    console.log(chat._id);
     const createdChat = yield chat_model_1.ChatModel.aggregate([
         {
             $match: {
@@ -157,6 +161,9 @@ const createChat = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void
 }));
 exports.createChat = createChat;
 const deleteChat = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    if (req.workspaceMember.role === "Member") {
+        throw new ApiError_1.ApiError(401, "Unauthorized to access");
+    }
     const { chatId } = req.query;
     if (!chatId) {
         throw new ApiError_1.ApiError(400, "Chat id required");
@@ -168,14 +175,18 @@ const deleteChat = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void
     const session = yield (0, mongoose_1.startSession)();
     session.startTransaction();
     try {
-        yield Promise.all([
-            attachment_model_1.AttachmentModel.deleteMany({
-                chatId: { $in: createdChat._id },
-            }, { session }),
-            message_model_1.ChatMessageModel.deleteMany({
-                _id: { $in: createdChat.messages },
-            }, { session }),
-        ]);
+        const deletedAttachments = yield attachment_model_1.AttachmentModel.deleteMany({
+            chatId: { $in: createdChat._id },
+        }, { session });
+        if (!deletedAttachments.acknowledged) {
+            throw new ApiError_1.ApiError(500, "failed to delete attachments of chat");
+        }
+        const deletedMessages = yield message_model_1.ChatMessageModel.deleteMany({
+            _id: { $in: createdChat.messages },
+        }, { session });
+        if (!deletedMessages.acknowledged) {
+            throw new ApiError_1.ApiError(500, "Failed to delete messages of chat");
+        }
         const deletedChat = yield chat_model_1.ChatModel.findByIdAndDelete(createdChat._id, {
             session: session,
         });
@@ -193,6 +204,7 @@ const deleteChat = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void
     }
     catch (error) {
         yield session.abortTransaction();
+        console.log(error.message);
         throw new ApiError_1.ApiError(500, "Failed to delete chat");
     }
     finally {
@@ -331,9 +343,10 @@ exports.updateChatName = updateChatName;
 //TODO:THIS FEATURE WILL BE ADDED IN UPCOMING DAYS
 // const updateChatSetting = asyncHandler(async (req, res) => {});
 const sendMessage = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { chatId } = req.params;
-    if (!chatId) {
-        throw new ApiError_1.ApiError(400, "Chat Id is required");
+    const { chatId, workspaceId } = req.params;
+    console.log(chatId, "This is chat Id in send ");
+    if (!chatId || !workspaceId) {
+        throw new ApiError_1.ApiError(400, "Id is required");
     }
     const parsedData = validation_1.sendMessageSchema.safeParse(req.body);
     if (!parsedData.success) {
@@ -348,10 +361,15 @@ const sendMessage = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(voi
     if (!chat) {
         throw new ApiError_1.ApiError(400, "Chat not found");
     }
+    if (req.workspaceMember.role !== "Admin" &&
+        chat.creator.toString() !== req.workspaceMember._id.toString() &&
+        !chat.members.includes(req.workspaceMember._id)) {
+        throw new ApiError_1.ApiError(400, "You are not in the chat");
+    }
     const session = yield (0, mongoose_1.startSession)();
     session.startTransaction();
     try {
-        let attachments;
+        let attachments = [];
         if (files && files.length > 0) {
             attachments = yield Promise.all(files.map((file) => __awaiter(void 0, void 0, void 0, function* () {
                 const uploadResponse = yield (0, fileUpload_cloudinary_1.uploadOnCloudinary)(file.path, `/chats/${chat._id}`);
@@ -366,9 +384,7 @@ const sendMessage = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(voi
                 ], { session: session });
             })));
         }
-        if (!attachments) {
-            throw new ApiError_1.ApiError(500, "Failed to upload files");
-        }
+        console.log();
         const chatMessage = yield message_model_1.ChatMessageModel.create([
             {
                 sender: req.workspaceMember._id,
@@ -397,9 +413,10 @@ const sendMessage = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(voi
         // );
         res
             .status(200)
-            .json(new ApiResponse_1.ApiResponse(200, updatedChat, "Message send successfully"));
+            .json(new ApiResponse_1.ApiResponse(200, chatMessage[0], "Message send successfully"));
     }
     catch (error) {
+        console.log(error);
         yield session.abortTransaction();
         throw new ApiError_1.ApiError(500, "Internal server error");
     }
@@ -418,9 +435,22 @@ const deleteMessage = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(v
     if (!chat) {
         throw new ApiError_1.ApiError(400, "Chat not found");
     }
+    const isAdmin = req.workspaceMember.role === "Admin";
+    const isChatCreator = chat.creator.toString() === req.workspaceMember._id.toString();
+    if (!isAdmin &&
+        !isChatCreator &&
+        !chat.members.includes(req.workspaceMember._id)) {
+        throw new ApiError_1.ApiError(400, "You are not in the chat");
+    }
     const createdChatMessage = yield message_model_1.ChatMessageModel.findById(messageId);
+    console.log(createdChatMessage === null || createdChatMessage === void 0 ? void 0 : createdChatMessage._id, "this is schat message");
     if (!createdChatMessage) {
         throw new ApiError_1.ApiError(400, "Chat message not found");
+    }
+    if (req.workspaceMember._id.toString() !==
+        createdChatMessage.sender.toString() &&
+        !isAdmin) {
+        throw new ApiError_1.ApiError(401, "You are not authorized.");
     }
     const session = yield (0, mongoose_1.startSession)();
     session.startTransaction();
@@ -446,6 +476,7 @@ const deleteMessage = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(v
         res.status(200).json(new ApiResponse_1.ApiResponse(200, {}, "Chat deleted successfully"));
     }
     catch (error) {
+        console.log(error, "This is error in deleteing chat message");
         yield session.abortTransaction();
         throw new ApiError_1.ApiError(500, "Internal server error");
     }
@@ -455,7 +486,10 @@ const deleteMessage = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(v
 }));
 exports.deleteMessage = deleteMessage;
 const addMemberInChat = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { memberId, chatId, workspaceId } = req.params;
+    if (req.workspaceMember.role === "Member") {
+        throw new ApiError_1.ApiError(401, "Unauthorized to add member");
+    }
+    const { memberId, chatId } = req.params;
     if (!memberId || !chatId) {
         throw new ApiError_1.ApiError(400, "Id required");
     }

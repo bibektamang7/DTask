@@ -22,18 +22,17 @@ router
 	.route("/:workspaceId")
 	.post(workspaceEditor, createChat)
 	.delete(workspaceEditor, deleteChat)
-	.get(getChats);
+	.get(workspaceEditor, getChats);
 
-router
-	.route("/:workspaceId/:chatId/:memberId")
-	.post(addMemberInChat)
-	.delete(removeMemberFromChat);
-
-router.route("/:workspaceId/:chatId").get(getChat);
+router.route("/:workspaceId/:chatId").get(workspaceEditor, getChat);
 
 router
 	.route("/:workspaceId/:chatId/messages")
-	.post(upload.array("chatFile"), sendMessage)
-	.delete(deleteMessage);
+	.post(upload.array("chatFile"), workspaceEditor, sendMessage)
+	.delete(workspaceEditor, deleteMessage);
 
+router
+	.route("/:workspaceId/:chatId/members/:memberId")
+	.post(workspaceEditor, addMemberInChat)
+	.delete(workspaceEditor, removeMemberFromChat);
 export default router;

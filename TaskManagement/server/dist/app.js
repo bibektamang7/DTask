@@ -11,6 +11,7 @@ const app = (0, express_1.default)();
 });
 app.use(express_1.default.json({ limit: "16kb" }));
 app.use(express_1.default.urlencoded({ extended: true, limit: "20kb" }));
+// app.use(multer({limits: }))
 const user_routes_1 = __importDefault(require("./routes/user.routes"));
 const task_routes_1 = __importDefault(require("./routes/task.routes"));
 const workspace_routes_1 = __importDefault(require("./routes/workspace.routes"));

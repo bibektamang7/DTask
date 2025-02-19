@@ -334,6 +334,9 @@ const getWorkspace = asyncHandler(async (req, res) => {
 });
 
 const addMemeberInWorkspace = asyncHandler(async (req, res) => {
+	if (req.workspaceMember.role === "Member") {
+		throw new ApiError(401, "You are not authorized.");
+	}
 	const parsedData = addMemeberInWorkspaceSchema.safeParse(req.body);
 	if (!parsedData.success) {
 		console.log(parsedData.error.message);
@@ -430,6 +433,9 @@ const addMemeberInWorkspace = asyncHandler(async (req, res) => {
 const getAllMembersFromWorkspace = asyncHandler(async (req, res) => {});
 
 const deleteMemberFromWorkspace = asyncHandler(async (req, res) => {
+	if (req.workspaceMember.role === "Member") {
+		throw new ApiError(401, "You are not authorized.");
+	}
 	const { memberId } = req.query;
 
 	if (!memberId) {

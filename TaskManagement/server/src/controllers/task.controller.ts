@@ -24,13 +24,17 @@ const isMemberInWorkspace = async (memberId: string) => {
 	const member = await collection?.findOne({
 		_id: new mongoose.Types.ObjectId(memberId),
 	});
-	if (!member?.isJoined) { //TODO:HANDLE THIS LOGIC PROPERLY	
+	if (!member?.isJoined) {
+		//TODO:HANDLE THIS LOGIC PROPERLY
 		return false;
 	}
 	return !!member;
 };
 
 const createTask = asyncHandler(async (req, res) => {
+	if (req.workspaceMember.role === "Member") {
+		throw new ApiError(401, "You are not authorized.");
+	}
 	const parsedData = createTaskSchema.safeParse(req.body);
 	if (!parsedData.success) {
 		console.log(parsedData.error.message);
@@ -224,6 +228,9 @@ const getTask = asyncHandler(async (req, res) => {
 const updateTask = asyncHandler(async (req, res) => {});
 
 const deleteTask = asyncHandler(async (req, res) => {
+	if (req.workspaceMember.role === "Member") {
+		throw new ApiError(401, "You are not authorized.");
+	}
 	const { taskId } = req.query;
 	if (!taskId) {
 		throw new ApiError(400, "Task id required");
@@ -302,6 +309,9 @@ const deleteTask = asyncHandler(async (req, res) => {
 });
 
 const addAttachmentInTask = asyncHandler(async (req, res) => {
+	if (req.workspaceMember.role === "Member") {
+		throw new ApiError(401, "You are not authorized.");
+	}
 	const { taskId } = req.params;
 	if (!taskId) {
 		throw new ApiError(400, "Task id required");
@@ -395,6 +405,9 @@ const addAttachmentInTask = asyncHandler(async (req, res) => {
 
 const deleteAttachmentFromTask = asyncHandler(async (req, res) => {
 	// apply zod validation
+	if (req.workspaceMember.role === "Member") {
+		throw new ApiError(401, "You are not authorized.");
+	}
 	const { attachmentId } = req.body;
 	const { taskId } = req.params;
 	if (!taskId) {
@@ -583,7 +596,10 @@ const deleteComment = asyncHandler(async (req, res) => {
 		throw new ApiError(400, "Comment not found");
 	}
 	//TODO:create logic for admin be able to delete
-	if (comment.createdBy.toString() !== req.member._id.toString()) {
+	if (
+		req.workspaceMember.role !== "Admin" &&
+		comment.createdBy.toString() !== req.member._id.toString()
+	) {
 		throw new ApiError(401, "Unauthorized to delete comment");
 	}
 	const session = await mongoose.startSession();
