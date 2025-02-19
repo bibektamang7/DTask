@@ -130,7 +130,7 @@ const createChat = asyncHandler(async (req, res) => {
 
 const deleteChat = asyncHandler(async (req, res) => {
 	if (req.workspaceMember.role === "Member") {
-		throw new ApiError(401, "Unauthorized to access");
+		// throw new ApiError(401, "Unauthorized to access");
 	}
 	const { chatId } = req.query;
 
@@ -363,22 +363,24 @@ const sendMessage = asyncHandler(async (req, res) => {
 						`/chats/${chat._id}`
 					);
 
-					return await AttachmentModel.create(
-						[
-							{
-								filename: uploadResponse?.filename,
-								publicId: uploadResponse?.publicId,
-								fileUrl: uploadResponse?.url,
-								fileType: uploadResponse?.format,
-								chatId: chat._id,
-							},
-						],
-						{ session: session }
-					);
+					return (
+						await AttachmentModel.create(
+							[
+								{
+									filename: uploadResponse?.filename,
+									publicId: uploadResponse?.publicId,
+									fileUrl: uploadResponse?.url,
+									fileType: uploadResponse?.format,
+									chatId: chat._id,
+								},
+							],
+							{ session: session }
+						)
+					)[0]._id;
 				})
 			);
 		}
-		console.log();
+		
 
 		const chatMessage = await ChatMessageModel.create(
 			[
@@ -451,7 +453,7 @@ const deleteMessage = asyncHandler(async (req, res) => {
 	}
 	const createdChatMessage = await ChatMessageModel.findById(messageId);
 	console.log(createdChatMessage?._id, "this is schat message");
-	
+
 	if (!createdChatMessage) {
 		throw new ApiError(400, "Chat message not found");
 	}

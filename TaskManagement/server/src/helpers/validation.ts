@@ -78,7 +78,6 @@ const createChatSchema = z.object({
 });
 
 const sendMessageSchema = z.object({ 
-	sender: z.string(),
 	content: z.string().optional(),
 })
 

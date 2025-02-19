@@ -17,21 +17,21 @@ import upload from "../middlewares/multer.middleware";
 const router = Router();
 
 //not sure about get tasks and update task, need to review this route futher
-router.use(authMiddleware, workspaceEditor);
+router.use(authMiddleware);
 router
 	.route("/:workspaceId")
-	.post(createTask)
-	.get(getTask)
-	.delete(deleteTask);
+	.post(workspaceEditor,createTask)
+	.get(workspaceEditor,getTask)
+	.delete(workspaceEditor,deleteTask);
 
 router
-	.route("/attachments")
-	.post(upload.array("taskFiles", 10), addAttachmentInTask)
-	.delete(deleteAttachmentFromTask);
+	.route("/:workspaceId/attachments/:taskId")
+	.post(upload.array("taskFiles", 10), workspaceEditor,addAttachmentInTask)
+	.delete(workspaceEditor,deleteAttachmentFromTask);
 upload;
 router
 	.route("/:workspaceId/:taskId/comments")
-	.post(upload.single("commentImage"), createComment)
-	.delete(deleteComment);
+	.post(upload.single("commentImage"),workspaceEditor, createComment)
+	.delete(workspaceEditor,deleteComment);
 
 export default router;

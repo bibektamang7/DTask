@@ -28,7 +28,7 @@ router.route("/:workspaceId/:chatId").get(workspaceEditor, getChat);
 
 router
 	.route("/:workspaceId/:chatId/messages")
-	.post(upload.array("chatFile"), workspaceEditor, sendMessage)
+	.post(upload.array("chatFiles"), workspaceEditor, sendMessage)
 	.delete(workspaceEditor, deleteMessage);
 
 router

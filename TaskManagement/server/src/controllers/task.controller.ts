@@ -316,6 +316,7 @@ const addAttachmentInTask = asyncHandler(async (req, res) => {
 	if (!taskId) {
 		throw new ApiError(400, "Task id required");
 	}
+	console.log(taskId, "this is task id");
 	const files = req.files as Express.Multer.File[];
 
 	if (!files || files.length < 1) {
@@ -332,7 +333,9 @@ const addAttachmentInTask = asyncHandler(async (req, res) => {
 	if (!task) {
 		throw new ApiError(400, "Task not found");
 	}
-	if (task.workspaceId !== req.workspaceMember.workspace) {
+	if (
+		task.workspaceId.toString() !== req.workspaceMember.workspace.toString()
+	) {
 		throw new ApiError(400, "Task not found in workspace");
 	}
 
@@ -348,23 +351,25 @@ const addAttachmentInTask = asyncHandler(async (req, res) => {
 						file.path,
 						`/tasks/${task._id}`
 					);
-
-					return await AttachmentModel.create(
-						[
-							{
-								filename: fileUploadResponse?.filename,
-								fileType: fileUploadResponse?.filename,
-								publicId: fileUploadResponse?.publicId,
-								fileUrl: fileUploadResponse?.url,
-								taskId: task._id,
-							},
-						],
-						{ session }
-					);
+					return (
+						await AttachmentModel.create(
+							[
+								{
+									filename: fileUploadResponse?.filename,
+									fileType: fileUploadResponse?.format,
+									publicId: fileUploadResponse?.publicId,
+									fileUrl: fileUploadResponse?.url,
+									taskId: task._id,
+								},
+							],
+							{ session }
+						)
+					)[0]._id;
 				})
 			);
 		}
 
+		console.log("yeta aako xa hai", attachments);
 		const updatedTask = await TaskModel.findByIdAndUpdate(
 			task._id,
 			{
@@ -393,7 +398,13 @@ const addAttachmentInTask = asyncHandler(async (req, res) => {
 		// );
 
 		await session.commitTransaction();
+		res
+			.status(200)
+			.json(
+				new ApiResponse(200, attachments, "Added attachments successfully")
+			);
 	} catch (error: any) {
+		console.log(error.message);
 		await session.abortTransaction();
 		throw new ApiError(500, "Failed to add attachments");
 	} finally {
@@ -408,10 +419,10 @@ const deleteAttachmentFromTask = asyncHandler(async (req, res) => {
 	if (req.workspaceMember.role === "Member") {
 		throw new ApiError(401, "You are not authorized.");
 	}
-	const { attachmentId } = req.body;
+	const { attachmentId } = req.query as { attachmentId: string };
 	const { taskId } = req.params;
-	if (!taskId) {
-		throw new ApiError(400, "Task id required");
+	if (!taskId || !attachmentId) {
+		throw new ApiError(400, "Task and attachment Id is required");
 	}
 	//TODO: EXTRACT USERID FROM ASSIGNEES
 	const task = await TaskModel.findById(taskId).populate({
@@ -424,7 +435,7 @@ const deleteAttachmentFromTask = asyncHandler(async (req, res) => {
 	if (!task) {
 		throw new ApiError(400, "Task not found");
 	}
-	if (task.workspaceId !== req.workspaceMember.workspace) {
+	if (task.workspaceId.toString() !== req.workspaceMember.workspace.toString()) {
 		throw new ApiError(400, "Task not found in workspace");
 	}
 	if (!task.attachments.includes(new mongoose.Types.ObjectId(attachmentId))) {
