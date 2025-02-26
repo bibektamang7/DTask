@@ -1,3 +1,5 @@
+import { BellIcon, CalendarIcon, CheckSquareIcon, LayoutDashboardIcon, MessageSquareIcon, UserIcon } from "lucide-react"
+
 const HeaderList = [
     {
         title: "About",
@@ -53,4 +55,43 @@ const featureCardData = [
     },
 ]
 
-export {HeaderList, featureCardData,}
+
+const sideBar_menu_lists = [
+	{
+		title: "Dashboard",
+		icon: LayoutDashboardIcon,
+		redirectTo: "/w",
+	},
+	{
+		title: "Tasks",
+		icon: CheckSquareIcon,
+		redirectTo: "/w/tasks"
+	},
+	{
+		title: "Calendar",
+		icon: CalendarIcon,
+		redirectTo: "/w/calendar"
+	},
+]
+
+const sidebar_account_lists = [
+	{
+		title: "User",
+		icon: UserIcon,
+		redirectTo: ""
+	},
+	{
+		title: "Chat",
+		icon: MessageSquareIcon,
+		redirectTo: "/w/chats"
+	},
+	{
+		title: "Notification",
+		icon:BellIcon,
+		redirectTo: "",
+	},
+]
+
+
+
+export {HeaderList, featureCardData, sideBar_menu_lists, sidebar_account_lists}

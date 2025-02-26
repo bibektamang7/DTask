@@ -21,13 +21,19 @@ import WorkspaceLayout from "./components/workspace/WorkspaceLayout";
 import ChatLayout from "./components/workspace/chats/ChatLayout";
 import TaskLayout from "./components/workspace/tasks/TaskLayout";
 import { Calendar } from "./components/ui/calendar";
+import AuthLayout from "./components/AuthLayout";
+
+import { taskLoader, workspaceLoader } from "./helpers/api";
+import { ListView } from "./pages/ListView";
+
 const router = createBrowserRouter(
 	createRoutesFromElements(
 		<React.Fragment>
 			<Route
 				path="/"
 				element={<RootLayout />}
-				errorElement={<Error />}>
+				errorElement={<Error />}
+			>
 				<Route
 					index
 					element={<Home />}
@@ -46,14 +52,21 @@ const router = createBrowserRouter(
 
 			<Route
 				path="/w"
-				element={<WorkspaceLayout />}>
+				loader={workspaceLoader}
+				element={
+					<AuthLayout>
+						<WorkspaceLayout />
+					</AuthLayout>
+				}
+			>
 				<Route
 					index
 					element={<DashboardPage />}
 				/>
 				<Route
 					path="chats"
-					element={<ChatLayout />}>
+					element={<ChatLayout />}
+				>
 					<Route
 						index
 						element={<WorkspaceChat />}
@@ -61,16 +74,22 @@ const router = createBrowserRouter(
 				</Route>
 				<Route
 					path="tasks"
-					element={<TaskLayout />}>
+					element={<TaskLayout />}
+					loader={taskLoader}
+				>
 					<Route
 						index
-						// path="boardview"
+						path="boardview"
 						element={<BoardView />}
+					/>
+					<Route
+						index
+						element={<ListView />}
 					/>
 				</Route>
 				<Route
 					path="calendar"
-					element={<Calendar/>}
+					element={<Calendar />}
 				/>
 			</Route>
 

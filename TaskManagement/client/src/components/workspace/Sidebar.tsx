@@ -1,98 +1,95 @@
-import React from "react";
-import {
-	BellIcon,
-	CalendarIcon,
-	CheckSquareIcon,
-	HelpCircle,
-	LayoutDashboardIcon,
-	MessageSquareIcon,
-	PencilIcon,
-	Settings,
-	UserIcon,
-} from "lucide-react";
+import { HelpCircle, SidebarClose, Settings } from "lucide-react";
 import { Link } from "react-router";
 import { Button } from "../ui/button";
+import { sidebar_account_lists, sideBar_menu_lists } from "@/constants";
+import { useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 
-const Sidebar = () => {
+const Sidebar: React.FC<{ workspaceName: string }> = ({ workspaceName }) => {
+	const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
+	console.log(isSidebarOpen);
+
 	return (
-		<div className="w-full h-full p-6 bg-background">
+		<div
+			className={cn(
+				"w-full h-full p-6 bg-background",
+				!isSidebarOpen ? "w-fit" : ""
+			)}
+		>
 			<div className="h-full flex flex-col items-start justify-between">
-				<div>
+				<div className="w-full">
 					<div className="flex items-center justify-between mb-8">
-						<h2 className="text-xl font-semibold">Bibek Tamang</h2>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="md:flex">
-							<PencilIcon className="h-5 w-5" />
-						</Button>
+						{isSidebarOpen && (
+							<h2 className="text-lg font-semibold line-clamp-1">
+								{workspaceName}
+							</h2>
+						)}
+						<SidebarClose
+							onClick={() => setIsSidebarOpen((prev) => !prev)}
+							className="h-6 w-6 hover:cursor-pointer text-slate-300 "
+						/>
 					</div>
 
-					<div className="space-y-6">
+					<div className={cn("space-y-6", !isSidebarOpen ? "hidden" : "")}>
 						<div className="space-y-2">
-							<h3 className="text-sm font-medium text-muted-foreground">
-								Menu
-							</h3>
-							<nav className="space-y-1">
-								<Link
-									to="/w"
-									className="flex items-center px-3 py-2 text-muted-foreground rounded-lg hover:bg-accent hover:text-accent-foreground">
-									<LayoutDashboardIcon className="mr-3 h-5 w-5" />
-									Dashboard
-								</Link>
-								<Link
-									to="/w/tasks"
-									className="flex items-center px-3 py-2 text-muted-foreground rounded-lg hover:bg-accent hover:text-accent-foreground">
-									<CheckSquareIcon className="mr-3 h-5 w-5" />
-									Tasks
-								</Link>
-								<Link
-									to="/w/calendar"
-									className="flex items-center px-3 py-2 text-muted-foreground rounded-lg hover:bg-accent hover:text-accent-foreground">
-									<CalendarIcon className="mr-3 h-5 w-5" />
-									Calendar
-								</Link>
+							{isSidebarOpen && (
+								<h3 className="text-sm font-medium text-muted-foreground">
+									Menu
+								</h3>
+							)}
+							<nav className={cn("space-y-1", !isSidebarOpen ? "flex gap-2 flex-1 flex-col" : "")}>
+								{sideBar_menu_lists.map((ele, index) => (
+									<Link
+										key={`${ele.title}/${index}`}
+										to={ele.redirectTo}
+										className="flex w-fit text-sm items-center px-3 py-1 text-muted-foreground rounded-lg hover:bg-accent hover:text-accent-foreground"
+									>
+										<ele.icon
+											className={cn(
+												"mr-3 h-4 w-4",
+												!isSidebarOpen ? "h-6 w-6" : ""
+											)}
+										/>
+										{isSidebarOpen && ele.title}
+									</Link>
+								))}
 							</nav>
 						</div>
 
 						<div className="space-y-2">
-							<h3 className="text-sm font-medium text-muted-foreground">
-								Account
-							</h3>
+							{isSidebarOpen && (
+								<h3 className="text-sm font-medium text-muted-foreground">
+									Account
+								</h3>
+							)}
 							<nav className="space-y-1">
-								<Link
-									to="#"
-									className="flex items-center px-3 py-2 text-muted-foreground rounded-lg hover:bg-accent hover:text-accent-foreground">
-									<UserIcon className="mr-3 h-5 w-5" />
-									User
-								</Link>
-								<Link
-									to="/w/chats"
-									className="flex items-center px-3 py-2 text-muted-foreground rounded-lg hover:bg-accent hover:text-accent-foreground">
-									<MessageSquareIcon className="mr-3 h-5 w-5" />
-									Chat
-								</Link>
-								<Link
-									to="#"
-									className="flex items-center px-3 py-2 text-muted-foreground rounded-lg hover:bg-accent hover:text-accent-foreground">
-									<BellIcon className="mr-3 h-5 w-5" />
-									Notifications
-								</Link>
+								{sidebar_account_lists.map((ele, index) => (
+									<Link
+										key={`${ele.title}/${index}`}
+										to={ele.redirectTo}
+										className="flex items-center px-3 text-sm py-1 text-muted-foreground rounded-lg hover:bg-accent hover:text-accent-foreground"
+									>
+										<ele.icon className="mr-3 h-4 w-4" />
+										{isSidebarOpen && ele.title}
+									</Link>
+								))}
 							</nav>
 						</div>
 					</div>
 				</div>
-				<div className="pt-6 space-y-1">
+				<div className={cn("pt-6 space-y-1", !isSidebarOpen ? "hidden" : '')}>
 					<Link
 						to="#"
-						className="flex items-center px-3 py-2 text-muted-foreground rounded-lg hover:bg-accent hover:text-accent-foreground">
-						<Settings className="mr-3 h-5 w-5" />
+						className="flex text-sm items-center px-3 py-1 text-muted-foreground rounded-lg hover:bg-accent hover:text-accent-foreground"
+					>
+						<Settings className="mr-3 h-4 w-4" />
 						Setting
 					</Link>
 					<Link
 						to="#"
-						className="flex items-center px-3 py-2 text-muted-foreground rounded-lg hover:bg-accent hover:text-accent-foreground">
-						<HelpCircle className="mr-3 h-5 w-5" />
+						className="flex text-sm items-center px-3 py-1 text-muted-foreground rounded-lg hover:bg-accent hover:text-accent-foreground"
+					>
+						<HelpCircle className="mr-3 h-4 w-4" />
 						Help
 					</Link>
 				</div>

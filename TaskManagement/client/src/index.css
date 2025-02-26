@@ -31,7 +31,7 @@ a:hover {
 
 body {
   @apply font-poppins;
-  @apply bg-gray-900 text-gray-100;
+  @apply dark text-gray-100;
   margin: 0;
   display: flex;
   place-items: center;
@@ -158,4 +158,24 @@ button:focus-visible {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+/* this is for firefox */
+.scrollbar-hidden{
+  scrollbar-width: none;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+
+  }
+  body {
+    @apply bg-background text-foreground;
+
+  }
+
 }

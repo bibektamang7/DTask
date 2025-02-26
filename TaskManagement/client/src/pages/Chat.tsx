@@ -100,7 +100,7 @@ export default function WorkspaceChat() {
   const [showMobileChatList, setShowMobileChatList] = useState(true)
 
   return (
-    <div className="w-full flex min-h-screen bg-background">
+    <div className="w-full flex bg-background">
       {/* Mobile view */}
       <div className="md:hidden flex flex-col w-full">
         {showMobileChatList ? (
@@ -160,7 +160,8 @@ export default function WorkspaceChat() {
       {/* Desktop view */}
       <div className="hidden md:flex w-full">
         {/* Left sidebar - Chat rooms */}
-        <div className="w-80 border-r border-border">
+        <div className="w-80 max-h-screen scrollbar-hidden overflow-scroll border-r border-border">
+
           <div className="p-4 border-b border-border">
             <h1 className="text-xl font-semibold">Workspaces</h1>
           </div>
@@ -174,7 +175,7 @@ export default function WorkspaceChat() {
         </div>
 
         {/* Main chat area */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col max-h-screen">
           <ChatHeader />
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-4">
