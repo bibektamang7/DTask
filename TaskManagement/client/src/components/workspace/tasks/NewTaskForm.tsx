@@ -45,15 +45,11 @@ const priorities = [
 ];
 
 interface NewTaskFormProps {
-	workspaceId: string;
 	onClose: any;
-	onTaskAdded: any;
 }
 
 const NewTaskForm: React.FC<NewTaskFormProps> = ({
-	workspaceId,
 	onClose,
-	onTaskAdded,
 }) => {
 	const assignees = useSelector(
 		(state: RootState) => state.Workspaces.workspace.members
@@ -77,10 +73,12 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({
 	});
 
 	const onSubmit = async (data: any) => {
-		console.log(data);
 
 		// Data is type of UseFormReturn
-		await createTask(data);
+		const response = await createTask(data);
+		if(response.success) {
+			onClose();
+		}
 	};
 
 	// const handleClickOutside = useCallback(

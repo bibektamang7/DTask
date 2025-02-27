@@ -33,21 +33,14 @@ import {
 	CardHeader,
 } from "@/components/ui/card";
 import { Task } from "@/types/task";
-
-const statusColors = {
-	Done: "bg-green-500/10 text-green-500",
-	"In-Progress": "bg-blue-500/10 text-blue-500",
-	Todo: "bg-gray-500/10 text-gray-500",
-};
-
-const priorityColors = {
-	Urgent: "bg-red-500/10 text-red-500",
-	High: "bg-orange-500/10 text-orange-500",
-	Medium: "bg-yellow-500/10 text-yellow-500",
-	Low: "bg-green-500/10 text-green-500",
-};
+import { useOutletContext } from "react-router";
+import { statusColors, priorityColors } from "@/constants";
 
 export function ListView() {
+	const [setIsTaskOpen, isTaskOpen]: [
+		setIsTaskOpen: React.Dispatch<React.SetStateAction<boolean>>,
+		isTaskOpen: boolean,
+	] = useOutletContext();
 	const { tasksData, isLoading } = useTask();
 	const [tasks, setTasks] = React.useState<Task[]>([]);
 	const [search, setSearch] = React.useState("");
@@ -156,7 +149,11 @@ export function ListView() {
 
 			<div className="grid gap-4">
 				{filteredTasks.map((task: Task) => (
-					<Card key={task._id}>
+					<Card
+						key={task._id}
+						onClick={() => setIsTaskOpen(true)}
+						className="hover:cursor-pointer"
+					>
 						<CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
 							<div className="space-y-1">
 								<h3 className="font-semibold text-lg leading-none tracking-tight">

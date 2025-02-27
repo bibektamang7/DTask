@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, Outlet, useLoaderData } from "react-router";
 import NewTaskForm from "./NewTaskForm";
 import { setTasks } from "@/redux/features/taskSlice";
+import Task from "./Task";
 
 const TaskLayout = () => {
 	// const {_id} = useSelector((state: RootState) => state.Workspaces.workspace)
@@ -20,13 +21,13 @@ const TaskLayout = () => {
 	dispatch(setTasks(tasks));
 
 	const [isNewTaskForm, setIsNewTaskForm] = useState<boolean>(false);
+	const [isTaskOpen, setIsTaskOpen] = useState<boolean>(false);
 
 	return (
 		<>
+			{isTaskOpen && <Task onClose={() => setIsTaskOpen(false)}/>}
 			{isNewTaskForm && (
 				<NewTaskForm
-					workspaceId="123"
-					onTaskAdded={() => console.log("hello")}
 					onClose={() => setIsNewTaskForm(false)}
 				/>
 			)}
@@ -81,7 +82,9 @@ const TaskLayout = () => {
 								<Button onClick={() => setIsNewTaskForm(true)}>New Task</Button>
 							</div>
 						</div>
-						<Outlet />
+						<Outlet 
+							context={[setIsTaskOpen, isTaskOpen]}
+						/>
 					</div>
 				</main>
 			</div>

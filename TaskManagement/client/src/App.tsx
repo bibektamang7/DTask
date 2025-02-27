@@ -15,8 +15,8 @@ import Loader from "./components/Loader";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import DashboardPage from "./components/workspace/Dashboard";
-import BoardView from "./pages/BoardView";
-import WorkspaceChat from "./pages/Chat";
+import BoardView from "./pages/Tasks/BoardView";
+import WorkspaceChat from "./pages/chats/Chat";
 import WorkspaceLayout from "./components/workspace/WorkspaceLayout";
 import ChatLayout from "./components/workspace/chats/ChatLayout";
 import TaskLayout from "./components/workspace/tasks/TaskLayout";
@@ -24,7 +24,7 @@ import { Calendar } from "./components/ui/calendar";
 import AuthLayout from "./components/AuthLayout";
 
 import { taskLoader, workspaceLoader } from "./helpers/api";
-import { ListView } from "./pages/ListView";
+import { ListView } from "./pages/Tasks/ListView";
 
 const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -79,12 +79,12 @@ const router = createBrowserRouter(
 				>
 					<Route
 						index
-						path="boardview"
-						element={<BoardView />}
+						element={<ListView />}
 					/>
 					<Route
 						index
-						element={<ListView />}
+						path="boardview"
+						element={<BoardView />}
 					/>
 				</Route>
 				<Route

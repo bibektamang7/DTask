@@ -8,9 +8,6 @@ const useTask = () => {
         <Navigate to={"/login"}/>
     }
     const {data, isLoading} = useGetTasksQuery({token: token, workspaceId: workspaceId});
-    console.log(data);
-    
-
     return {tasksData: data?.data, isLoading};
 }
 export {useTask}

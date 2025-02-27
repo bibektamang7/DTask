@@ -119,7 +119,7 @@ export default function BoardView() {
 								<MoreHorizontal className="h-4 w-4" />
 							</Button>
 						</div>
-						<div className="bg-muted/50 rounded-lg p-4 min-h-[600px]">
+						<div className="bg-muted/50 rounded-lg p-4 min-h-[600px] h-full">
 							{tasks.length > 0 ? (
 								tasks
 									.filter((task) => task.status === status)
