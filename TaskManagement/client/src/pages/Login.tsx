@@ -1,36 +1,43 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
-import {  useRegisterWithGoogleMutation } from "@/redux/services/authApi";
+import { useRegisterWithGoogleMutation } from "@/redux/services/authApi";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/customs/useAuth";
 
 const Login = () => {
+	const [isRemember, setIsRemember] = useState<boolean>(false);
 	const [email, setEmail] = useState<string>("");
 	const [password, setPassword] = useState<string>("");
-	const {login, isLoading} = useAuth()
+	const { login, isLoading } = useAuth();
 	const [loginWithGoogle] = useRegisterWithGoogleMutation();
 
 	const handleLogin = async (e: any) => {
 		e.preventDefault();
 		try {
-			await login(email, password)
-			
+			await login(email, password);
+			if (isRemember) {
+				localStorage.setItem("email", email);
+			}
 		} catch (err) {
 			console.error("Login failed:", err);
 		}
 	};
 	const handleSignInWithGoogle = async () => {
 		try {
-		const resposne = await loginWithGoogle({}).unwrap();
-		console.log(resposne);
-		
+			const resposne = await loginWithGoogle({}).unwrap();
 		} catch (error) {
-			console.log("something went wrong")
+			console.log("something went wrong");
 		}
-	}
-
+	};
+	useEffect(() => {
+		const savedEmail = localStorage.getItem("email");
+		if (savedEmail) {
+			setEmail(savedEmail?.toString());
+			setIsRemember(true);
+		}
+	}, []);
 
 	return (
 		<section className="w-full min-h-screen h-full p-8">
@@ -51,6 +58,7 @@ const Login = () => {
 								<label htmlFor="email">Email</label>
 								<Input
 									placeholder="Enter your email"
+									defaultValue={email}
 									onChange={(e) => setEmail(e.target.value)}
 									className="my-2 outline-none border-none bg-gray-800 py-6"
 								/>
@@ -65,8 +73,15 @@ const Login = () => {
 								/>
 							</div>
 							<div className="flex items-center justify-between">
-								<div className="flex items-center space-x-2">
-									<input type="checkbox" />
+								<div
+									onClick={() => setIsRemember(prev => !prev)}
+									className="flex items-center space-x-2"
+								>
+									<input
+										checked={isRemember}
+										type="checkbox"
+										onChange={() => setIsRemember(prev => !prev)}
+									/>
 									<label
 										htmlFor="terms"
 										className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import {
 	Search,
@@ -37,10 +37,8 @@ import { useOutletContext } from "react-router";
 import { statusColors, priorityColors } from "@/constants";
 
 export function ListView() {
-	const [setIsTaskOpen, isTaskOpen]: [
-		setIsTaskOpen: React.Dispatch<React.SetStateAction<boolean>>,
-		isTaskOpen: boolean,
-	] = useOutletContext();
+	const [setTaskId]: [setTaskId: React.Dispatch<React.SetStateAction<string>>] =
+		useOutletContext();
 	const { tasksData, isLoading } = useTask();
 	const [tasks, setTasks] = React.useState<Task[]>([]);
 	const [search, setSearch] = React.useState("");
@@ -84,7 +82,7 @@ export function ListView() {
 		return <h1>Loading...</h1>;
 	}
 	return (
-		<div className="w-full max-w-7xl mx-auto p-6 space-y-6">
+		<div className="w-full max-w-7xl mx-auto space-y-6 z-0">
 			<div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
 				<div className="flex-1 w-full sm:max-w-sm">
 					<div className="relative">
@@ -151,7 +149,7 @@ export function ListView() {
 				{filteredTasks.map((task: Task) => (
 					<Card
 						key={task._id}
-						onClick={() => setIsTaskOpen(true)}
+						onClick={() => setTaskId(task._id)}
 						className="hover:cursor-pointer"
 					>
 						<CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">

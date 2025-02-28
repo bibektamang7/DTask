@@ -17,9 +17,8 @@ export const taskApi = createApi({
 	tagTypes: ["Task", "Attachment", "Comment"],
 	endpoints: (builder) => ({
 		getTask: builder.query({
-			query: (taskInfo) => ({
-				url: "/tasks",
-				body: taskInfo,
+			query: ({workspaceId, taskId}) => ({
+				url: `/tasks/${workspaceId}?taskId=${taskId}`,
 				credentials: "include",
 			}),
 			providesTags: ["Task"],

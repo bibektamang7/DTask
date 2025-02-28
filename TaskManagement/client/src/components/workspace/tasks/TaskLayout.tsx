@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, Outlet, useLoaderData } from "react-router";
 import NewTaskForm from "./NewTaskForm";
 import { setTasks } from "@/redux/features/taskSlice";
-import Task from "./Task";
+import Task from "./SidebarTask";
 
 const TaskLayout = () => {
 	// const {_id} = useSelector((state: RootState) => state.Workspaces.workspace)
@@ -21,11 +21,11 @@ const TaskLayout = () => {
 	dispatch(setTasks(tasks));
 
 	const [isNewTaskForm, setIsNewTaskForm] = useState<boolean>(false);
-	const [isTaskOpen, setIsTaskOpen] = useState<boolean>(false);
+	const [taskId, setTaskId] = useState<string>("");
 
 	return (
 		<>
-			{isTaskOpen && <Task onClose={() => setIsTaskOpen(false)}/>}
+			{taskId.length > 0 && <Task taskId={taskId} onClose={() => setTaskId("")}/>}
 			{isNewTaskForm && (
 				<NewTaskForm
 					onClose={() => setIsNewTaskForm(false)}
@@ -83,7 +83,7 @@ const TaskLayout = () => {
 							</div>
 						</div>
 						<Outlet 
-							context={[setIsTaskOpen, isTaskOpen]}
+							context={[setTaskId]}
 						/>
 					</div>
 				</main>

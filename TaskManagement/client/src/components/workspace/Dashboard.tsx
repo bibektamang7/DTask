@@ -62,9 +62,9 @@ export default function DashboardPage() {
 			: inProgressTasks;
 
 	return (
-		<main className="relative lg:flex lg:flex-1">
-			<div className="w-full">
-				<div className="container mx-auto p-4 md:p-8 space-y-8">
+		<main className="relative lg:flex lg:flex-1 w-full">
+			<div className="w-full pl-2">
+				<div className="container py-4 md:py-8 space-y-8">
 					<div>
 						<div className="text-muted-foreground">{formattedDate}</div>
 						<h1 className="text-3xl md:text-4xl font-medium line-clamp-1">

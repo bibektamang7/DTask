@@ -104,7 +104,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({
 	// // }, [handleClickOutside]);
 
 	return (
-		<div className="fixed w-full h-full backdrop-blur-md z-10 overflow-y-auto py-16">
+		<div className="fixed left-0 top-0  w-screen h-full backdrop-blur-md z-50 overflow-y-auto py-16">
 			<div className="relative w-full max-w-2xl mx-auto p-6 space-y-6 bg-background text-foreground rounded-lg">
 				<p
 					className="absolute right-7 font-extralight hover:cursor-pointer text-sm top-1"

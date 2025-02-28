@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { Button } from "../ui/button";
 import { Menu, PencilIcon } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
+import { SidebarProvider, SidebarTrigger } from "../ui/sidebar";
 
 const WorkspaceLayout = () => {
 	const loaderData = useLoaderData();
@@ -14,15 +15,17 @@ const WorkspaceLayout = () => {
 	}
 	return (
 		<div className="max-h-screen bg-background dark">
-			<div className="flex flex-col md:flex-row">
+			<div className="flex flex-row">
+				<SidebarProvider
+					className="transition-all duration-300  w-fit z-0"
+				>
+					<Sidebar
+						workspaceName={loaderData.name}
+					/>
+					<SidebarTrigger />
+				</SidebarProvider>
 
-				{/* Desktop Sidebar */}
-				<div className="min-h-screen hidden md:block w-fit border-r">
-					<Sidebar workspaceName={loaderData.name} />
-				</div>
-
-				{/* Main Content */}
-				<ScrollArea className="max-h-screen overflow-y-auto scrollbar-hidden w-full">
+				<ScrollArea className="max-h-screen overflow-y-auto scrollbar-hidden flex-1">
 					<Outlet />
 				</ScrollArea>
 			</div>

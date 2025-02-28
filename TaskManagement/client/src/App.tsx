@@ -23,8 +23,10 @@ import TaskLayout from "./components/workspace/tasks/TaskLayout";
 import { Calendar } from "./components/ui/calendar";
 import AuthLayout from "./components/AuthLayout";
 
-import { taskLoader, workspaceLoader } from "./helpers/api";
+import { taskDataLoader, taskLoader, workspaceLoader } from "./helpers/api";
 import { ListView } from "./pages/Tasks/ListView";
+import Task from "./pages/Tasks/Task";
+import Editor from "./components/workspace/tasks/Editor";
 
 const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -82,7 +84,6 @@ const router = createBrowserRouter(
 						element={<ListView />}
 					/>
 					<Route
-						index
 						path="boardview"
 						element={<BoardView />}
 					/>
@@ -91,8 +92,16 @@ const router = createBrowserRouter(
 					path="calendar"
 					element={<Calendar />}
 				/>
+				<Route
+					path="task/:taskId"
+					element={<Task />}
+					loader={taskDataLoader}
+				/>
 			</Route>
-
+			<Route
+				path="/editor"
+				element={<Editor />}
+			/>
 			<Route
 				path="*"
 				element={<Not_Fount />}

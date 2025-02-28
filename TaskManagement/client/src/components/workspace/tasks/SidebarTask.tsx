@@ -1,5 +1,4 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { priorityColors, statusColors } from "@/constants";
@@ -19,22 +18,42 @@ import {
 	Tag,
 	Users,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { Link } from "react-router";
 
 interface TaskProps {
 	onClose: any;
+	taskId: string;
 }
-type TaskOptions = "Activity" | "My Work" | "Assigned" | "Comments";
-const Task: React.FC<TaskProps> = ({ onClose }) => {
-	const [taskOptions, setTaskOptions] = useState<TaskOptions>("Activity");
+const Task: React.FC<TaskProps> = ({ onClose, taskId }) => {
+	const taskRef = useRef<HTMLDivElement>(null);
+	const handleClickOutside = useCallback(function handleClickOutside(e: any) {
+		if (taskRef.current && !taskRef.current.contains(e.target)) {
+			onClose();
+		}
+	}, []);
+	useEffect(() => {
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, [handleClickOutside]);
 	return (
 		<section className="fixed top-0 left-0 px-8 py-4 w-screen h-screen min-h-screen backdrop-blur-sm z-20">
 			<div className="w-full h-full flex justify-end">
-				<div className="lg:w-[35%] w-full sm:w-[70%] bg-gray-900 p-4 rounded-md overflow-y-auto scrollbar-hidden overflow-x-hidden">
+				<div
+					ref={taskRef}
+					className="lg:w-[35%] w-full sm:w-[70%] bg-gray-900 p-4 rounded-md overflow-y-auto scrollbar-hidden overflow-x-hidden"
+				>
 					<div className="flex items-center justify-between border-b-2 pb-4 border-gray-700">
 						<Link
-							to={``}
+							to={`/w/task/${taskId}`}
 							className="hover:scale-110 hover:text-white"
 						>
 							<Maximize2
@@ -177,26 +196,23 @@ const Task: React.FC<TaskProps> = ({ onClose }) => {
 						<div>
 							<Card className="bg-inherit">
 								<CardContent className="p-0">
-									<Tabs defaultValue={taskOptions}>
+									<Tabs defaultValue={"Activity"}>
 										<TabsList className="w-full bg-inherit justify-start">
 											<TabsTrigger
 												className="bg-inherit"
 												value="Activity"
-												onClick={() => setTaskOptions("Activity")}
 											>
 												Activity
 											</TabsTrigger>
 											<TabsTrigger
 												className="bg-inherit"
 												value="My Work"
-												onClick={() => setTaskOptions("My Work")}
 											>
 												My Work
 											</TabsTrigger>
 											<TabsTrigger
 												className="bg-inherit"
 												value="Assigned"
-												onClick={() => setTaskOptions("Assigned")}
 											>
 												Assigned
 											</TabsTrigger>
@@ -204,21 +220,21 @@ const Task: React.FC<TaskProps> = ({ onClose }) => {
 											<TabsTrigger
 												className="bg-inherit"
 												value="Comments"
-												onClick={() => setTaskOptions("Comments")}
 											>
 												Comments
 											</TabsTrigger>
 										</TabsList>
-										<TabsContent value={taskOptions}>
-											{taskOptions === "Activity" ? (
-												<Activity />
-											) : taskOptions === "My Work" ? (
-												<MyWork />
-											) : taskOptions === "Assigned" ? (
-												<TaskAssigned />
-											) : (
-												<Comment />
-											)}
+										<TabsContent value="Activity">
+											<Activity />
+										</TabsContent>
+										<TabsContent value="My Work">
+											<MyWork />
+										</TabsContent>
+										<TabsContent value="Assigned">
+											<TaskAssigned />
+										</TabsContent>
+										<TabsContent value="Comments">
+											<Comment />
 										</TabsContent>
 									</Tabs>
 								</CardContent>
