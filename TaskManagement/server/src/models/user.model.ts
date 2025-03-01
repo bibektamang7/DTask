@@ -48,18 +48,6 @@ const userSchema = new Schema<User>(
 				ref: "Workspace",
 			},
 		],
-		assignedTasks: [
-			{
-				type: Schema.Types.ObjectId,
-				ref: "Task",
-			},
-		],
-		createdTasks: [
-			{
-				type: Schema.Types.ObjectId,
-				ref: "Task",
-			},
-		],
 	},
 	{ timestamps: true }
 );

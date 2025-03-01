@@ -7,23 +7,32 @@ import { WorkspaceModel } from "../models/workspaces/workspace.model";
 export const workspaceEditor = asyncHandler(
 	async (req: Request, _, next: NextFunction) => {
 		const { workspaceId } = req.params;
-
+		console.log(workspaceId);
+		
 		if (!workspaceId) {
 			throw new ApiError(400, "Workspace id required");
 		}
-		const workspace = await WorkspaceModel.findById(workspaceId);
+		const workspace = await WorkspaceModel.findById(workspaceId).populate({
+			path: "members",
+			populate: {
+				path: "user",
+				select: "username avatar",
+			},
+			select: "user",
+		});
 		if (!workspace) {
 			throw new ApiError(400, "Workspace not found");
 		}
 		const workspaceMember = await WorkspaceMemberModel.findOne({
 			workspace: workspaceId,
-			userId: req.member._id,
+			user: req.member._id,
 		});
-		console.log("workspace member", workspaceMember);
+		
 		if (!workspaceMember || !workspaceMember.isJoined) {
 			throw new ApiError(401, "Unauthorized member");
 		}
 		req.workspaceMember = workspaceMember;
+		req.workspace = workspace;
 		next();
 	}
 );

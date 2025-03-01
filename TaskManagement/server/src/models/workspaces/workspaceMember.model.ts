@@ -7,7 +7,7 @@ export interface WorkspaceMember extends Document{
     role: Role;
     isJoined: boolean;
     workspace: mongoose.Types.ObjectId;
-    userId: mongoose.Types.ObjectId
+    user: mongoose.Types.ObjectId
 }
 
 const workspaceMemberSchema = new Schema<WorkspaceMember>({
@@ -25,7 +25,7 @@ const workspaceMemberSchema = new Schema<WorkspaceMember>({
         ref: "Workspace",
         required: true,
     },
-    userId: {
+    user: {
         type: Schema.Types.ObjectId,
         ref: "User",
         required: true,

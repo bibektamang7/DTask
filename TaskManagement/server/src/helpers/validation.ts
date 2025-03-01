@@ -16,8 +16,8 @@ const setUsernameSchema = z.object({
 });
 
 const userLoginWithEmailAndPasswordSchema = z.object({
-	email: z.string(),
-	password: z.string(),
+	email: z.string().min(1),
+	password: z.string().min(1),
 });
 
 const createWorkspaceSchema = z.object({
@@ -40,14 +40,14 @@ const addMemeberInWorkspaceSchema = z.object({
 });
 
 const createTaskSchema = z.object({
-	workspaceId: z.string(),
-	title: z.string(),
-	status: z.enum(["Done", "Todo", "In-Progress"]),
-	description: z.string(),
+	title: z.string().min(1),
+	status: z.enum(["Completed", "Todo", "In-Progress"]),
+	description: z.string().optional(),
 	priority: z.enum(["Low", "Medium", "High", "Urgent"]),
-	dueDate: z.string(), //TODO:need to recheck this validation
-	assignees: z.array(z.string()).min(1),
-	// attachments?: z.array() //TODO:Not sure
+	startDate: z.string(),
+	dueDate: z.string(),
+	assignees: z.array(z.string()),
+	tags: z.array(z.string()).max(4).optional(),
 });
 
 const deleteTaskSchema = z.object({

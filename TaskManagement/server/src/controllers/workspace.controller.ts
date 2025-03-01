@@ -28,7 +28,7 @@ const publisher = workspaceClient.duplicate();
 
 const isValidUser = async (userId: string) => {
 	const db = mongoose.connection.db;
-	const collection = db?.collection("User");
+	const collection = db?.collection("users");
 	const user = await collection?.findOne({
 		_id: new mongoose.Types.ObjectId(userId),
 	});
@@ -70,41 +70,48 @@ const createWorkspaceService = async (data: any) => {
 		// Add members to workspace
 		const updatedMember =
 			parsedData.data.members?.map((id) => ({
-				userId: id,
+				user: id,
 				workspace: workspace[0]._id,
 				role: "Member",
 				isJoined: false,
 			})) ?? [];
 
 		updatedMember.push({
-			userId: workspace[0].owner.toString(),
+			user: workspace[0].owner.toString(),
 			workspace: workspace[0]._id,
 			role: "Admin",
 			isJoined: true,
 		});
+
 		const member = await WorkspaceMemberModel.create(updatedMember, {
 			session,
+			ordered: true,
 		});
+
 		if (!member) throw new Error("Failed to create workspace member");
 
 		// Update workspace with member details
 		const updatedWorkspace = await WorkspaceModel.findByIdAndUpdate(
 			workspace[0]._id,
-			{ $set: { member } },
+			{ $set: { members: member } },
 			{ new: true, session }
 		);
 		if (!updatedWorkspace) throw new Error("Failed to update workspace member");
 
 		await session.commitTransaction();
-		// publisher.publish(
-		// 	"workspaceCreated",
-		// 	JSON.stringify({
-		// 		workspaceId: workspace[0]._id,
-		// 		members: parsedData.data.members,
-		// 	})
-		// );
+
+		await publisher.publish(
+			"workspaceCreated",
+			JSON.stringify({
+				workspaceId: workspace[0]._id,
+				members: parsedData.data.members || [],
+			})
+		);
+
 		return updatedWorkspace;
 	} catch (error: any) {
+		console.log(error);
+
 		await session.abortTransaction();
 		session.endSession();
 		throw new ApiError(500, "Something went wrong while creating workspace");
@@ -120,7 +127,6 @@ workspaceClient.subscribe("createWorkspace", async (message) => {
 
 		await publisher.publish("workspace:created", JSON.stringify({ workspace }));
 	} catch (error: any) {
-		console.log("workspace creation failed");
 		await publisher.publish(
 			"workspace:failed",
 			JSON.stringify({ message: error.message })
@@ -148,7 +154,7 @@ const deleteWorkspace = asyncHandler(async (req, res) => {
 	const workspace = await WorkspaceModel.findById(workspaceId).populate({
 		path: "members",
 		populate: {
-			path: "userId",
+			path: "user",
 			select: "username avatar",
 		},
 	});
@@ -187,13 +193,13 @@ const deleteWorkspace = asyncHandler(async (req, res) => {
 		);
 
 		await session.commitTransaction();
-		// publisher.publish(
-		// 	"workspaceDeleted",
-		// 	JSON.stringify({
-		// 		workspaceId: workspace._id,
-		// 		workspaceMember: workspace.members,
-		// 	})
-		// );
+		publisher.publish(
+			"workspaceDeleted",
+			JSON.stringify({
+				workspaceId: workspace._id,
+				workspaceMember: workspace.members,
+			})
+		);
 	} catch (error: any) {
 		await session.abortTransaction();
 		console.log(error);
@@ -217,7 +223,7 @@ const updateWorkspace = asyncHandler(async (req, res) => {
 	const workspace = await WorkspaceModel.findById(workspaceId).populate({
 		path: "members",
 		populate: {
-			path: "userId",
+			path: "user",
 			select: "username avatar",
 		},
 	});
@@ -242,43 +248,43 @@ const updateWorkspace = asyncHandler(async (req, res) => {
 		throw new ApiError(400, "Failed to updated workspace");
 	}
 	//TODO:Consider what to return
-	// publisher.publish(
-	// 	"workspaceNameUpdated",
-	// 	JSON.stringify({
-	// 		workspaceId: updatedWorkspace._id,
-	// 		name: updatedWorkspace.name,
-	// 		members: workspace.members,
-	// 	})
-	// );
+	publisher.publish(
+		"workspaceNameUpdated",
+		JSON.stringify({
+			workspaceId: updatedWorkspace._id,
+			name: updatedWorkspace.name,
+			members: workspace.members,
+		})
+	);
 	res
 		.status(200)
 		.json(new ApiResponse(200, workspace, "Workspace updated successfully"));
 });
 
 const getWorkspace = asyncHandler(async (req, res) => {
-	console.log("what sdfkskljflaskdf safksdakfljkdfq");
-
 	const { workspaceId } = req.params;
-	if (!workspaceId) {
-		throw new ApiError(400, "Workspace id required");
+	const userId = req.member._id;
+
+	if (!workspaceId && !userId) {
+		throw new ApiError(400, "Workspace ID or User ID is required");
 	}
+
+	const matchCondition = workspaceId ? { _id: workspaceId } : { owner: userId };
+
 	const workspace = await WorkspaceModel.aggregate([
 		{
-			$match: {
-				_id: workspaceId,
-			},
+			$match: matchCondition,
 		},
 		{
 			$lookup: {
 				from: "users",
-				localField: "ownerId",
+				localField: "owner",
 				foreignField: "_id",
 				as: "owner",
 				pipeline: [
 					{
 						$project: {
 							_id: 1,
-							role: 1,
 							email: 1,
 							username: 1,
 							avatar: 1,
@@ -289,47 +295,47 @@ const getWorkspace = asyncHandler(async (req, res) => {
 		},
 		{
 			$lookup: {
-				from: "tasks",
-				localField: "tasks",
+				from: "workspacemembers",
+				localField: "members",
 				foreignField: "_id",
-				as: "tasks",
+				as: "members",
 				pipeline: [
 					{
-						$project: {
-							_id: 1,
-							title: 1,
-							description: 1,
-							status: 1,
-							priority: 1,
-							dueDate: 1,
-							createdAt: 1,
-							creator: 1,
-							assignees: 1,
+						$lookup: {
+							from: "users",
+							localField: "user",
+							foreignField: "_id",
+							as: "user",
+							pipeline: [
+								{
+									$project: {
+										username: 1,
+										avatar: 1,
+										email: 1,
+									},
+								},
+							],
+						},
+					},
+					{
+						$addFields: {
+							user: { $arrayElemAt: ["$user", 0] },
 						},
 					},
 				],
 			},
 		},
 		{
-			$lookup: {
-				from: "attachments",
-				localField: "attachments",
-				foreignField: "_id",
-				as: "attachments",
-				pipeline: [
-					{
-						$project: {
-							fileUrl: 1,
-							fileName: 1,
-						},
-					},
-				],
+			$addFields: {
+				owner: { $arrayElemAt: ["$owner", 0] },
 			},
 		},
 	]);
+
 	if (workspace.length < 1) {
-		throw new ApiError(400, "Failed to fetch workspace");
+		throw new ApiError(404, "Workspace not found");
 	}
+
 	res.status(200).json(new ApiResponse(200, workspace[0]));
 });
 
@@ -339,7 +345,6 @@ const addMemeberInWorkspace = asyncHandler(async (req, res) => {
 	}
 	const parsedData = addMemeberInWorkspaceSchema.safeParse(req.body);
 	if (!parsedData.success) {
-		console.log(parsedData.error.message);
 		throw new ApiError(400, "Validation error");
 	}
 
@@ -361,7 +366,7 @@ const addMemeberInWorkspace = asyncHandler(async (req, res) => {
 			[
 				{
 					workspace: req.workspaceMember.workspace,
-					userId: parsedData.data.member.userId,
+					user: parsedData.data.member.userId,
 					role: parsedData.data.member.role,
 					isJoined: parsedData.data.member.isJoined,
 				},
@@ -377,14 +382,14 @@ const addMemeberInWorkspace = asyncHandler(async (req, res) => {
 			req.workspaceMember.workspace,
 			{
 				$push: {
-					members: parsedData.data.member.userId,
+					members: workspaceMember,
 				},
 			},
 			{ session: session, new: true }
 		).populate({
 			path: "members",
 			populate: {
-				path: "userId",
+				path: "user",
 				select: "avatar username",
 			},
 		});
@@ -472,7 +477,7 @@ const deleteMemberFromWorkspace = asyncHandler(async (req, res) => {
 		const populatedWorkspace = await workspace.populate({
 			path: "members",
 			populate: {
-				path: "userId",
+				path: "user",
 				select: "avatar username",
 			},
 		});
@@ -489,14 +494,14 @@ const deleteMemberFromWorkspace = asyncHandler(async (req, res) => {
 		}
 
 		await session.commitTransaction();
-		// publisher.publish(
-		// 	"RemoveMemberFromWorkspace",
-		// 	JSON.stringify({
-		// 		workspaceId: workspace._id,
-		// 		userId: member.userId,
-		// 		members: populatedWorkspace.members,
-		// 	})
-		// );
+		publisher.publish(
+			"removeMemberFromWorkspace",
+			JSON.stringify({
+				workspaceId: workspace._id,
+				userId: member.user,
+				members: populatedWorkspace.members,
+			})
+		);
 	} catch (error) {
 		await session.abortTransaction();
 

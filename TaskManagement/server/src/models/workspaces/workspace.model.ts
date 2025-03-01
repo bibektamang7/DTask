@@ -24,13 +24,7 @@ const workspaceSchema = new Schema<WorkspaceProps>({
             ref: "WorkspaceMember",
         }
     ],
-    tasks: [
-        {
-            type: Schema.Types.ObjectId,
-            ref: "Task",
-        }
-    ],
-
+  
 }, { timestamps: true });
 
 

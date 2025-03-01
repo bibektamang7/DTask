@@ -21,8 +21,8 @@ const isMemberInWorkspace = async (memberId: string) => {
 	return !!member;
 };
 
-// const chatClient = createClient({ url: "redis://localhost:6379" });
-// chatClient.connect().then(() => console.log("Chat client connected"));
+const chatClient = createClient({ url: "redis://localhost:6379" });
+chatClient.connect().then(() => console.log("Chat client connected"));
 
 const createChat = asyncHandler(async (req, res) => {
 	if (req.workspaceMember.role === "Member") {
@@ -116,12 +116,12 @@ const createChat = asyncHandler(async (req, res) => {
 		},
 	]);
 
-	// chatClient.publish(
-	// 	`chatCreated:${createdChat[0]._id}`,
-	// 	JSON.stringify({
-	// 		chatId: createdChat,
-	// 	})
-	// );
+	chatClient.publish(
+		`chatCreated`,
+		JSON.stringify({
+			chat: createdChat[0],
+		})
+	);
 
 	res
 		.status(200)
@@ -130,7 +130,7 @@ const createChat = asyncHandler(async (req, res) => {
 
 const deleteChat = asyncHandler(async (req, res) => {
 	if (req.workspaceMember.role === "Member") {
-		// throw new ApiError(401, "Unauthorized to access");
+		throw new ApiError(401, "Unauthorized to access");
 	}
 	const { chatId } = req.query;
 
@@ -141,7 +141,12 @@ const deleteChat = asyncHandler(async (req, res) => {
 	if (!createdChat) {
 		throw new ApiError(400, "Chat not found");
 	}
-
+	if (
+		req.workspaceMember.role !== "Admin" &&
+		req.workspaceMember._id.toString() !== createdChat.creator.toString()
+	) {
+		throw new ApiError(401, "Unauthorized access");
+	}
 	const session = await startSession();
 	session.startTransaction();
 
@@ -171,12 +176,12 @@ const deleteChat = asyncHandler(async (req, res) => {
 			throw new ApiError(500, "Unable to delete chat");
 		}
 		await session.commitTransaction();
-		// chatClient.publish(
-		// 	`deletedChat:${deletedChat._id}`,
-		// 	JSON.stringify({
-		// 		chatId: deletedChat._id,
-		// 	})
-		// );
+		chatClient.publish(
+			`deletedChat:${deletedChat._id}`,
+			JSON.stringify({
+				chatId: deletedChat._id,
+			})
+		);
 		res.status(200).json(new ApiResponse(200, {}, "Chat deleted successfully"));
 	} catch (error: any) {
 		await session.abortTransaction();
@@ -380,8 +385,8 @@ const sendMessage = asyncHandler(async (req, res) => {
 				})
 			);
 		}
+		console.log("here comes and what");
 		
-
 		const chatMessage = await ChatMessageModel.create(
 			[
 				{
@@ -410,13 +415,13 @@ const sendMessage = asyncHandler(async (req, res) => {
 		}
 
 		await session.commitTransaction();
-		// chatClient.publish(
-		// 	"sendMessage",
-		// 	JSON.stringify({
-		// 		chatId: updatedChat._id,
-		// 		message: chatMessage,
-		// 	})
-		// );
+		chatClient.publish(
+			"sendMessage",
+			JSON.stringify({
+				chatId: updatedChat._id,
+				message: chatMessage,
+			})
+		);
 		res
 			.status(200)
 			.json(new ApiResponse(200, chatMessage[0], "Message send successfully"));
@@ -489,13 +494,13 @@ const deleteMessage = asyncHandler(async (req, res) => {
 		}
 
 		await session.commitTransaction();
-		// chatClient.publish(
-		// 	"deleteMessage",
-		// 	JSON.stringify({
-		// 		chatId: chat._id,
-		// 		messageId: deletedMessage._id,
-		// 	})
-		// );
+		chatClient.publish(
+			"deleteMessage",
+			JSON.stringify({
+				chatId: chat._id,
+				messageId: deletedMessage._id,
+			})
+		);
 		res.status(200).json(new ApiResponse(200, {}, "Chat deleted successfully"));
 	} catch (error: any) {
 		console.log(error, "This is error in deleteing chat message");
@@ -531,13 +536,13 @@ const addMemberInChat = asyncHandler(async (req, res) => {
 	if (!updatedChat) {
 		throw new ApiError(500, "Failed to add member in the chat");
 	}
-	// chatClient.publish(
-	// 	"AddMember",
-	// 	JSON.stringify({
-	// 		chatId: updatedChat._id,
-	// 		memberId: memberId,
-	// 	})
-	// );
+	chatClient.publish(
+		"addMember",
+		JSON.stringify({
+			chatId: updatedChat._id,
+			memberId: memberId,
+		})
+	);
 	res.status(200).json(new ApiResponse(200, {}, "Member added in the chat"));
 });
 
@@ -561,13 +566,13 @@ const removeMemberFromChat = asyncHandler(async (req, res) => {
 	if (!updatedChat) {
 		throw new ApiError(500, "Failed to remove member");
 	}
-	// chatClient.publish(
-	// 	"removeMember",
-	// 	JSON.stringify({
-	// 		chatId: chat._id,
-	// 		memberId: memberId,
-	// 	})
-	// );
+	chatClient.publish(
+		"removeMember",
+		JSON.stringify({
+			chatId: chat._id,
+			memberId: memberId,
+		})
+	);
 	res.status(200).json(new ApiResponse(200, {}, "Member removed"));
 });
 

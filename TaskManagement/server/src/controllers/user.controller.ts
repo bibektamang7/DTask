@@ -78,21 +78,19 @@ const registerUser = asyncHandler(async (req, res) => {
 				members: parsedData.data.workspace.member,
 			})
 		);
-		console.log("yeat ta aako xa");
-		await new Promise((resolve, reject) => {
+		const workspaceData = await new Promise((resolve, reject) => {
 			const timeout = setTimeout(() => {
-				console.log("Workspace creation timed out.");
 				userClient.unsubscribe("workspace:created");
 				userClient.unsubscribe("workspace:failed");
 				reject(new Error("Workspace creation timeout"));
 			}, 10000);
 
 			userClient.subscribe("workspace:created", (message) => {
-				console.log("Workspace created:", message);
+				const { workspace } = JSON.parse(message.toString());
 				clearTimeout(timeout); // Clear the timeout if workspace creation is successful
 				userClient.unsubscribe("workspace:created"); // Unsubscribe after receiving the message
 				userClient.unsubscribe("workspace:failed"); // Unsubscribe to prevent further listening
-				resolve(message); // Resolve the promise with the message
+				resolve(workspace); // Resolve the promise with the message
 			});
 
 			userClient.subscribe("workspace:failed", () => {
@@ -110,11 +108,25 @@ const registerUser = asyncHandler(async (req, res) => {
 			});
 		});
 
+		const updatedUser = await UserModel.findByIdAndUpdate(
+			createdUser[0]._id,
+			{
+				$push: {
+					workspaces: workspaceData,
+				},
+			},
+			{ new: true, session: session }
+		);
+		if (!updatedUser) {
+			throw new ApiError(500, "Unable to create user");
+		}
+		console.log(workspaceData);
+
+		console.log(updatedUser);
+
 		await session.commitTransaction();
 		res.status(200).json(new ApiResponse(200, {}, "Signup successfull"));
 	} catch (error) {
-		console.log(error);
-		console.log("yeta aayeara chai mistake vayecha hai");
 		await session.abortTransaction();
 		res
 			.status(500)
@@ -157,6 +169,7 @@ const userLoginWithEmailAndPassword = asyncHandler(async (req, res) => {
 	if (!parsedData.success) {
 		throw new ApiError(400, "Validation Error");
 	}
+	console.log(parsedData.data);
 
 	const user = await UserModel.findOne({
 		email: parsedData.data.email,
@@ -181,10 +194,12 @@ const userLoginWithEmailAndPassword = asyncHandler(async (req, res) => {
 	);
 
 	const options = {
-		httpOnly: true,
 		secure: true,
+		httpOnly: true,
 	};
-
+	console.log("accessToekn", accessToken);
+	console.log("refreshToken", refreshToken);
+	
 	res
 		.status(200)
 		.cookie("accessToken", accessToken, options)
@@ -192,7 +207,15 @@ const userLoginWithEmailAndPassword = asyncHandler(async (req, res) => {
 		.json(
 			new ApiResponse(
 				200,
-				{ token: accessToken, userId: user._id },
+				{
+					token: accessToken,
+					user: {
+						avatar: user.avatar,
+						email: user.email,
+						_id: user._id,
+						username: user.username,
+					},
+				},
 				"Logged in successfully"
 			)
 		);

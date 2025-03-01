@@ -14,8 +14,8 @@ import { uploadOnCloudinary } from "../helpers/fileUpload.cloudinary";
 
 import { createClient } from "redis";
 
-// const taskClient = createClient({ url: "redis://localhost:6379" });
-// taskClient.connect().then(() => console.log("Task client connected"));
+const taskClient = createClient({ url: "redis://localhost:6379" });
+taskClient.connect().then(() => console.log("Task client connected"));
 
 const isMemberInWorkspace = async (memberId: string) => {
 	const db = mongoose.connection.db; // Get the database connection
@@ -56,8 +56,10 @@ const createTask = asyncHandler(async (req, res) => {
 	);
 
 	const task = await TaskModel.create({
-		workspaceId: parsedData.data.workspaceId,
+		workspaceId: req.workspace._id,
+		startDate: parsedData.data.startDate,
 		title: parsedData.data.title,
+		tags: parsedData.data.tags,
 		status: parsedData.data.status,
 		description: parsedData.data.description,
 		priority: parsedData.data.priority,
@@ -85,9 +87,9 @@ const createTask = asyncHandler(async (req, res) => {
 					{
 						$lookup: {
 							from: "User",
-							localField: "userId",
+							localField: "user",
 							foreignField: "_id",
-							as: "userId",
+							as: "user",
 							pipeline: [
 								{
 									$project: {
@@ -103,54 +105,69 @@ const createTask = asyncHandler(async (req, res) => {
 			},
 		},
 	]);
-
-	// taskClient.publish(
-	// 	"taskCreated",
-	// 	JSON.stringify({
-	// 		task: createdTask[0],
-	// 		assignees: parsedData.data.assignees,
-	// 	})
-	// );
+	await taskClient.publish(
+		"taskCreated",
+		JSON.stringify({
+			userId: req.member._id,
+			workspaceId: req.workspaceMember.workspace,
+			task: createdTask[0],
+			members: req.workspace.members,
+		})
+	);
 
 	// TODO:Emit socket emit for task creation
 	//Also consider where you need to return created task or not
 	res.status(200).json(new ApiResponse(200, task, "Task created successfully"));
 });
 
-const getTasks = asyncHandler(async (req, res) => {});
+const getTasks = asyncHandler(async (req, res) => {
+	console.log(req.workspace);
 
-const getTask = asyncHandler(async (req, res) => {
-	const { taskId } = req.params;
-	if (!taskId) {
-		throw new ApiError(400, "Task id required");
-	}
-	//TODO:NEED TO AGGREGATE THIS ACCOR
-	const task = await TaskModel.aggregate([
+	const tasks = await TaskModel.aggregate([
 		{
 			$match: {
-				_id: new mongoose.Types.ObjectId(taskId),
+				workspaceId: req.workspace._id,
 			},
 		},
 		{
 			$lookup: {
-				from: "User",
-				localField: "createdBy",
+				from: "WorkspaceMember",
+				localField: "assignees",
 				foreignField: "_id",
-				as: "createdBy",
+				as: "assignees",
 				pipeline: [
 					{
 						$project: {
-							avatar: 1,
-							username: 1,
-							email: 1,
+							role: 1,
+							user: 1,
 						},
 					},
 				],
 			},
 		},
+	]);
+	if (!tasks) {
+		throw new ApiError(400, "Tasks not found");
+	}
+	console.log(tasks);
+
+	res.status(200).json(new ApiResponse(200, tasks, "Fetched tasks"));
+});
+
+const getTask = asyncHandler(async (req, res) => {
+	const { taskId } = req.query;
+	if (!taskId) {
+		throw new ApiError(400, "Task id required");
+	}
+	const task = await TaskModel.aggregate([
+		{
+			$match: {
+				_id: new mongoose.Types.ObjectId(taskId.toString()),
+			},
+		},
 		{
 			$lookup: {
-				from: "Attachment",
+				from: "attachments",
 				localField: "attachments",
 				foreignField: "_id",
 				as: "attachments",
@@ -166,31 +183,14 @@ const getTask = asyncHandler(async (req, res) => {
 		},
 		{
 			$lookup: {
-				from: "User",
-				localField: "assignees",
-				foreignField: "_id",
-				as: "assignees",
-				pipeline: [
-					{
-						$project: {
-							username: 1,
-							avatar: 1,
-							email: 1,
-						},
-					},
-				],
-			},
-		},
-		{
-			$lookup: {
-				from: "Comment",
+				from: "comments",
 				localField: "comments",
 				foreignField: "_id",
 				as: "comments",
 				pipeline: [
 					{
 						$lookup: {
-							from: "Attachment",
+							from: "attachments",
 							localField: "attachments",
 							foreignField: "_id",
 							as: "attachemnts",
@@ -204,20 +204,10 @@ const getTask = asyncHandler(async (req, res) => {
 							],
 						},
 					},
-					{
-						$project: {
-							message: 1,
-							createdBy: 1,
-							likes: 1,
-							attachments: 1,
-						},
-					},
 				],
 			},
 		},
 	]);
-	console.log("This is task here");
-	console.log(task);
 
 	if (!task || task.length < 1) {
 		throw new ApiError(400, "Task not found");
@@ -240,7 +230,7 @@ const deleteTask = asyncHandler(async (req, res) => {
 	const task = await TaskModel.findById(taskId).populate({
 		path: "assignees",
 		populate: {
-			path: "userId",
+			path: "user",
 			select: "username avatar",
 		},
 	});
@@ -289,13 +279,15 @@ const deleteTask = asyncHandler(async (req, res) => {
 		}
 
 		await session.commitTransaction();
-		// taskClient.publish(
-		// 	"taskDeleted",
-		// 	JSON.stringify({
-		// 		taskId: task._id,
-		// 		assignees: task.assignees,
-		// 	})
-		// );
+		taskClient.publish(
+			"taskDeleted",
+			JSON.stringify({
+				workspaceId: req.workspace._id,
+				userId: req.member._id,
+				taskId: task._id,
+				members: req.workspace.members,
+			})
+		);
 	} catch (error) {
 		await session.abortTransaction();
 		throw new ApiError(500, "Internal server error");
@@ -316,7 +308,6 @@ const addAttachmentInTask = asyncHandler(async (req, res) => {
 	if (!taskId) {
 		throw new ApiError(400, "Task id required");
 	}
-	console.log(taskId, "this is task id");
 	const files = req.files as Express.Multer.File[];
 
 	if (!files || files.length < 1) {
@@ -326,7 +317,7 @@ const addAttachmentInTask = asyncHandler(async (req, res) => {
 	const task = await TaskModel.findById(taskId).populate({
 		path: "assignees",
 		populate: {
-			path: "userId",
+			path: "user",
 			select: "username avatar",
 		},
 	});
@@ -368,8 +359,6 @@ const addAttachmentInTask = asyncHandler(async (req, res) => {
 				})
 			);
 		}
-
-		console.log("yeta aako xa hai", attachments);
 		const updatedTask = await TaskModel.findByIdAndUpdate(
 			task._id,
 			{
@@ -388,14 +377,16 @@ const addAttachmentInTask = asyncHandler(async (req, res) => {
 		// TODO: CONSIDER SENDING TASK WITH FULL DETAILS
 		// SO THAT ACTIVE USER WILL BE UPDATED AT REAL TIME
 
-		// taskClient.publish(
-		// 	"AttachmentAdded",
-		// 	JSON.stringify({
-		// 		taskId: updatedTask._id,
-		// 		attachment: updatedTask.attachments,
-		// 		assinees: task.assignees,
-		// 	})
-		// );
+		taskClient.publish(
+			"attachmentAdded",
+			JSON.stringify({
+				workspaceId: req.workspace._id,
+				userId: req.member._id,
+				taskId: updatedTask._id,
+				attachment: updatedTask.attachments,
+				members: req.workspace.members,
+			})
+		);
 
 		await session.commitTransaction();
 		res
@@ -404,7 +395,6 @@ const addAttachmentInTask = asyncHandler(async (req, res) => {
 				new ApiResponse(200, attachments, "Added attachments successfully")
 			);
 	} catch (error: any) {
-		console.log(error.message);
 		await session.abortTransaction();
 		throw new ApiError(500, "Failed to add attachments");
 	} finally {
@@ -428,14 +418,16 @@ const deleteAttachmentFromTask = asyncHandler(async (req, res) => {
 	const task = await TaskModel.findById(taskId).populate({
 		path: "assignees",
 		populate: {
-			path: "userId",
+			path: "user",
 			select: "username avatar",
 		},
 	});
 	if (!task) {
 		throw new ApiError(400, "Task not found");
 	}
-	if (task.workspaceId.toString() !== req.workspaceMember.workspace.toString()) {
+	if (
+		task.workspaceId.toString() !== req.workspaceMember.workspace.toString()
+	) {
 		throw new ApiError(400, "Task not found in workspace");
 	}
 	if (!task.attachments.includes(new mongoose.Types.ObjectId(attachmentId))) {
@@ -465,14 +457,16 @@ const deleteAttachmentFromTask = asyncHandler(async (req, res) => {
 		}
 
 		await session.commitTransaction();
-		// taskClient.publish(
-		// 	"AttachmentDeleted",
-		// 	JSON.stringify({
-		// 		taskId: updatedTask._id,
-		// 		attachmentId: attachment._id,
-		// 		assignees: task.assignees,
-		// 	})
-		// );
+		taskClient.publish(
+			"attachmentDeleted",
+			JSON.stringify({
+				useId: req.member._id,
+				workspaceId: req.workspace._id,
+				taskId: updatedTask._id,
+				attachmentId: attachment._id,
+				members: req.workspace.members,
+			})
+		);
 	} catch (error) {
 		await session.commitTransaction();
 		throw new ApiError(500, "Internal server error");
@@ -497,7 +491,7 @@ const createComment = asyncHandler(async (req, res) => {
 	const task = await TaskModel.findById(parsedData.data.taskId).populate({
 		path: "assignees",
 		populate: {
-			path: "userId",
+			path: "user",
 			select: "username avatar",
 		},
 	});
@@ -561,14 +555,16 @@ const createComment = asyncHandler(async (req, res) => {
 		console.log(updatedTask);
 
 		// TODO: CONSIDER ADDING FULL DETAILS OF COMMENT SO THAT USER WILL BE UPDATED AT REAL TIEM
-		// taskClient.publish(
-		// 	"madeComment",
-		// 	JSON.stringify({
-		// 		taskId: updatedTask._id,
-		// 		comment: comment,
-		// 		assignees: task.assignees
-		// 	})
-		// );
+		taskClient.publish(
+			"makeComment",
+			JSON.stringify({
+				workspaceId: req.workspace._id,
+				userId: req.member._id,
+				taskId: updatedTask._id,
+				comment: comment,
+				members: req.workspace.members,
+			})
+		);
 
 		res
 			.status(200)
@@ -585,6 +581,7 @@ const createComment = asyncHandler(async (req, res) => {
 });
 
 const deleteComment = asyncHandler(async (req, res) => {
+	console.log("yea ko k xa");
 	const { commentId } = req.query;
 	console.log(commentId);
 	if (!commentId) {
@@ -597,7 +594,6 @@ const deleteComment = asyncHandler(async (req, res) => {
 	if (!parsedData.success) {
 		throw new ApiError(400, "Validation Error");
 	}
-	//TODO: SAME GOES HERE
 	const task = await TaskModel.findById(parsedData.data.taskId);
 	if (!task) {
 		throw new ApiError(400, "Task not found");
@@ -606,15 +602,17 @@ const deleteComment = asyncHandler(async (req, res) => {
 	if (!comment) {
 		throw new ApiError(400, "Comment not found");
 	}
-	//TODO:create logic for admin be able to delete
+
 	if (
 		req.workspaceMember.role !== "Admin" &&
 		comment.createdBy.toString() !== req.member._id.toString()
 	) {
+		console.log(req.workspaceMember.role);
 		throw new ApiError(401, "Unauthorized to delete comment");
 	}
 	const session = await mongoose.startSession();
 	session.startTransaction();
+
 	try {
 		if (comment.attachments) {
 			const deleteAttachment = await AttachmentModel.findByIdAndDelete(
@@ -634,17 +632,22 @@ const deleteComment = asyncHandler(async (req, res) => {
 		}
 
 		await session.commitTransaction();
-		// taskClient.publish(
-		// 	"DeletedComment",
-		// 	JSON.stringify({
-		// 		taskId: task._id,
-		// 		commentId: deletedComment._id,
-		// 	})
-		// );
+		taskClient.publish(
+			"deletedComment",
+			JSON.stringify({
+				workspaceId: req.workspace._id,
+				userId: req.member._id,
+				taskId: task._id,
+				commentId: deletedComment._id,
+				members: req.workspace.members,
+			})
+		);
 		res
 			.status(200)
 			.json(new ApiResponse(200, {}, "Comment Deleted successfully"));
 	} catch (error: any) {
+		console.log(error);
+
 		await session.abortTransaction();
 		throw new ApiError(
 			500,
@@ -653,6 +656,36 @@ const deleteComment = asyncHandler(async (req, res) => {
 	} finally {
 		session.endSession();
 	}
+});
+
+const updateTaskDocument = asyncHandler(async (req, res) => {
+	const { taskId } = req.query;
+	if (!taskId) {
+		throw new ApiError(400, "TaskId not found");
+	}
+	const { taskEditorData } = req.body;
+	//TODO:PROPER VALIDATION REQUIRED, THIS IS JUST FOR DEVELOPMENT
+	if (!taskEditorData) {
+		throw new ApiError(400, "Editor data required");
+	}
+	const task = await TaskModel.findById(taskId.toString());
+	if (!task) {
+		throw new ApiError(400, "Task not found!");
+	}
+	const updatedTask = await TaskModel.findByIdAndUpdate(
+		task._id,
+		{
+			$set: {
+				taskEditorData: taskEditorData,
+			},
+		},
+		{ new: true }
+	);
+	if (!updatedTask) {
+		throw new ApiError(500, "Failed to updated editor data");
+	}
+	//TODO:EMIT EVENT TO THE WORKSPACE USER OR TASK USER THAT EDITOR DOCUMENT HAS BEEN UPDATED
+res.status(200).json(new ApiResponse(200, task, "Task Editor's data has been updated"))
 });
 
 export {
@@ -665,4 +698,5 @@ export {
 	deleteAttachmentFromTask,
 	createComment,
 	deleteComment,
+	updateTaskDocument,
 };
