@@ -25,6 +25,7 @@ import {
 	CarouselNext,
 	CarouselPrevious,
 } from "@/components/ui/carousel";
+import CustomEditor from "@/components/workspace/tasks/Editor";
 const Task = () => (
 	<div className="w-full h-full flex justify-end">
 		<div className="w-full p-4 rounded-md overflow-y-auto scrollbar-hidden overflow-x-hidden">
@@ -187,8 +188,8 @@ const Task = () => (
 								<CarouselNext />
 							</Carousel>
 						</div>
-						<div className="thereiswhereyouwillwritetaskrelatedinfo">
-
+						<div className="relative overflow-auto scrollbar-hidden w-full mt-8 h-screen">
+							<CustomEditor />
 						</div>
 					</div>
 				</div>
