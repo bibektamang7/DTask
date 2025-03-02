@@ -159,6 +159,19 @@ const getTask = asyncHandler(async (req, res) => {
 	if (!taskId) {
 		throw new ApiError(400, "Task id required");
 	}
+	const todayStart = new Date();
+	todayStart.setHours(0, 0, 0, 0);
+
+	const todayEnd = new Date();
+	todayEnd.setHours(23, 59, 59, 999); 
+
+	const yesterdayStart = new Date();
+	yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+	yesterdayStart.setHours(0, 0, 0, 0);
+
+	const yesterdayEnd = new Date();
+	yesterdayEnd.setDate(yesterdayEnd.getDate() - 1);
+	yesterdayEnd.setHours(23, 59, 59, 999);
 	const task = await TaskModel.aggregate([
 		{
 			$match: {
@@ -207,6 +220,54 @@ const getTask = asyncHandler(async (req, res) => {
 				],
 			},
 		},
+		{
+			$lookup: {
+				from: "notifications",
+				localField: "taskActivities",
+				foreignField: "_id",
+				as: "taskActivities",
+			},
+		},
+		{
+			$addFields: {
+				todaysActivity: {
+					$filter: {
+						input: "$taskActivities",
+						as: "activity",
+						cond: {
+							$and: [
+								{ $gte: ["$$activity.createdAt", todayStart] },
+								{ $lte: ["$$activity.createdAt", todayEnd] },
+							],
+						},
+					},
+				},
+				yesterdaysActivity: {
+					$filter: {
+						input: "$taskActivities",
+						as: "activity",
+						cond: {
+							$and: [
+								{ $gte: ["$$activity.createdAt", yesterdayStart] },
+								{ $lte: ["$$activity.createdAt", yesterdayEnd] },
+							],
+						},
+					},
+				},
+				pastsActivity: {
+					$filter: {
+						input: "$taskActivities",
+						as: "activity",
+						cond: { $lt: ["$$activity.createdAt", yesterdayStart] },
+					},
+				},
+			},
+		},
+		{
+			$project: {
+				taskActivities: 0,
+			}
+		}
 	]);
 
 	if (!task || task.length < 1) {
@@ -685,7 +746,9 @@ const updateTaskDocument = asyncHandler(async (req, res) => {
 		throw new ApiError(500, "Failed to updated editor data");
 	}
 	//TODO:EMIT EVENT TO THE WORKSPACE USER OR TASK USER THAT EDITOR DOCUMENT HAS BEEN UPDATED
-res.status(200).json(new ApiResponse(200, task, "Task Editor's data has been updated"))
+	res
+		.status(200)
+		.json(new ApiResponse(200, task, "Task Editor's data has been updated"));
 });
 
 export {

@@ -24,6 +24,8 @@ const notificationSchema = new Schema(
 				"PRIORITY",
 				"DUE_DATE",
 				"COMMENT",
+				"TASK_EDITOR",
+				"TAGS"
 			],
 		},
 		reference: {
