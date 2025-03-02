@@ -17,7 +17,7 @@ export const taskApi = createApi({
 	tagTypes: ["Task", "Attachment", "Comment"],
 	endpoints: (builder) => ({
 		getTask: builder.query({
-			query: ({workspaceId, taskId}) => ({
+			query: ({ workspaceId, taskId }) => ({
 				url: `/tasks/${workspaceId}?taskId=${taskId}`,
 				credentials: "include",
 			}),
@@ -87,6 +87,15 @@ export const taskApi = createApi({
 			}),
 			providesTags: ["Task"],
 		}),
+		updateTaskEditor: builder.mutation({
+			query: ({ workspaceId, taskId, editorStateData }) => ({
+				method: "PATCH",
+				url: `/tasks/${workspaceId}?taskId=${taskId}`,
+				body: editorStateData,
+				credentials: "include",
+			}),
+			invalidatesTags: ["Task"],
+		}),
 	}),
 });
 
@@ -99,4 +108,5 @@ export const {
 	useGetTaskQuery,
 	useRemoveAttachmentMutation,
 	useGetTasksQuery,
+	useUpdateTaskEditorMutation,
 } = taskApi;

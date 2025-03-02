@@ -1,4 +1,5 @@
 import { User } from "./user";
+import { WorkspaceMember } from "./workspace";
 
 export interface Task {
     _id: string;
@@ -15,18 +16,32 @@ export interface Task {
    comments: Comment[]
 }
 
-interface Comment {
+export interface Comment {
     _id: string;
     message: string;
     taskId: string;
-    createdBy: User;
+    createdBy: string;
     attachment: Attachment;
     likes: number;    
+    createdAt: Date;
 }
-interface Attachment {
+export interface Attachment {
     _id:string;
     fileName: string;
     fileType: string;
     fileUrl: string;
     taskId: string;
+}
+
+
+export interface Notification {
+    _id: string;
+    recipient: string[];
+    sender: string;
+    purpose:string;
+    reference: string;
+    referenceModal: string;
+    message: string;
+    isArchived: boolean;
+    createdAt: Date
 }

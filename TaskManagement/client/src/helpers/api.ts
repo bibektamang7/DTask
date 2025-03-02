@@ -52,7 +52,7 @@ export const taskLoader = async () => {
 	}
 };
 
-export const taskDataLoader  = async ({ params }: { params: any }) => {
+export const taskDataLoader = async ({ params }: { params: any }) => {
 	const workspaceId = localStorage.getItem("workspace");
 	if (!workspaceId) {
 		redirect("/login");
@@ -62,7 +62,7 @@ export const taskDataLoader  = async ({ params }: { params: any }) => {
 		const result = await store
 			.dispatch(taskApi.endpoints.getTask.initiate({ workspaceId, taskId }))
 			.unwrap();
-		return result.data.data;
+		return result.data;
 	} catch (error) {
 		toast({
 			title: "Failed to fetch task.",

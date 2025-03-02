@@ -1,7 +1,16 @@
 import { User } from "@/types/user";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-const userInitialState = {
-	user: {},
+
+interface UserInitialStateProps {
+	user: User
+}
+const userInitialState: UserInitialStateProps = {
+	user: {
+		_id: "",
+		avatar: "",
+		email: "",
+		username:"",
+	},
 };
 const userSlice = createSlice({
 	name: "User",

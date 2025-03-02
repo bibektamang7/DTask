@@ -192,7 +192,7 @@ const Task: React.FC<TaskProps> = ({ onClose, taskId }) => {
 							</p>
 						</div>
 					</div>
-					<div className="mt-4">
+					{/* <div className="mt-4">
 						<div>
 							<Card className="bg-inherit">
 								<CardContent className="p-0">
@@ -240,7 +240,7 @@ const Task: React.FC<TaskProps> = ({ onClose, taskId }) => {
 								</CardContent>
 							</Card>
 						</div>
-					</div>
+					</div> */}
 				</div>
 			</div>
 		</section>
