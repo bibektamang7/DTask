@@ -1,13 +1,38 @@
 import { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardFooter,
+	CardHeader,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { PencilIcon, Quote } from "lucide-react";
+import {
+	MessageSquare,
+	MoreVertical,
+	Paperclip,
+	PencilIcon,
+	Quote,
+} from "lucide-react";
 import { useGetWorkspaceQuery } from "@/redux/services/workspaceApi";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useWorkspace } from "@/hooks/customs/useWorkspace";
+import { useTask } from "@/hooks/customs/useTask";
+import { Task } from "@/types/task";
+import { RootState } from "@/redux/store";
+import { useSelector } from "react-redux";
+import { WorkspaceMember } from "@/types/workspace";
+import { Badge } from "../ui/badge";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { priorityColors, statusColors } from "@/constants";
+import { format } from "date-fns";
 
 // const teamMembers = [
 // 	{ name: "Bipin Tamang", image: "/placeholder.svg" },
@@ -18,8 +43,11 @@ import { useWorkspace } from "@/hooks/customs/useWorkspace";
 type TaskOptionProp = "Todo" | "In Progress" | "Completed";
 
 export default function DashboardPage() {
+	const { taskData } = useTask();
 	const { workspaceData, isLoading } = useWorkspace();
-
+	const workspaceMembers = useSelector(
+		(state: RootState) => state.Workspaces.workspace.members
+	);
 	if (isLoading) return <>Loading...</>;
 
 	const [date, setDate] = useState<Date | undefined>(new Date());
@@ -34,26 +62,41 @@ export default function DashboardPage() {
 	const [todoTasks, setTodoTasks] = useState<any[]>([]);
 	const [inProgressTasks, setInProgressTasks] = useState<any[]>([]);
 	const [recentTasks, setRecentTasks] = useState<any[]>([]);
-	const [teamMembers, setTeamMembers] = useState<any[]>([]);
+	const [teamMembers, setTeamMembers] = useState<WorkspaceMember[]>([]);
 	const [quoteOfTheDay, setQuoteOfTheDay] = useState<string>("");
 
 	useEffect(() => {
-		if (workspaceData) {
-			// setCompletedTasks(workspaceData.completedTasks || []);
-			// setOverdueTasks(workspaceData.overdueTasks || []);
-			// setUpcomingTasks(workspaceData.upcomingTasks || []);
+		if (workspaceMembers) {
+			setTeamMembers(workspaceMembers);
+		}
+	}, []);
+
+	useEffect(() => {
+		if (taskData) {
+			const filteredCompletedTasks = taskData.filter(
+				(task: Task) => task.status === "Completed"
+			);
+			const filteredTodoTasks = taskData.filter(
+				(task: Task) => task.status === "Todo"
+			);
+			const filteredInProgressTasks = taskData.filter(
+				(task: Task) => task.status === "In-Progress"
+			);
+			setCompletedTasks(filteredCompletedTasks || []);
+			setTodoTasks(filteredTodoTasks || []);
+			setInProgressTasks(filteredInProgressTasks || []);
 
 			const sevenDaysAgo = new Date();
 			sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-			// const recentTasksList = workspaceData.tasks.filter((task: any) => {
-			// 	const createdAt = new Date(task.createdAt);
-			// 	return createdAt >= sevenDaysAgo;
-			// });
+			const recentTasksList = taskData.filter((task: Task) => {
+				const createdAt = new Date(task.createdAt);
+				return createdAt >= sevenDaysAgo;
+			});
 
-			// setRecentTasks(recentTasksList);
+			setRecentTasks(recentTasksList);
 		}
-	}, [workspaceData]);
+	}, []);
 	const selectedTasks =
 		taskOption === "Completed"
 			? completedTasks
@@ -154,7 +197,7 @@ export default function DashboardPage() {
 										value="Todo"
 										onClick={() => setTaskOption("Todo")}
 									>
-									Todo	
+										Todo
 									</TabsTrigger>
 									<TabsTrigger
 										value="In Progress"
@@ -174,16 +217,108 @@ export default function DashboardPage() {
 									className="space-y-4"
 								>
 									{selectedTasks.length > 0 ? (
-										selectedTasks.map((item) => (
-											<div
-												key={item}
-												className="flex items-center gap-4 p-4 bg-muted rounded-lg"
+										selectedTasks.map((task) => (
+											<Card
+												key={task._id}
+												className="hover:cursor-pointer"
 											>
-												<div className="h-10 w-10 bg-muted-foreground/20 rounded-full" />
-												<div className="text-sm">
-													New ideas for developments
-												</div>
-											</div>
+												<CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+													<div className="space-y-1">
+														<h3 className="font-semibold text-lg leading-none tracking-tight">
+															{task.title}
+														</h3>
+														<div className="flex flex-wrap gap-2">
+															{task.tags.map((tag: string) => (
+																<Badge
+																	key={tag}
+																	variant="secondary"
+																	className="text-xs"
+																>
+																	{tag}
+																</Badge>
+															))}
+														</div>
+													</div>
+													<DropdownMenu>
+														<DropdownMenuTrigger asChild>
+															<Button
+																variant="ghost"
+																size="icon"
+															>
+																<MoreVertical className="h-4 w-4" />
+															</Button>
+														</DropdownMenuTrigger>
+														<DropdownMenuContent align="end">
+															<DropdownMenuItem>Edit</DropdownMenuItem>
+															<DropdownMenuItem>Delete</DropdownMenuItem>
+														</DropdownMenuContent>
+													</DropdownMenu>
+												</CardHeader>
+												<CardContent>
+													<p className="text-sm text-muted-foreground line-clamp-2">
+														{task.description}
+													</p>
+												</CardContent>
+												<CardFooter className="flex flex-wrap gap-4 items-center justify-between">
+													<div className="flex items-center gap-4">
+														<Badge
+															variant="secondary"
+															className={
+																statusColors[
+																	task.status as keyof typeof statusColors
+																]
+															}
+														>
+															{task.status}
+														</Badge>
+														<Badge
+															variant="secondary"
+															className={
+																priorityColors[
+																	task.priority as keyof typeof priorityColors
+																]
+															}
+														>
+															{task.priority}
+														</Badge>
+														<div className="text-sm text-muted-foreground">
+															Due {format(task.dueDate, "MMM d, yyyy")}
+														</div>
+													</div>
+													<div className="flex items-center gap-4">
+														<div className="flex items-center gap-1 text-muted-foreground">
+															<Paperclip className="h-4 w-4" />
+															<span className="text-sm">
+																{task.attachments.length}
+															</span>
+														</div>
+														<div className="flex items-center gap-1 text-muted-foreground">
+															<MessageSquare className="h-4 w-4" />
+															<span className="text-sm">
+																{task.comments.length}
+															</span>
+														</div>
+														<div className="flex -space-x-2">
+															{task.assignees.map(
+																(assignee: WorkspaceMember) => (
+																	<Avatar
+																		key={assignee._id}
+																		className="border-2 border-background"
+																	>
+																		<AvatarImage
+																			src={assignee.user.avatar}
+																			alt={assignee.user.username}
+																		/>
+																		<AvatarFallback>
+																			{assignee.user.username.charAt(0)}
+																		</AvatarFallback>
+																	</Avatar>
+																)
+															)}
+														</div>
+													</div>
+												</CardFooter>
+											</Card>
 										))
 									) : (
 										<div className="h-32 bg-muted rounded-lg flex items-center justify-center">
@@ -219,13 +354,52 @@ export default function DashboardPage() {
 								variant="ghost"
 								className="text-blue-500 hover:text-blue-600"
 							>
-								View All
+								<Link to={`tasks`}>View All</Link>
 							</Button>
 						</div>
 						<div className="space-y-4">
 							{recentTasks.length > 0 ? (
 								recentTasks.map((task) => (
-									<div className="h-32 bg-muted rounded-lg" />
+									<Card
+										key={task._id}
+										className="hover:cursor-pointer flex flex-col gap-4"
+									>
+										<CardHeader className="flex flex-row gap-4 items-start justify-between space-y-0 pb-2">
+											<div className="space-y-1 flex-1">
+												<h3 className="font-semibold line-clamp-1 text-slate-300 text-base leading-none tracking-tight">
+													{task.title}
+												</h3>
+											</div>
+											<div className="text-[0.6rem] text-muted-foreground w-1/5">
+												Due {format(task.dueDate, "MMM d, yyyy")}
+											</div>
+										</CardHeader>
+
+										<CardFooter className="flex flex-wrap gap-4 items-center justify-between">
+											<div className="flex items-center gap-4">
+												<Badge
+													variant="secondary"
+													className={
+														statusColors[
+															task.status as keyof typeof statusColors
+														]
+													}
+												>
+													{task.status}
+												</Badge>
+												<Badge
+													variant="secondary"
+													className={
+														priorityColors[
+															task.priority as keyof typeof priorityColors
+														]
+													}
+												>
+													{task.priority}
+												</Badge>
+											</div>
+										</CardFooter>
+									</Card>
 								))
 							) : (
 								<div className="h-32 bg-muted rounded-lg flex items-center justify-center">
@@ -255,12 +429,14 @@ export default function DashboardPage() {
 									>
 										<Avatar>
 											<AvatarImage
-												src={member.avatar}
-												alt={member.username}
+												src={member.user.avatar}
+												alt={member.user.username}
 											/>
-											<AvatarFallback>{member.username}</AvatarFallback>
+											<AvatarFallback>
+												{member.user.username.charAt(0)}
+											</AvatarFallback>
 										</Avatar>
-										<div className="text-sm">{member.username}</div>
+										<div className="text-sm">{member.user.username}</div>
 									</div>
 								))
 							) : (

@@ -62,16 +62,16 @@ function TaskCard({
 }
 
 export default function BoardView() {
-	const { tasksData, isLoading } = useTask();
+	const { taskData, isLoading } = useTask();
 	const [tasks, setTasks] = useState<Task[]>([]);
 	const [draggedTask, setDraggedTask] = useState<Task | null>(null);
 
-	console.log(tasksData);
+	console.log(taskData);
 	useEffect(() => {
-		if (tasksData) {
-			setTasks(tasksData);
+		if (taskData) {
+			setTasks(taskData);
 		}
-	}, [tasksData]);
+	}, [taskData]);
 
 	const onDragStart = (e: React.DragEvent<HTMLDivElement>, task: Task) => {
 		e.dataTransfer.setData("text/plain", task._id); // Store task ID in event
@@ -92,8 +92,8 @@ export default function BoardView() {
 		return <div>Loading...</div>;
 	}
 	useEffect(() => {
-		if (tasksData) {
-			setTasks(tasksData);
+		if (taskData) {
+			setTasks(taskData);
 		}
 	});
 	return (

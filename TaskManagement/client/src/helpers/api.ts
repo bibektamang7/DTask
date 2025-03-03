@@ -1,9 +1,8 @@
 import { toast } from "@/hooks/use-toast";
 import { workspaceApi } from "@/redux/services/workspaceApi";
-import { RootState, store } from "@/redux/store";
+import { store } from "@/redux/store";
 import { redirect } from "react-router";
 import { taskApi } from "@/redux/services/taskApi";
-import { Description } from "@radix-ui/react-toast";
 
 export const workspaceLoader = async () => {
 	const token = localStorage.getItem("token");
@@ -11,13 +10,23 @@ export const workspaceLoader = async () => {
 	if (!token) return redirect("/login");
 
 	try {
-		const result = await store.dispatch(
-			workspaceApi.endpoints.getWorkspace.initiate(token)
-		);
+		const workspaceResult = await store
+			.dispatch(workspaceApi.endpoints.getWorkspace.initiate(token))
+			.unwrap();
+		const taskResult = await store
+			.dispatch(
+				taskApi.endpoints.getTasks.initiate({
+					token,
+					workspaceId: workspaceResult.data._id,
+				})
+			)
+			.unwrap();
 
-		if (result.error) return redirect("/login");
-		return result.data.data;
+		if (workspaceResult.error || taskResult.error) return redirect("/login");
+		return workspaceResult.data;
 	} catch (error) {
+		console.log(error);
+
 		toast({
 			title: "Something went wrong while fetching workspace",
 			description: "Please try again",
@@ -27,8 +36,6 @@ export const workspaceLoader = async () => {
 };
 export const taskLoader = async () => {
 	const token = localStorage.getItem("token");
-	// const dispatch = useDispatch();
-
 	if (!token) return redirect("/login");
 	const workspace = store.getState().Workspaces.workspace;
 	try {
@@ -40,8 +47,6 @@ export const taskLoader = async () => {
 				})
 			)
 			.unwrap();
-		// dispatch(setTasks(result.data.data));
-		// if (result.error) return redirect("/login");
 		return result.data.data;
 	} catch (error) {
 		toast({

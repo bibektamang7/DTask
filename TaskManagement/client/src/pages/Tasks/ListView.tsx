@@ -39,7 +39,7 @@ import { statusColors, priorityColors } from "@/constants";
 export function ListView() {
 	const [setTaskId]: [setTaskId: React.Dispatch<React.SetStateAction<string>>] =
 		useOutletContext();
-	const { tasksData, isLoading } = useTask();
+	const { taskData, isLoading } = useTask();
 	const [tasks, setTasks] = React.useState<Task[]>([]);
 	const [search, setSearch] = React.useState("");
 	const [statusFilter, setStatusFilter] = React.useState<string>("all");
@@ -73,10 +73,10 @@ export function ListView() {
 			});
 	}, [tasks, search, statusFilter, priorityFilter, sortBy]);
 	useEffect(() => {
-		if (tasksData) {
-			setTasks(tasksData);
+		if (taskData) {
+			setTasks(taskData);
 		}
-	}, [tasksData]);
+	}, [taskData]);
 
 	if (isLoading) {
 		return <h1>Loading...</h1>;
@@ -227,11 +227,11 @@ export function ListView() {
 											className="border-2 border-background"
 										>
 											<AvatarImage
-												src={assignee.avatar}
-												alt={assignee.username}
+												src={assignee.user.avatar}
+												alt={assignee.user.username}
 											/>
 											<AvatarFallback>
-												{assignee.username.charAt(0)}
+												{assignee.user.username.charAt(0)}
 											</AvatarFallback>
 										</Avatar>
 									))}

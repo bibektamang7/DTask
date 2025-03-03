@@ -7,7 +7,6 @@ export const useWorkspace = () => {
 	const dispatch = useDispatch();
 	const token = localStorage.getItem("token");
 	const { data, isLoading } = useGetWorkspaceQuery(token!);
-
 	useEffect(() => {
 		if (data) {
 			dispatch(setWorkspace(data.data));

@@ -1,19 +1,22 @@
 import { User } from "./user";
 import { WorkspaceMember } from "./workspace";
 
+type Status = "Completed" | "Todo" | "In-Progress"
+
 export interface Task {
     _id: string;
    title: string;
    tags: string[]
    description: string;
-   status: string;
+   status: Status;
    priority: string;
    dueDate: Date; 
    workspaceId: string;
-   assignees: User[], //TODO:need to consider this
+   assignees: WorkspaceMember[], //TODO:need to consider this
    createdBy: User;
    attachments: Attachment[]; 
    comments: Comment[]
+   createdAt: string;
 }
 
 export interface Comment {
