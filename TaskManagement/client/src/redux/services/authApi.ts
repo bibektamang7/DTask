@@ -21,14 +21,17 @@ export const authApi = createApi({
 		registerWithGoogle: builder.mutation({
 			query: () => ({
 				url: "/users/google",
-				method: "GET"
+				method: "GET",
 			}),
 		}),
 		logoutUser: builder.mutation({
-			query: () => ({
+			query: ({ token }) => ({
 				url: "/users/logout",
 				method: "POST",
 				credentials: "include",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
 			}),
 		}),
 	}),

@@ -16,7 +16,6 @@ import {
 	PencilIcon,
 	Quote,
 } from "lucide-react";
-import { useGetWorkspaceQuery } from "@/redux/services/workspaceApi";
 import { Link, useNavigate } from "react-router";
 import { useWorkspace } from "@/hooks/customs/useWorkspace";
 import { useTask } from "@/hooks/customs/useTask";

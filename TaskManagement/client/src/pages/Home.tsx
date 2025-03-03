@@ -17,7 +17,7 @@ const Home = () => {
       </h2>
       <p className="my-5 text-sm text-center font-extralight">Boost productivity, stay organized and meet deadlines with out all-in-one task management platform.</p>
       <div className="my-8 w-full flex justify-center items-center gap-4">
-        <Button className="tracking-tighter font-semibold bg-gray-900 hover:bg-primary border-gray-500">Get Started</Button>
+        <Button className="tracking-tighter hover:border-none outline-none border-none hover:scale-105  font-semibold bg-gray-900 border-gray-500 hover:bg-gray-900/40 text-white">Get Started</Button>
         <Button className="tracking-tighter font-semibold">Watch Demo</Button>
       </div>
       <div className="my-12 rounded-lg overflow-hidden">

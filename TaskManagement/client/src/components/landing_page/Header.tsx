@@ -27,12 +27,12 @@ const Header = () => {
 			<Menu className="lg:hidden" />
 			<div className="hidden lg:flex lg:items-center lg:justify-center lg:gap-4">
 				<Link to={`/login`}>
-					<Button className="bg-gray-900 hover:bg-primary outline-primary font-medium">
+					<Button className="bg-gray-900 text-white outline-primary font-medium hover:bg-gray-900/40 hover:border-none">
 						Log in
 					</Button>
 				</Link>
 				<Link to={`/signup`}>
-					<Button className="hover:bg-gray-900 font-medium">Sign up</Button>
+					<Button className="font-medium">Sign up</Button>
 				</Link>
 			</div>
 		</div>
