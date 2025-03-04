@@ -15,6 +15,7 @@ import { AttachmentModel } from "../models/attachment.model";
 import { CommentModel } from "../models/tasks/comment.model";
 
 import { createClient } from "redis";
+import { TodoModel } from "../models/workspaces/todo.model";
 
 const workspaceClient = createClient({ url: "redis://localhost:6379" });
 const publisher = workspaceClient.duplicate();
@@ -318,6 +319,14 @@ const getWorkspace = asyncHandler(async (req, res) => {
 						},
 					},
 					{
+						$lookup: {
+							from: "todos",
+							localField: "todos",
+							foreignField: "_id",
+							as: "todos",
+						},
+					},
+					{
 						$addFields: {
 							user: { $arrayElemAt: ["$user", 0] },
 						},
@@ -517,6 +526,72 @@ const deleteMemberFromWorkspace = asyncHandler(async (req, res) => {
 // const acceptInvitation = asyncHandler(async (req, res) => {});
 // const declineInvitation = asyncHandler(async (req, res) => {});
 
+const addTodo = asyncHandler(async (req, res) => {
+	const { title } = req.body;
+
+	const todo = await TodoModel.create({
+		title,
+	});
+	if (!todo) {
+		throw new ApiError(500, "Failed to create todo.");
+	}
+
+	const updatedWorkspaceMember = await WorkspaceMemberModel.findByIdAndUpdate(
+		req.workspaceMember._id,
+		{
+			$push: {
+				todos: todo._id,
+			},
+		},
+		{ new: true }
+	);
+	if (!updatedWorkspaceMember) {
+		throw new ApiError(500, "Failed to add todo.");
+	}
+	res.status(200).json(new ApiResponse(200, todo, "Added Todo Successfully"));
+});
+
+const updateTodo = asyncHandler(async (req, res) => {
+	const { todoId, isTick } = req.body;
+	console.log(todoId, isTick);
+	
+	const todo = await TodoModel.findByIdAndUpdate(
+		todoId,
+		{
+			$set: {
+				isTick,
+			},
+		},
+		{ new: true }
+	);
+	if (!todo) {
+		throw new ApiError(500, "Failed to update todo");
+	}
+	res.status(200).json(new ApiResponse(200, {}, "Todo Updated Successfully"));
+});
+const deleteTodo = asyncHandler(async (req, res) => {
+	const { todoId } = req.query;
+
+	if (!todoId) {
+		throw new ApiError(400, "Todo is required");
+	}
+	const deletedTodo = await TodoModel.findByIdAndDelete(todoId.toString());
+	if (!deletedTodo) {
+		throw new ApiError(500, "Failed to delete todo");
+	}
+	const updatedWorkspaceMember = await WorkspaceMemberModel.findByIdAndUpdate(
+		req.workspaceMember._id,
+		{
+			$pull: {
+				todos: deletedTodo._id,
+			},
+		}
+	);
+	res
+		.status(200)
+		.json(new ApiResponse(200, deletedTodo, "Todo Deleted Successfully"));
+});
+
 export {
 	createWorkspace,
 	deleteWorkspace,
@@ -525,4 +600,7 @@ export {
 	addMemeberInWorkspace,
 	getAllMembersFromWorkspace,
 	deleteMemberFromWorkspace,
+	addTodo,
+	updateTodo,
+	deleteTodo,
 };
