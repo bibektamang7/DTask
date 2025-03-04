@@ -3,7 +3,17 @@ const BASE_URL = "http://localhost:8000/api/v1/";
 
 export const workspaceApi = createApi({
 	reducerPath: "workspaces",
-	baseQuery: fetchBaseQuery({ baseUrl: BASE_URL }),
+	baseQuery: fetchBaseQuery({
+		baseUrl: BASE_URL,
+		prepareHeaders: (headers) => {
+			const token = localStorage.getItem("token");
+			if (token) {
+				headers.set("Authorization", `Bearer ${token}`);
+			}
+			return headers;
+		},
+	}),
+	tagTypes: ["Todo", "Workspace"],
 	endpoints: (builder) => ({
 		getWorkspace: builder.query({
 			query: (token: string) => ({
@@ -13,6 +23,7 @@ export const workspaceApi = createApi({
 				},
 				credentials: "include",
 			}),
+			providesTags: ["Workspace", "Todo"],
 		}),
 		createWorkspace: builder.mutation({
 			query: (workspaceInfo) => ({
@@ -37,6 +48,7 @@ export const workspaceApi = createApi({
 				body: memberInfo,
 				credentials: "include",
 			}),
+			invalidatesTags: ["Workspace"],
 		}),
 		removeMemberFromWorkspace: builder.mutation({
 			query: (removedMemberInfo) => ({
@@ -45,6 +57,37 @@ export const workspaceApi = createApi({
 				body: removedMemberInfo,
 				credentials: "include",
 			}),
+			invalidatesTags: ["Workspace"],
+		}),
+		addTodo: builder.mutation({
+			query: ({ title, workspaceId }) => ({
+				url: `/workspaces/members/${workspaceId}/todos`,
+				method: "POST",
+				body: {
+					title,
+				},
+				credentials: "include",
+			}),
+			invalidatesTags: ["Todo", "Workspace"],
+		}),
+		deleteTodo: builder.mutation({
+			query: ({ todoId, workspaceId }) => ({
+				url: `/workspaces/members/${workspaceId}/todos?todoId=${todoId}`,
+				method: "DELETE",
+				credentials: "include",
+			}),
+			invalidatesTags: ["Workspace", "Todo"],
+		}),
+		updateTodo: builder.mutation({
+			query: ({ todoId, workspaceId, isTick }) => ({
+				url: `/workspaces/members/${workspaceId}/todos`,
+				method: "PATCH",
+				body: {
+					todoId,
+					isTick,
+				},
+			}),
+			invalidatesTags: ["Workspace", "Todo"],
 		}),
 	}),
 });
@@ -55,4 +98,7 @@ export const {
 	useDeleteWorkspaceMutation,
 	useCreateWorkspaceMutation,
 	useAddMemberInWorkspaceMutation,
+	useAddTodoMutation,
+	useDeleteTodoMutation,
+	useUpdateTodoMutation,
 } = workspaceApi;

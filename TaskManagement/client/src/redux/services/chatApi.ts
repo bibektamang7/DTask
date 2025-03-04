@@ -2,7 +2,15 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 const BASE_URL = "http://localhost:8000/";
 export const chatApi = createApi({
 	reducerPath: "chats",
-	baseQuery: fetchBaseQuery({ baseUrl: BASE_URL }),
+	baseQuery: fetchBaseQuery({ baseUrl: BASE_URL ,
+		prepareHeaders: (headers) => {
+			const token = localStorage.getItem("token");
+			if (token) {
+				headers.set("Authorization", `Bearer ${token}`);
+			}
+			return headers;
+		}
+	}),
 	endpoints: (builder) => ({
 		createChat: builder.mutation({
 			query: (chatInfo) => ({

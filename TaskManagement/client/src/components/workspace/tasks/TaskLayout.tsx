@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { RootState } from "@/redux/store";
 import {
 	CheckSquareIcon,
 	ClockIcon,
@@ -8,14 +7,13 @@ import {
 	LayoutListIcon,
 } from "lucide-react";
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch} from "react-redux";
 import { Link, Outlet, useLoaderData } from "react-router";
 import NewTaskForm from "./NewTaskForm";
 import { setTasks } from "@/redux/features/taskSlice";
 import Task from "./SidebarTask";
 
 const TaskLayout = () => {
-	// const {_id} = useSelector((state: RootState) => state.Workspaces.workspace)
 	const dispatch = useDispatch();
 	const tasks = useLoaderData();
 	

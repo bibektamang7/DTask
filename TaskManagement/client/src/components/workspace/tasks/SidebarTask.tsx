@@ -1,11 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { priorityColors, statusColors } from "@/constants";
-import Activity from "@/pages/Tasks/Activity";
-import Comment from "@/pages/Tasks/Comment";
-import MyWork from "@/pages/Tasks/MyWork";
-import TaskAssigned from "@/pages/Tasks/TaskAssigned";
 import { RootState } from "@/redux/store";
 import { WorkspaceMember } from "@/types/workspace";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
@@ -23,9 +17,7 @@ import {
 import React, {
 	useCallback,
 	useEffect,
-	useMemo,
 	useRef,
-	useState,
 } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router";

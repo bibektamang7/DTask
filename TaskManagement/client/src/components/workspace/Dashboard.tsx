@@ -32,12 +32,8 @@ import {
 } from "../ui/dropdown-menu";
 import { priorityColors, statusColors } from "@/constants";
 import { format } from "date-fns";
-
-// const teamMembers = [
-// 	{ name: "Bipin Tamang", image: "/placeholder.svg" },
-// 	{ name: "John Doe", image: "/placeholder.svg" },
-// 	{ name: "Jane Smith", image: "/placeholder.svg" },
-// ];
+import Todo from "./Todo";
+import QuoteOfTheDay from "./QuoteOfTheDay";
 
 type TaskOptionProp = "Todo" | "In Progress" | "Completed";
 
@@ -62,7 +58,6 @@ export default function DashboardPage() {
 	const [inProgressTasks, setInProgressTasks] = useState<any[]>([]);
 	const [recentTasks, setRecentTasks] = useState<any[]>([]);
 	const [teamMembers, setTeamMembers] = useState<WorkspaceMember[]>([]);
-	const [quoteOfTheDay, setQuoteOfTheDay] = useState<string>("");
 
 	useEffect(() => {
 		if (workspaceMembers) {
@@ -116,75 +111,8 @@ export default function DashboardPage() {
 					</div>
 
 					<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-						<Card className="lg:col-span-2">
-							<CardContent className="p-6">
-								<div className="flex items-center gap-2 mb-4">
-									<PencilIcon className="h-6 w-6 text-yellow-500" />
-									<h2 className="text-xl font-semibold">To do list</h2>
-								</div>
-								<Button
-									variant="ghost"
-									className="w-full justify-start text-muted-foreground mb-4"
-								>
-									+ click to add
-								</Button>
-								<div className="space-y-3">
-									<div className="flex items-start gap-2">
-										<input
-											type="checkbox"
-											id="task1"
-										/>
-										<label
-											htmlFor="task1"
-											className="text-sm leading-none"
-										>
-											Finish making this application
-										</label>
-									</div>
-									<div className="flex items-start gap-2">
-										<input
-											type="checkbox"
-											id="task2"
-										/>
-										<label
-											htmlFor="task2"
-											className="text-sm leading-none"
-										>
-											Have dinner before 8
-										</label>
-									</div>
-									<div className="flex items-start gap-2">
-										<input
-											type="checkbox"
-											id="task3"
-										/>
-										<label
-											htmlFor="task3"
-											className="text-sm leading-none"
-										>
-											Finish making this application
-										</label>
-									</div>
-								</div>
-							</CardContent>
-						</Card>
-
-						<Card>
-							<CardContent className="p-6">
-								<div className="flex items-center justify-between mb-4">
-									<h2 className="text-lg font-semibold">Quote of the day</h2>
-									<Button
-										variant="ghost"
-										className="text-blue-500 hover:text-blue-600"
-									>
-										View
-									</Button>
-								</div>
-								<p className="text-muted-foreground text-sm">
-									<Quote>{quoteOfTheDay}</Quote>
-								</p>
-							</CardContent>
-						</Card>
+						<Todo />
+						<QuoteOfTheDay />
 					</div>
 
 					<Card>
