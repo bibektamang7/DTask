@@ -9,6 +9,7 @@ export interface Task {
    tags: string[]
    description: string;
    status: Status;
+   startDate: Date;
    priority: string;
    dueDate: Date; 
    workspaceId: string;

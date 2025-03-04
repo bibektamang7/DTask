@@ -1,5 +1,4 @@
 import { useLogoutUserMutation } from "@/redux/services/authApi";
-import { Navigate, redirect } from "react-router";
 import { toast } from "../use-toast";
 
 const useLogout = () => {

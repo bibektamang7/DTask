@@ -18,6 +18,7 @@ const TaskLayout = () => {
 	// const {_id} = useSelector((state: RootState) => state.Workspaces.workspace)
 	const dispatch = useDispatch();
 	const tasks = useLoaderData();
+	
 	dispatch(setTasks(tasks));
 
 	const [isNewTaskForm, setIsNewTaskForm] = useState<boolean>(false);

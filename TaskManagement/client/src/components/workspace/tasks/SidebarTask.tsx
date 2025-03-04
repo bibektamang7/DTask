@@ -6,6 +6,8 @@ import Activity from "@/pages/Tasks/Activity";
 import Comment from "@/pages/Tasks/Comment";
 import MyWork from "@/pages/Tasks/MyWork";
 import TaskAssigned from "@/pages/Tasks/TaskAssigned";
+import { RootState } from "@/redux/store";
+import { WorkspaceMember } from "@/types/workspace";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import {
 	Calendar,
@@ -25,6 +27,7 @@ import React, {
 	useRef,
 	useState,
 } from "react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router";
 
 interface TaskProps {
@@ -32,6 +35,9 @@ interface TaskProps {
 	taskId: string;
 }
 const Task: React.FC<TaskProps> = ({ onClose, taskId }) => {
+	const task = useSelector((state: RootState) => state.Tasks.tasks).find(
+		(task) => task._id === taskId
+	);
 	const taskRef = useRef<HTMLDivElement>(null);
 	const handleClickOutside = useCallback(function handleClickOutside(e: any) {
 		if (taskRef.current && !taskRef.current.contains(e.target)) {
@@ -44,6 +50,7 @@ const Task: React.FC<TaskProps> = ({ onClose, taskId }) => {
 			document.removeEventListener("mousedown", handleClickOutside);
 		};
 	}, [handleClickOutside]);
+
 	return (
 		<section className="fixed top-0 left-0 px-8 py-4 w-screen h-screen min-h-screen backdrop-blur-sm z-20">
 			<div className="w-full h-full flex justify-end">
@@ -81,7 +88,7 @@ const Task: React.FC<TaskProps> = ({ onClose, taskId }) => {
 						</div>
 					</div>
 					<div className="mt-5">
-						<h3 className="font-medium text-lg">Design Homepage Wireframe</h3>
+						<h3 className="font-medium text-lg">{task?.title}</h3>
 						<div className="text-sm mt-6">
 							<div className="mt-4 flex items-center justify-between">
 								<div className="flex gap-2 items-center justify-center">
@@ -95,7 +102,7 @@ const Task: React.FC<TaskProps> = ({ onClose, taskId }) => {
 									</span>
 								</div>
 								<p className="font-medium text-[0.7rem] ">
-									September 20, 2024 10:30 AM
+									{new Date(task?.createdAt!).toDateString()}
 								</p>
 							</div>
 							<div className="mt-4 flex items-center justify-between">
@@ -115,7 +122,7 @@ const Task: React.FC<TaskProps> = ({ onClose, taskId }) => {
 										statusColors["Completed" as keyof typeof statusColors]
 									}
 								>
-									Completed
+									{task?.status}
 								</Badge>
 							</div>
 							<div className="mt-4 flex items-center justify-between">
@@ -133,7 +140,7 @@ const Task: React.FC<TaskProps> = ({ onClose, taskId }) => {
 									variant="secondary"
 									className={priorityColors["Urgent"]}
 								>
-									Urgent
+									{task?.priority}
 								</Badge>
 							</div>
 							<div className="mt-4 flex items-center justify-between">
@@ -148,7 +155,8 @@ const Task: React.FC<TaskProps> = ({ onClose, taskId }) => {
 									</span>
 								</div>
 								<p className="font-medium text-[0.7rem] ">
-									Octaber 2, 2024 - Octaber 13, 2024
+									{new Date(task?.startDate!).toDateString()} -{" "}
+									{new Date(task?.dueDate!).toDateString()}
 								</p>
 							</div>
 							<div className="mt-4 flex items-center justify-between">
@@ -162,7 +170,9 @@ const Task: React.FC<TaskProps> = ({ onClose, taskId }) => {
 										Tags
 									</span>
 								</div>
-								<Badge>Task</Badge>
+								{task?.tags.map((tag: string) => (
+									<Badge>{tag}</Badge>
+								))}
 							</div>
 							<div className="mt-4 flex items-center justify-between">
 								<div className="flex gap-2 items-center justify-center">
@@ -175,20 +185,25 @@ const Task: React.FC<TaskProps> = ({ onClose, taskId }) => {
 										Assignees
 									</span>
 								</div>
-								<div>
-									<Avatar className="">
-										<AvatarImage src="" />
-										<AvatarFallback>B</AvatarFallback>
-									</Avatar>
+								<div className="flex -gap-2">
+									{task?.assignees.map((assignee: WorkspaceMember) => (
+										<Avatar>
+											<AvatarImage
+												src={assignee.user.avatar}
+												alt={assignee.user.username}
+											/>
+											<AvatarFallback>
+												{assignee.user.username.charAt(0)}
+											</AvatarFallback>
+										</Avatar>
+									))}
 								</div>
 							</div>
 						</div>
 						<div className="mt-4 rounded-md shadow-md bg-slate-800 py-2 pl-3 pr-4">
 							<strong className="text-sm font-medium">Task Description</strong>
 							<p className="tracking-tighter text-slate-300 mt-1 font-light -leading-[2rem] text-[0.8rem]">
-								This is task management system and I'm tyring to build robust
-								task management system that everyone can use without making any
-								extra effors.
+								{task?.description}
 							</p>
 						</div>
 					</div>

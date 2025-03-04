@@ -47,7 +47,7 @@ export const taskLoader = async () => {
 				})
 			)
 			.unwrap();
-		return result.data.data;
+		return result.data;
 	} catch (error) {
 		toast({
 			title: "Something went wrong while fetching tasks",
