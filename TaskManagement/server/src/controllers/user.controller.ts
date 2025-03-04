@@ -22,8 +22,8 @@ const encryptPassword = async (password: string) => {
 	return hashedPassword;
 };
 
-const decryptPassword = (password: string, savedPassword: string) => {
-	const pass = bcrypt.compare(savedPassword, password);
+const decryptPassword = async(password: string, savedPassword: string) => {
+	const pass = await bcrypt.compare(password, savedPassword);
 	return pass;
 };
 
@@ -178,7 +178,7 @@ const userLoginWithEmailAndPassword = asyncHandler(async (req, res) => {
 	if (!user || !user.password) {
 		throw new ApiError(400, "User not found!");
 	}
-	const isPasswordCorrect = decryptPassword(
+	const isPasswordCorrect = await decryptPassword(
 		parsedData.data.password,
 		user.password
 	);
