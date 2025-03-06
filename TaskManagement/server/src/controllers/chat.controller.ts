@@ -43,75 +43,26 @@ const createChat = asyncHandler(async (req, res) => {
 			}
 		})
 	);
+	const unreadCounts: Record<string, number> = {};
+	parsedData.data.members.forEach(
+		(member) => (unreadCounts[member.toString()] = 0)
+	);
 
 	const chat = await ChatModel.create({
 		creator: req.workspaceMember._id,
-		workspaceId: workspaceId,
-		members: parsedData.data.members,
+		name: parsedData.data.name,
+		workspace: req.workspace._id,
+		members: [...parsedData.data.members, req.workspaceMember._id],
+		unreadCounts,
 	});
 	if (!chat) {
 		throw new ApiError(500, "Internal server error");
 	}
-	console.log("yeta paxi aako ho");
-	console.log(chat._id);
 
 	const createdChat = await ChatModel.aggregate([
 		{
 			$match: {
 				_id: chat._id,
-			},
-		},
-		{
-			$lookup: {
-				from: "WorkspaceMember",
-				localField: "creator",
-				foreignField: "_id",
-				as: "creator",
-				pipeline: [
-					{
-						$lookup: {
-							from: "User",
-							localField: "userId",
-							foreignField: "_id",
-							as: "userId",
-							pipeline: [
-								{
-									$project: {
-										avatar: 1,
-										username: 1,
-									},
-								},
-							],
-						},
-					},
-				],
-			},
-		},
-		{
-			$lookup: {
-				from: "WorkspaceMember",
-				localField: "members",
-				foreignField: "_id",
-				as: "members",
-				pipeline: [
-					{
-						$lookup: {
-							from: "User",
-							localField: "userId",
-							foreignField: "_id",
-							as: "userId",
-							pipeline: [
-								{
-									$project: {
-										avatar: 1,
-										email: 1,
-										username: 1,
-									},
-								},
-							],
-						},
-					},
-				],
 			},
 		},
 	]);
@@ -194,7 +145,7 @@ const deleteChat = asyncHandler(async (req, res) => {
 });
 
 const getChat = asyncHandler(async (req, res) => {
-	const { chatId } = req.params;
+	const { chatId } = req.query;
 	if (!chatId) {
 		throw new ApiError(400, "Chat Id is required");
 	}
@@ -284,40 +235,18 @@ const getChats = asyncHandler(async (req, res) => {
 		},
 		{
 			$lookup: {
-				from: "WorkspaceMember",
-				localField: "creator",
+				from: "ChatMessage",
+				localField: "lastMessage",
 				foreignField: "_id",
-				as: "creator",
-				pipeline: [
-					{
-						$lookup: {
-							from: "User",
-							localField: "userId",
-							foreignField: "_id",
-							as: "userId",
-							pipeline: [
-								{
-									$project: {
-										avatar: 1,
-										username: 1,
-									},
-								},
-							],
-						},
-						$project: {
-							role: 1,
-							userId: 1,
-						},
-					},
-				],
+				as: "lastMessage",
+			},
+		},
+		{
+			$project: {
+				messages: 0,
 			},
 		},
 	]);
-
-	if (chats.length < 1) {
-		throw new ApiError(400, "Failed to load chats");
-	}
-
 	res
 		.status(200)
 		.json(new ApiResponse(200, chats, "Chats fetched successfully"));
@@ -340,7 +269,6 @@ const sendMessage = asyncHandler(async (req, res) => {
 		throw new ApiError(400, "Validation Error");
 	}
 
-	//TODO:NOT SURE ABOUT THIS LOGIC
 	const files = req.files as Express.Multer.File[];
 	if ((!files || files.length === 0) && !parsedData.data.content) {
 		throw new ApiError(400, "Either files or message required");
@@ -356,6 +284,15 @@ const sendMessage = asyncHandler(async (req, res) => {
 	) {
 		throw new ApiError(400, "You are not in the chat");
 	}
+
+	const unreadCounts: Record<string, number> = {};
+	chat.members.forEach((member) => {
+		if (member.toString() !== req.workspaceMember._id.toString()) {
+			unreadCounts[member.toString()] =
+				(chat.unreadCounts.get(member.toString()) || 0) + 1;
+		}
+	});
+
 	const session = await startSession();
 	session.startTransaction();
 	try {
@@ -385,11 +322,11 @@ const sendMessage = asyncHandler(async (req, res) => {
 				})
 			);
 		}
-		console.log("here comes and what");
-		
+
 		const chatMessage = await ChatMessageModel.create(
 			[
 				{
+					chat: chat._id,
 					sender: req.workspaceMember._id,
 					content: parsedData.data.content || "",
 					attachments: attachments,
@@ -404,11 +341,15 @@ const sendMessage = asyncHandler(async (req, res) => {
 		const updatedChat = await ChatModel.findByIdAndUpdate(
 			chat._id,
 			{
+				$set: {
+					unreadCounts,
+					lastMessage: chatMessage[0]._id,
+				},
 				$push: {
 					messages: chatMessage[0]._id,
 				},
 			},
-			{ session }
+			{ new: true, session }
 		);
 		if (!updatedChat) {
 			throw new ApiError(500, "Failed to add message in the chat");
@@ -511,6 +452,26 @@ const deleteMessage = asyncHandler(async (req, res) => {
 	}
 });
 
+const getChatMessages = asyncHandler(async (req, res) => {
+	const { chatId } = req.params;
+	if (!chatId) {
+		throw new ApiError(400, "Chat is required");
+	}
+	const chat = await ChatModel.findById(chatId);
+	if (!chat) {
+		throw new ApiError(400, "Chat not found");
+	}
+	const chatMessages = await ChatMessageModel.find({
+		chat: chat._id,
+	});
+	if (!chatMessages) {
+		throw new ApiError(500, "Failed to fetch messages");
+	}
+	res
+		.status(200)
+		.json(new ApiResponse(200, chatMessages, "Fetched Chat Messages "));
+});
+
 const addMemberInChat = asyncHandler(async (req, res) => {
 	if (req.workspaceMember.role === "Member") {
 		throw new ApiError(401, "Unauthorized to add member");
@@ -527,11 +488,18 @@ const addMemberInChat = asyncHandler(async (req, res) => {
 	if (!chat) {
 		throw new ApiError(400, "Chat not found");
 	}
-	const updatedChat = await ChatModel.findByIdAndUpdate(chat._id, {
-		$push: {
-			members: memberId,
+	const updatedChat = await ChatModel.findByIdAndUpdate(
+		chat._id,
+		{
+			$set: {
+				[`unreadCounts.${req.workspaceMember._id.toString()}`]: 0,
+			},
+			$addToSet: {
+				members: memberId,
+			},
 		},
-	});
+		{ new: true }
+	);
 
 	if (!updatedChat) {
 		throw new ApiError(500, "Failed to add member in the chat");
@@ -559,6 +527,9 @@ const removeMemberFromChat = asyncHandler(async (req, res) => {
 	}
 
 	const updatedChat = await ChatModel.findByIdAndUpdate(chat._id, {
+		$unset: {
+			[`unreadCounts.${req.workspaceMember._id.toString()}`]: "",
+		},
 		$pull: {
 			members: memberId,
 		},
@@ -585,6 +556,7 @@ export {
 	deleteChat,
 	sendMessage,
 	deleteMessage,
+	getChatMessages,
 	getChat,
 	getChats,
 };

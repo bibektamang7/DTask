@@ -10,6 +10,7 @@ import {
 	removeMemberFromChat,
 	getChat,
 	getChats,
+	getChatMessages,
 } from "../controllers/chat.controller";
 import upload from "../middlewares/multer.middleware";
 import { workspaceEditor } from "../middlewares/workspaceAuth";
@@ -22,14 +23,15 @@ router
 	.route("/:workspaceId")
 	.post(workspaceEditor, createChat)
 	.delete(workspaceEditor, deleteChat)
-	.get(workspaceEditor, getChats);
+	.get(workspaceEditor, getChat);
 
-router.route("/:workspaceId/:chatId").get(workspaceEditor, getChat);
+router.route("/:workspaceId/getChats").get(workspaceEditor, getChats);
 
 router
 	.route("/:workspaceId/:chatId/messages")
 	.post(upload.array("chatFiles"), workspaceEditor, sendMessage)
-	.delete(workspaceEditor, deleteMessage);
+	.delete(workspaceEditor, deleteMessage)
+	.get(workspaceEditor,getChatMessages )
 
 router
 	.route("/:workspaceId/:chatId/members/:memberId")

@@ -2,14 +2,23 @@ import mongoose, { Schema } from "mongoose";
 
 const chatSchema = new Schema(
 	{
-		workspaceId: {
+		name: {
 			type: String,
+			required: true,
+		},
+		workspace: {
+			type: Schema.Types.ObjectId,
+			ref: "Workspace",
 			required: true,
 		},
 		creator: {
 			type: Schema.Types.ObjectId,
 			ref: "WorkspaceMember",
 			required: true,
+		},
+		lastMessage: {
+			type: Schema.Types.ObjectId,
+			ref: "ChatMessage",
 		},
 		messages: [
 			{
@@ -24,6 +33,11 @@ const chatSchema = new Schema(
 				ref: "WorkspaceMember",
 			},
 		],
+		unreadCounts: {
+			type: Map,
+			of: Number,
+			default: {},
+		},
 	},
 	{ timestamps: true }
 );

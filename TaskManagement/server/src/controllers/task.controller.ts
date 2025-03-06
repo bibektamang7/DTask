@@ -7,6 +7,7 @@ import {
 	createCommentSchema,
 	createTaskSchema,
 	deleteCommentSchema,
+	updateTaskSchema,
 } from "../helpers/validation";
 import mongoose, { startSession } from "mongoose";
 import { CommentModel } from "../models/tasks/comment.model";
@@ -163,7 +164,7 @@ const getTask = asyncHandler(async (req, res) => {
 	todayStart.setHours(0, 0, 0, 0);
 
 	const todayEnd = new Date();
-	todayEnd.setHours(23, 59, 59, 999); 
+	todayEnd.setHours(23, 59, 59, 999);
 
 	const yesterdayStart = new Date();
 	yesterdayStart.setDate(yesterdayStart.getDate() - 1);
@@ -266,8 +267,8 @@ const getTask = asyncHandler(async (req, res) => {
 		{
 			$project: {
 				taskActivities: 0,
-			}
-		}
+			},
+		},
 	]);
 
 	if (!task || task.length < 1) {
@@ -276,7 +277,35 @@ const getTask = asyncHandler(async (req, res) => {
 	res.status(200).json(new ApiResponse(200, task[0]));
 });
 
-const updateTask = asyncHandler(async (req, res) => {});
+const updateTask = asyncHandler(async (req, res) => {
+	const { taskId } = req.params;
+	if (!taskId) {
+		throw new ApiError(400, "Task is required");
+	}
+	const task = await TaskModel.findById(taskId);
+	if (!task) {
+		throw new ApiError(400, "Task not found");
+	}
+	const parsedData = updateTaskSchema.safeParse(req.body);
+	if (!parsedData.success) {
+		throw new ApiError(400, "Validation Error");
+	}
+	const updatedTask = await TaskModel.findByIdAndUpdate(
+		task._id,
+		{
+			$set: {
+				...parsedData.data,
+			},
+		},
+		{ new: true }
+	);
+	if (!updatedTask) {
+		throw new ApiError(500, "Failed to update task");
+	}
+	res
+		.status(200)
+		.json(new ApiResponse(200, updatedTask, "Task updated successfully"));
+});
 
 const deleteTask = asyncHandler(async (req, res) => {
 	if (req.workspaceMember.role === "Member") {

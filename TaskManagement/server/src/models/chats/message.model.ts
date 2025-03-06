@@ -1,7 +1,12 @@
 import mongoose, { Schema } from "mongoose";
-import { TimeSeriesBucketTimestamp } from "redis";
 
 const messageSchema = new Schema({
+    chat: {
+        type: Schema.Types.ObjectId,
+        ref: "Chat",
+        required: true,
+        index: true,
+    },
     sender: {
         type: Schema.Types.ObjectId,
         ref: "WorkspaceMember",

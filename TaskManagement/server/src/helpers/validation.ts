@@ -50,6 +50,15 @@ const createTaskSchema = z.object({
 	tags: z.array(z.string()).max(4).optional(),
 });
 
+const updateTaskSchema = z.object({
+	title: z.string().min(1).optional(),
+	status: z.enum(["Completed", "Todo", "In-Progress"]).optional(),
+	description: z.string().optional(),
+	priority: z.enum(["Low", "Medium", "High", "Urgent"]).optional(),
+	startDate: z.string().optional(),
+	dueDate: z.string().optional(),
+})
+
 const deleteTaskSchema = z.object({
 	workspaceId: z.string(),
 });
@@ -73,7 +82,7 @@ const deleteCommentSchema = z.object({
 });
 
 const createChatSchema = z.object({
-	creator: z.string(),
+	name: z.string(),
 	members: z.array(z.string()).min(1),
 });
 
@@ -96,4 +105,5 @@ export {
 	setUsernameSchema,
 	signupSchema,
 	userLoginWithEmailAndPasswordSchema,
+	updateTaskSchema
 };
