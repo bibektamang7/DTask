@@ -461,9 +461,21 @@ const getChatMessages = asyncHandler(async (req, res) => {
 	if (!chat) {
 		throw new ApiError(400, "Chat not found");
 	}
-	const chatMessages = await ChatMessageModel.find({
-		chat: chat._id,
-	});
+	const chatMessages = await ChatMessageModel.aggregate([
+		{
+			$match: {
+				chat: chat._id,
+			},
+		},
+		{
+			$lookup: {
+				from: "attachments",
+				localField: "attachments",
+				foreignField: "_id",
+				as: "attachments",
+			},
+		},
+	]);
 	if (!chatMessages) {
 		throw new ApiError(500, "Failed to fetch messages");
 	}
