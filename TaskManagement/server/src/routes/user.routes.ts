@@ -8,7 +8,8 @@ import {
   refreshToken,
   registerUser,
   setUsername,
-  userLoginWithEmailAndPassword
+  userLoginWithEmailAndPassword,
+  getUserByEmail
 } from "../controllers/user.controller";
 import password from "../helpers/googleAuth";
 import { authMiddleware } from "../middlewares/auth.middleware";
@@ -30,9 +31,11 @@ router.route("/auth/google/callback").get(
 );
 router
 .route("/")
-.get(getUser)
+.get(authMiddleware,getUser)
 .patch(authMiddleware, updateUserDetails)
-.delete(deleteUser);
+.delete(authMiddleware,deleteUser);
+
+router.route("/getUser").get(authMiddleware, getUserByEmail)
 
 router.route("/login").post(userLoginWithEmailAndPassword);
 router.route("/signup").post(registerUser);

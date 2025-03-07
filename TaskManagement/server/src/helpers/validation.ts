@@ -3,11 +3,11 @@ import z from "zod";
 const signupSchema = z.object({
 	email: z.string(),
 	password: z.string(),
-	username: z.string(),
-	workspace: z.object({
-		name: z.string(),
-		member: z.array(z.string()).optional(),
-	}),
+	// username: z.string(),
+	// workspace: z.object({
+	// 	name: z.string(),
+	// 	member: z.array(z.string()).optional(),
+	// }),
 });
 
 const setUsernameSchema = z.object({

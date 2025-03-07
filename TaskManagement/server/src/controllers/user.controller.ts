@@ -22,7 +22,7 @@ const encryptPassword = async (password: string) => {
 	return hashedPassword;
 };
 
-const decryptPassword = async(password: string, savedPassword: string) => {
+const decryptPassword = async (password: string, savedPassword: string) => {
 	const pass = await bcrypt.compare(password, savedPassword);
 	return pass;
 };
@@ -56,84 +56,42 @@ const registerUser = asyncHandler(async (req, res) => {
 	}
 
 	const password = await encryptPassword(parsedData.data.password);
-	const session = await mongoose.startSession();
-	session.startTransaction();
 
-	try {
-		const createdUser = await UserModel.create(
-			[
-				{
-					email: parsedData.data.email,
-					username: parsedData.data.username,
-					password,
-				},
-			],
-			{ session }
-		);
-		await userClient.publish(
-			"createWorkspace",
-			JSON.stringify({
-				owner: createdUser[0]._id,
-				name: parsedData.data.workspace.name,
-				members: parsedData.data.workspace.member,
-			})
-		);
-		const workspaceData = await new Promise((resolve, reject) => {
-			const timeout = setTimeout(() => {
-				userClient.unsubscribe("workspace:created");
-				userClient.unsubscribe("workspace:failed");
-				reject(new Error("Workspace creation timeout"));
-			}, 10000);
-
-			userClient.subscribe("workspace:created", (message) => {
-				const { workspace } = JSON.parse(message.toString());
-				clearTimeout(timeout); // Clear the timeout if workspace creation is successful
-				userClient.unsubscribe("workspace:created"); // Unsubscribe after receiving the message
-				userClient.unsubscribe("workspace:failed"); // Unsubscribe to prevent further listening
-				resolve(workspace); // Resolve the promise with the message
-			});
-
-			userClient.subscribe("workspace:failed", () => {
-				clearTimeout(timeout); // Clear timeout if creation fails
-				userClient.unsubscribe("workspace:created");
-				userClient.unsubscribe("workspace:failed");
-				console.log("Workspace creation failed.");
-				reject(new Error("Workspace creation failed"));
-			});
-
-			req.on("close", () => {
-				clearTimeout(timeout); // Ensure timeout is cleared if the request is closed
-				userClient.unsubscribe("workspace:created");
-				userClient.unsubscribe("workspace:failed");
-			});
-		});
-
-		const updatedUser = await UserModel.findByIdAndUpdate(
-			createdUser[0]._id,
-			{
-				$push: {
-					workspaces: workspaceData,
-				},
-			},
-			{ new: true, session: session }
-		);
-		if (!updatedUser) {
-			throw new ApiError(500, "Unable to create user");
-		}
-		console.log(workspaceData);
-
-		console.log(updatedUser);
-
-		await session.commitTransaction();
-		res.status(200).json(new ApiResponse(200, {}, "Signup successfull"));
-	} catch (error) {
-		await session.abortTransaction();
-		res
-			.status(500)
-			.json(new ApiResponse(500, {}, "Failed to signup, please try again."));
-	} finally {
-		session.endSession();
+	const createdUser = await UserModel.create({
+		email: parsedData.data.email,
+		// username: parsedData.data.username,
+		password,
+	});
+	if (!createdUser) {
+		throw new ApiError(500, "Failed to signup");
 	}
+	const { refreshToken, accessToken } = generateAccessAndRefreshToken(
+		createdUser._id.toString()
+	);
+
+	const options = {
+		secure: true,
+		httpOnly: true,
+	};
+	res
+		.status(200)
+		.cookie("accessToken", accessToken, options)
+		.cookie("refreshToken", refreshToken, options)
+		.json(
+			new ApiResponse(
+				200,
+				{
+					token: accessToken,
+					user: {
+						avatar: createdUser.avatar,
+						email: createdUser.email,
+						_id: createdUser._id,
+						username: createdUser.username,
+					},
+				},
+				"Signup Successfull"
+			)
+		);
 });
 
 const setUsername = asyncHandler(async (req, res) => {
@@ -159,6 +117,7 @@ const setUsername = asyncHandler(async (req, res) => {
 	if (!createdUser) {
 		throw new ApiError(500, "Failed to register username");
 	}
+
 	res
 		.status(200)
 		.json(new ApiResponse(200, {}, "Username is set successfully"));
@@ -197,9 +156,6 @@ const userLoginWithEmailAndPassword = asyncHandler(async (req, res) => {
 		secure: true,
 		httpOnly: true,
 	};
-	console.log("accessToekn", accessToken);
-	console.log("refreshToken", refreshToken);
-	
 	res
 		.status(200)
 		.cookie("accessToken", accessToken, options)
@@ -356,8 +312,20 @@ const getUsersByEmail = asyncHandler(async (req, res) => {
 	}
 });
 
+const getUserByEmail = asyncHandler(async (req, res) => {
+	const { email } = req.query;
+	const user = await UserModel.findOne({
+		email: email,
+	}).select("-password");
+	if (!user) {
+		throw new ApiError(400, "User not found");
+	}
+	res.status(200).json(new ApiResponse(200, user));
+});
+
 export {
 	getUser,
+	getUserByEmail,
 	updateUserDetails,
 	deleteUser,
 	userSignIn,

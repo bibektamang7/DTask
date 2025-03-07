@@ -17,7 +17,6 @@ const userSchema = new Schema<User>(
 	{
 		username: {
 			type: String,
-			unique: true,
 			index: true,
 		},
 		googleId: {
