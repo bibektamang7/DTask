@@ -23,10 +23,18 @@ import TaskLayout from "./components/workspace/tasks/TaskLayout";
 import { Calendar } from "./components/ui/calendar";
 import AuthLayout from "./components/AuthLayout";
 
-import { taskDataLoader, taskLoader, workspaceLoader } from "./helpers/api";
+import {
+	chatsLoader,
+	notificationsLoader,
+	taskDataLoader,
+	taskLoader,
+	workspaceLoader,
+} from "./helpers/api";
 import { ListView } from "./pages/Tasks/ListView";
 import Task from "./pages/Tasks/Task";
-import Editor from "./components/workspace/tasks/Editor";
+import CreateWorkspace from "./pages/CreateWorkspace";
+import SetUsername from "./pages/SetUsername";
+import Notification from "./pages/notifications/Notification";
 
 const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -65,15 +73,12 @@ const router = createBrowserRouter(
 					index
 					element={<DashboardPage />}
 				/>
+
 				<Route
 					path="chats"
-					element={<ChatLayout />}
-				>
-					<Route
-						index
-						element={<WorkspaceChat />}
-					/>
-				</Route>
+					element={<WorkspaceChat />}
+					loader={chatsLoader}
+				/>
 				<Route
 					path="tasks"
 					element={<TaskLayout />}
@@ -97,7 +102,20 @@ const router = createBrowserRouter(
 					element={<Task />}
 					loader={taskDataLoader}
 				/>
+				<Route
+					element={<Notification />}
+					path="notifications"
+					loader={notificationsLoader}
+				/>
 			</Route>
+			<Route
+				path="create-workspace"
+				element={<CreateWorkspace />}
+			/>
+			<Route
+				path="set-username"
+				element={<SetUsername />}
+			/>
 			<Route
 				path="*"
 				element={<Not_Fount />}

@@ -8,7 +8,8 @@ const useLogout = () => {
 	const handleLogout = async () => {
 		try {
 			const response = await makeLogout({ token }).unwrap();
-			localStorage.clear();
+			localStorage.removeItem("token");
+			localStorage.removeItem("workspace")
 			window.location.href = "/";
 			toast({
 				title: "Logout Successfull",

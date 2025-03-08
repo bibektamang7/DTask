@@ -25,7 +25,8 @@ export const store = configureStore({
 		getDefaultMiddleware().concat(
 			authApi.middleware,
 			workspaceApi.middleware,
-			taskApi.middleware
+			taskApi.middleware,
+			chatApi.middleware,
 		),
 });
 

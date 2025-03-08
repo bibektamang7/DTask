@@ -8,10 +8,10 @@ import { Provider } from "react-redux";
 import { Toaster } from "./components/ui/toaster.tsx";
 
 createRoot(document.getElementById("root")!).render(
-	<StrictMode>
+	// <StrictMode>
 		<Provider store={store}>
 			<App />
 			<Toaster/>
 		</Provider>
-	</StrictMode>
+	// {/* </StrictMode> */}
 );

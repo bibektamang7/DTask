@@ -27,8 +27,7 @@ const TaskLayout = () => {
 			{taskId.length > 0 && <Task taskId={taskId} onClose={() => setTaskId("")}/>}
 			{isNewTaskForm && (
 				<NewTaskForm
-					onClose={() => setIsNewTaskForm(false)}
-				/>
+					onClose={() => setIsNewTaskForm(false)} 				/>
 			)}
 			<div className="w-full flex min-h-screen bg-background">
 				<main className="flex-1 p-8">

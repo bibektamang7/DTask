@@ -3,6 +3,7 @@ import { workspaceApi } from "@/redux/services/workspaceApi";
 import { store } from "@/redux/store";
 import { redirect } from "react-router";
 import { taskApi } from "@/redux/services/taskApi";
+import { chatApi } from "@/redux/services/chatApi";
 
 export const workspaceLoader = async () => {
 	const token = localStorage.getItem("token");
@@ -24,13 +25,13 @@ export const workspaceLoader = async () => {
 
 		if (workspaceResult.error || taskResult.error) return redirect("/login");
 		return workspaceResult.data;
-	} catch (error) {
+	} catch (error: any) {
 		console.log(error);
 
 		toast({
-			title: "Something went wrong while fetching workspace",
-			description: "Please try again",
+			title: error.data.error,
 		});
+		if (error.status === 404) return redirect("/create-workspace");
 		return redirect("/login");
 	}
 };
@@ -58,7 +59,8 @@ export const taskLoader = async () => {
 };
 
 export const taskDataLoader = async ({ params }: { params: any }) => {
-	const workspaceId = localStorage.getItem("workspace");
+	// const workspaceId = localStorage.getItem("workspace");
+	const workspaceId = store.getState().Workspaces.workspace._id;
 	if (!workspaceId) {
 		redirect("/login");
 	}
@@ -71,6 +73,39 @@ export const taskDataLoader = async ({ params }: { params: any }) => {
 	} catch (error) {
 		toast({
 			title: "Failed to fetch task.",
+			description: "please try again!",
+			variant: "destructive",
+		});
+	}
+};
+
+export const chatsLoader = async () => {
+	const workspaceId = store.getState().Workspaces.workspace._id;
+	try {
+		const chatResponse = await store
+			.dispatch(chatApi.endpoints.getChats.initiate({ workspaceId }))
+			.unwrap();
+
+		return chatResponse.data;
+	} catch (error: any) {
+		toast({
+			title: "Failed to fetch chats.",
+			description: "please try again!",
+			variant: "destructive",
+		});
+	}
+};
+
+export const notificationsLoader = async () => {
+	try {
+		const notificationResponse = await store
+			.dispatch(workspaceApi.endpoints.getNotifications.initiate({}))
+			.unwrap();
+
+		return notificationResponse.data;
+	} catch (error: any) {
+		toast({
+			title: error.data.error,
 			description: "please try again!",
 			variant: "destructive",
 		});

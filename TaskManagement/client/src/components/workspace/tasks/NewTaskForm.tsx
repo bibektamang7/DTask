@@ -45,12 +45,10 @@ const priorities = [
 ];
 
 interface NewTaskFormProps {
-	onClose: any;
+	onClose: () => void;
 }
 
-const NewTaskForm: React.FC<NewTaskFormProps> = ({
-	onClose,
-}) => {
+const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 	const assignees = useSelector(
 		(state: RootState) => state.Workspaces.workspace.members
 	);
@@ -73,12 +71,10 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({
 	});
 
 	const onSubmit = async (data: any) => {
+		console.log(data);
 
 		// Data is type of UseFormReturn
-		const response = await createTask(data);
-		if(response.success) {
-			onClose();
-		}
+		await createTask(data);
 	};
 
 	// const handleClickOutside = useCallback(
@@ -104,7 +100,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({
 	// // }, [handleClickOutside]);
 
 	return (
-		<div className="fixed left-0 top-0  w-screen h-full backdrop-blur-md z-50 overflow-y-auto py-16">
+		<div className="fixed top-0 left-0 w-full h-full backdrop-blur-md z-10 overflow-y-auto py-16">
 			<div className="relative w-full max-w-2xl mx-auto p-6 space-y-6 bg-background text-foreground rounded-lg">
 				<p
 					className="absolute right-7 font-extralight hover:cursor-pointer text-sm top-1"

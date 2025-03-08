@@ -1,9 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-const BASE_URL = "http://localhost:8000/";
+const BASE_URL = "http://localhost:8000/api/v1/";
 
 export const userApi = createApi({
 	reducerPath: "users",
 	baseQuery: fetchBaseQuery({ baseUrl: BASE_URL }),
+	tagTypes: ["User"],
 	endpoints: (builder) => ({
 		getUser: builder.query({
 			query: (userInfo) => ({
@@ -28,8 +29,34 @@ export const userApi = createApi({
 				credentials: "include",
 			}),
 		}),
+		getUsersByEmail: builder.query({
+			query: ({ email, token }) => ({
+				url: `/users/getUser?email=${email}`,
+				credentials: "include",
+				headers: {
+					authorization: `Bearer ${token}`,
+				},
+			}),
+		}),
+		setUsername: builder.mutation({
+			query: ({ username, token }) => ({
+				url: "/users/username",
+				method: "PATCH",
+				body: { username },
+				headers: {
+					authorization: `Bearer ${token}`,
+				},
+				credentials: "include",
+			}),
+			invalidatesTags: ["User"],
+		}),
 	}),
 });
 
-export const { useGetUserQuery, useUpdateUserMutation, useDeleteUserMutation } =
-	userApi;
+export const {
+	useGetUserQuery,
+	useUpdateUserMutation,
+	useDeleteUserMutation,
+	useLazyGetUsersByEmailQuery,
+	useSetUsernameMutation,
+} = userApi;

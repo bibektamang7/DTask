@@ -1,5 +1,5 @@
 import { User } from "./user";
-import { WorkspaceMember } from "./workspace";
+import { Workspace, WorkspaceMember } from "./workspace";
 
 type Status = "Completed" | "Todo" | "In-Progress"
 
@@ -38,12 +38,14 @@ export interface Attachment {
 }
 
 
+type Referece = Task | Workspace | Comment
+
 export interface Notification {
     _id: string;
-    recipient: string[];
-    sender: string;
+    recipient: User[];
+    sender: User;
     purpose:string;
-    reference: string;
+    reference: Referece;
     referenceModal: string;
     message: string;
     isArchived: boolean;

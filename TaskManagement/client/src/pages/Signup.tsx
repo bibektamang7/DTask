@@ -1,22 +1,48 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import React, { useState } from "react";
-import { Link } from "react-router";
+import { setUser } from "@/redux/features/authSlice";
+import { Link, useNavigate } from "react-router";
 import { useRegisterUserMutation } from "@/redux/services/authApi";
 import { cn } from "@/lib/utils";
+import { Form, FormProvider, useForm } from "react-hook-form";
+import {
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+} from "@/components/ui/form";
+import { toast } from "@/hooks/use-toast";
+import { useDispatch } from "react-redux";
 
 const Signup = () => {
-	const [email, setEmail] = useState<string>("");
-	const [password, setPassword] = useState<string>("");
-
+	const dispatch = useDispatch();
+	const navigate = useNavigate();
+	const form = useForm({
+		defaultValues: {
+			email: "" as string,
+			password: "" as string,
+		},
+	});
 	const [register, { isLoading }] = useRegisterUserMutation();
 
-	const handleRegister = async (e: any) => {
-		e.preventDefault()
+	const handleRegister = async (data: { email: string; password: string }) => {
 		try {
-			const response = await register({ email, password }).unwrap();
-		} catch (error) {
-			// alert("something went wrong");
+			const response = await register(data).unwrap();
+			dispatch(setUser(response.data.user));
+			console.log(response);
+
+			localStorage.setItem("token", response.data.token);
+			toast({
+				title: response.message,
+			});
+			navigate("/w");
+		} catch (error: any) {
+			toast({
+				title: error.data.error,
+				description: "Please try again",
+				variant: "destructive",
+			});
 		}
 	};
 
@@ -31,54 +57,64 @@ const Signup = () => {
 						<p className="text-sm font-extralight text-center text-gray-400">
 							Embrace productivity and efficiency by optimizing your tasks
 						</p>
-						<form
-							action=""
-							onSubmit={handleRegister}
-						>
-							<div className="flex flex-col flex-1 my-4">
-								<label htmlFor="email">Email</label>
-								<Input
-									placeholder="Enter your email"
-									className="my-2 outline-none border-none bg-gray-800 py-6"
-									onChange={(e) => setEmail(e.target.value)}
+						<FormProvider {...form}>
+							<form onSubmit={form.handleSubmit(handleRegister)} className="flex flex-col gap-4">
+								<FormField
+									control={form.control}
+									name="email"
+									rules={{ required: "Email is required" }}
+									render={({ field, fieldState }) => (
+										<FormItem>
+											<FormLabel htmlFor="email">Email</FormLabel>
+											<FormControl>
+												<Input
+													placeholder="Enter your email"
+													className="my-2 outline-none border-none bg-gray-800 py-6"
+													{...field}
+												/>
+											</FormControl>
+											{form.formState.errors.email && (
+												<span className="text-red-500 text-sm">
+													{fieldState.error?.message}
+												</span>
+											)}
+										</FormItem>
+									)}
 								/>
-							</div>
-							<div className="flex flex-col my-4">
-								<label htmlFor="password">Password</label>
-								<Input
-									onChange={(e) => setPassword(e.target.value)}
-									placeholder="Enter your password"
-									type="password"
-									className="my-2 outline-none border-none bg-gray-800 py-6"
+								<FormField
+									control={form.control}
+									name="password"
+									rules={{ required: "Password is required" }}
+									render={({ field, fieldState }) => (
+										<FormItem>
+											<FormLabel htmlFor="password">password</FormLabel>
+											<FormControl>
+												<Input
+													placeholder="Enter your password"
+													className="my-2 outline-none border-none bg-gray-800 py-6"
+													type="password"
+													{...field}
+												/>
+											</FormControl>
+											{form.formState.errors.password && (
+												<span className="text-red-500 text-sm">
+													{fieldState.error?.message}
+												</span>
+											)}
+										</FormItem>
+									)}
 								/>
-							</div>
-							<div className="flex items-center justify-between">
-								<div className="flex items-center space-x-2">
-									<input type="checkbox" />
-									<label
-										htmlFor="terms"
-										className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-									>
-										I agree to the{" "}
-										<Link
-											className="underline text-indigo-500"
-											to={`/terms`}
-										>
-											Terms & conditions
-										</Link>
-									</label>
-								</div>
-							</div>
-							<Button
-								type="submit"
-								className={cn(
-									"w-full mt-12 py-5",
-									isLoading ? "bg-red-600" : ""
-								)}
-							>
-							Get Started	
-							</Button>
-						</form>
+								<Button
+									type="submit"
+									className={cn(
+										"w-full mt-4 py-5",
+										isLoading ? "bg-red-600" : ""
+									)}
+								>
+									Get Started
+								</Button>
+							</form>
+						</FormProvider>
 						<div>
 							<Button className="w-full py-5 bg-gray-900 border-2 border-slate-500 my-4">
 								<img

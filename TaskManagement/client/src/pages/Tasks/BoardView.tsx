@@ -2,23 +2,29 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MoreHorizontal, MessageSquare, Paperclip } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useGetTasksQuery } from "@/redux/services/taskApi";
 import { useTask } from "@/hooks/customs/useTask";
 import { Task } from "@/types/task";
+import { useOutletContext } from "react-router";
+import { useTaskUpdate } from "@/hooks/customs/useTaskUpdate";
 
-function TaskCard({
-	task,
-	onDragStart,
-	draggedTask,
-}: {
+interface TaskCardProps {
+	onTaskClick: any;
 	task: Task;
 	onDragStart: (e: React.DragEvent<HTMLDivElement>, task: Task) => void;
 	draggedTask: Task | null;
-}) {
+}
+
+const TaskCard: React.FC<TaskCardProps> = ({
+	onTaskClick,
+	task,
+	onDragStart,
+	draggedTask,
+}) => {
 	const isDragging = draggedTask?._id === task._id;
 
 	return (
 		<Card
+			onClick={onTaskClick}
 			className={`mb-4 cursor-grab transition-all duration-200 ease-in-out ${
 				isDragging ? "opacity-50 scale-105 shadow-lg" : ""
 			}`}
@@ -59,14 +65,20 @@ function TaskCard({
 			</CardContent>
 		</Card>
 	);
-}
+};
 
-export default function BoardView() {
+const BoardView = () => {
+	const [setTaskId]: [setTaskId: React.Dispatch<React.SetStateAction<string>>] =
+		useOutletContext();
 	const { taskData, isLoading } = useTask();
 	const [tasks, setTasks] = useState<Task[]>([]);
 	const [draggedTask, setDraggedTask] = useState<Task | null>(null);
+	const { handleUpdate } = useTaskUpdate();
 
-	console.log(taskData);
+	const handleTaskUpdate = async (taskId: string, taskUpdateInfo: any) => {
+		await handleUpdate(taskId, taskUpdateInfo);
+	};
+
 	useEffect(() => {
 		if (taskData) {
 			setTasks(taskData);
@@ -74,17 +86,23 @@ export default function BoardView() {
 	}, [taskData]);
 
 	const onDragStart = (e: React.DragEvent<HTMLDivElement>, task: Task) => {
-		e.dataTransfer.setData("text/plain", task._id); // Store task ID in event
+		e.dataTransfer.setData("text/plain", task._id);
 		setDraggedTask(task);
 	};
 
 	const onDrop = (status: Task["status"]) => {
 		if (draggedTask) {
 			setTasks((prev) =>
-				prev.map((task) =>
-					task._id === draggedTask._id ? { ...task, status } : task
-				)
+				prev.map((task) => {
+					if (task._id === draggedTask._id) {
+						const newTask = { ...task, status };
+						console.log(newTask);
+						return newTask;
+					}
+					return task;
+				})
 			);
+			handleTaskUpdate(draggedTask._id, { status });
 			setDraggedTask(null);
 		}
 	};
@@ -95,7 +113,7 @@ export default function BoardView() {
 		if (taskData) {
 			setTasks(taskData);
 		}
-	});
+	}, []);
 	return (
 		<main className="p-8 w-full">
 			<div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -125,6 +143,7 @@ export default function BoardView() {
 									.filter((task) => task.status === status)
 									.map((task) => (
 										<TaskCard
+											onTaskClick={() => setTaskId(task._id)}
 											draggedTask={draggedTask}
 											onDragStart={onDragStart}
 											key={task._id}
@@ -140,4 +159,6 @@ export default function BoardView() {
 			</div>
 		</main>
 	);
-}
+};
+
+export default BoardView;

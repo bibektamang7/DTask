@@ -13,17 +13,15 @@ import {
 	Paperclip,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
-import { useLoaderData } from "react-router";
+import { Form, useLoaderData } from "react-router";
 import { ChatSchema, MessageSchema } from "@/types/chat";
 import NewChatForm from "@/components/workspace/chats/NewChatForm";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { cn } from "@/lib/utils";
 import { WorkspaceMember } from "@/types/workspace";
-import { useForm } from "react-hook-form";
-import { useSendMessage } from "@/hooks/customs/useSendMessage";
-import { toast } from "@/hooks/use-toast";
-import { useGetChatMessageQuery } from "@/redux/services/chatApi";
+import { FormProvider, useForm } from "react-hook-form";
+import { FormControl, FormField } from "@/components/ui/form";
 
 interface ChatRoomListProps {
 	chats: ChatSchema[];
@@ -168,29 +166,15 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 										{new Date(message.createdAt).toDateString()}
 									</span>
 								</div>
-								{message.content.length > 0 ? (
-									<div
-										className={`rounded-lg p-2  ${
-											message.sender === currentMember?._id
-												? "bg-primary text-primary-foreground"
-												: "bg-muted"
-										}`}
-									>
-										{message.content}
-									</div>
-								) : (
-									<div>
-										{message.attachments.length > 0 &&
-											message.attachments.map((attachment) => (
-												<div key={attachment._id}>
-													<img
-														src={attachment.fileUrl}
-														alt={attachment.fileName}
-													/>
-												</div>
-											))}
-									</div>
-								)}
+								<div
+									className={`rounded-lg p-2 ${
+										message.sender === currentMember?._id
+											? "bg-primary text-primary-foreground"
+											: "bg-muted"
+									}`}
+								>
+									{message.content}
+								</div>
 							</div>
 						</div>
 					</div>
@@ -209,6 +193,7 @@ interface SelectedChatProps {
 	messageInput: string;
 	setMessageInput: React.Dispatch<React.SetStateAction<string>>;
 }
+
 const SelectedChat: React.FC<SelectedChatProps> = ({
 	selectedChat,
 	setShowMobileChatList,
@@ -219,23 +204,37 @@ const SelectedChat: React.FC<SelectedChatProps> = ({
 	messageInput,
 	setMessageInput,
 }) => {
-	const { handleSendMessage, sendMessageLoading } = useSendMessage(
-		selectedChat._id
-	);
-	const handleMessageSend = async () => {
-		const formData = new FormData();
-		formData.append("content", messageInput);
-		if (files.length > 0) {
-			files.forEach((file) => formData.append("chatFiles", file));
-		}
-		const response = await handleSendMessage(formData);
-		console.log(response);
-	};
+	const form = useForm({
+		defaultValues: {
+			content: "",
+			chatFiles: [] as File[],
+		},
+	});
+	console.log(form);
+
 	useEffect(() => {
 		return () => {
-			files.forEach((file) => URL.revokeObjectURL(String(file)));
+			form.watch("chatFiles").forEach((file) => {
+				URL.revokeObjectURL(String(file));
+			});
 		};
-	}, [files]);
+	}, [form.watch("chatFiles")]);
+
+	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		if (e.target.files) {
+			console.log(e.target.files);
+			const selectedFiles = Array.from(e.target.files).slice(0, 5);
+			const currentFiles = form.getValues("chatFiles");
+			const updatedFiles = [...currentFiles, ...selectedFiles].slice(0, 5);
+			form.setValue("chatFiles", updatedFiles);
+		}
+	};
+
+	const handleFileRemove = (file: File) => {
+		setFiles((prev) =>
+			prev.filter((selectedFile) => selectedFile.name !== file.name)
+		);
+	};
 
 	return (
 		<div className="flex-1 flex flex-col max-h-screen">
@@ -248,64 +247,76 @@ const SelectedChat: React.FC<SelectedChatProps> = ({
 				messages={messages}
 			/>
 			<div className="p-4 border-t border-border flex flex-col gap-4">
-				{files.length > 0 && (
+				{form.getValues("chatFiles").length > 0 && (
 					<div className="flex items-center gap-4">
-						{files.length > 0 &&
-							files.map((file) => (
-								<div
-									key={file.name}
-									className="relative w-16 h-12"
+						{form.getValues("chatFiles").map((file) => (
+							<div
+								key={file.name}
+								className="relative w-16 h-12"
+							>
+								<span
+									onClick={() => handleFileRemove(file)}
+									className="absolute right-0 -top-2 text-xs hover:cursor-pointer hover:scale-110"
 								>
-									<span
-										onClick={() =>
-											setFiles((prev) =>
-												prev.filter(
-													(selectedFile) => selectedFile.name !== file.name
-												)
-											)
-										}
-										className="absolute right-0 -top-2 text-xs hover:cursor-pointer hover:scale-110"
-									>
-										x
-									</span>
-									<img
-										src={URL.createObjectURL(file)}
-										className="w-full h-full object-cover"
-									/>
-								</div>
-							))}
+									x
+								</span>
+								<img
+									src={URL.createObjectURL(file)}
+									className="w-full h-full object-cover"
+								/>
+							</div>
+						))}
 					</div>
 				)}
-				<div className="flex gap-4  items-center ">
+
+				<div className="flex gap-4 items-center">
 					<Paperclip
 						className="hover:cursor-pointer"
 						onClick={() => document.getElementById("chatFiles")?.click()}
 						size={20}
 					/>
-					<div className="flex-1">
-						<Input
-							placeholder="Type a message..."
-							className="bg-muted"
-							value={messageInput}
-							onChange={(e) => setMessageInput(e.target.value)}
-						/>
-						<Input
-							id="chatFiles"
-							type="file"
-							multiple
-							className="hidden"
-							max={5}
-							onChange={(e) =>
-								setFiles((prev) => [
-									...prev,
-									...Array.from(e.target.files || []),
-								])
-							}
-						/>
-					</div>
-					{(messageInput.length > 0 || files.length > 0) && (
+					<FormProvider {...form}>
+						<Form
+							{...form}
+							className="flex-1"
+						>
+							<form>
+								<FormField
+									control={form.control}
+									name="content"
+									render={({ field }) => (
+										<FormControl>
+											<Input
+												placeholder="Type a message..."
+												className="bg-muted"
+												{...field}
+											/>
+										</FormControl>
+									)}
+								/>
+								<FormField
+									control={form.control}
+									name="chatFiles"
+									render={() => (
+										<FormControl>
+											<Input
+												id="chatFiles"
+												type="file"
+												multiple
+												className="hidden"
+												max={5}
+												onChange={handleFileChange}
+											/>
+										</FormControl>
+									)}
+								/>
+							</form>
+						</Form>
+					</FormProvider>
+
+					{(form.getValues("content").length > 0 ||
+						form.getValues("chatFiles").length > 0) && (
 						<SendHorizonal
-							onClick={handleMessageSend}
 							className={cn("hover:cursor-pointer")}
 							size={20}
 						/>
@@ -319,10 +330,9 @@ const SelectedChat: React.FC<SelectedChatProps> = ({
 export default function WorkspaceChat() {
 	const chatsFromLoader = useLoaderData();
 	const currentUserId = useSelector((state: RootState) => state.Users.user._id);
-	console.log(currentUserId);
 	const currentMember = useSelector(
 		(state: RootState) => state.Workspaces.workspace.members
-	).find((member: WorkspaceMember) => member.user._id === currentUserId);
+	).find((member) => member.user._id === currentUserId);
 
 	const [isNewChat, setIsNewChat] = useState<boolean>(false);
 	const [chats, setChats] = useState<ChatSchema[]>(chatsFromLoader || []);
@@ -331,15 +341,7 @@ export default function WorkspaceChat() {
 	const [selectedChat, setSelectedChat] = useState<ChatSchema | null>(null);
 	const [messages, setMessages] = useState<MessageSchema[]>([]);
 	const [files, setFiles] = useState<File[]>([]);
-	const { data: fetchedMessage, isLoading } = useGetChatMessageQuery(
-		{
-			workspaceId: currentMember?.workspace,
-			chatId: selectedChat?._id,
-		},
-		{
-			skip: !Boolean(selectedChat),
-		}
-	);
+
 	const [messageInput, setMessageInput] = useState<string>("");
 
 	useEffect(() => {
@@ -347,9 +349,7 @@ export default function WorkspaceChat() {
 		if (localCurrentChat) {
 		}
 	}, []);
-	useEffect(() => {
-		if (fetchedMessage) setMessages(fetchedMessage.data);
-	}, [fetchedMessage]);
+
 	return (
 		<>
 			{isNewChat && <NewChatForm onClose={() => setIsNewChat(false)} />}

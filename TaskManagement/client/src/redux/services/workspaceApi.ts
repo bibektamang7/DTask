@@ -26,7 +26,7 @@ export const workspaceApi = createApi({
 			providesTags: ["Workspace", "Todo"],
 		}),
 		createWorkspace: builder.mutation({
-			query: (workspaceInfo) => ({
+			query: ({ workspaceInfo }) => ({
 				url: "/workspaces",
 				method: "POST",
 				body: workspaceInfo,
@@ -42,13 +42,12 @@ export const workspaceApi = createApi({
 			}),
 		}),
 		addMemberInWorkspace: builder.mutation({
-			query: (memberInfo) => ({
-				url: "/workspaces/members",
+			query: ({ workspaceId, memberInfo }) => ({
+				url: `/workspaces/members/${workspaceId}`,
 				method: "POST",
 				body: memberInfo,
 				credentials: "include",
 			}),
-			invalidatesTags: ["Workspace"],
 		}),
 		removeMemberFromWorkspace: builder.mutation({
 			query: (removedMemberInfo) => ({
@@ -89,6 +88,12 @@ export const workspaceApi = createApi({
 			}),
 			invalidatesTags: ["Workspace", "Todo"],
 		}),
+		getNotifications: builder.query({
+			query: () => ({
+				url: "/workspaces/notifications",
+				credentials: "include",
+			}),
+		}),
 	}),
 });
 
@@ -101,4 +106,5 @@ export const {
 	useAddTodoMutation,
 	useDeleteTodoMutation,
 	useUpdateTodoMutation,
+	useGetNotificationsQuery,
 } = workspaceApi;

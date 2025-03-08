@@ -97,7 +97,7 @@ const sidebar_account_lists = [
 	{
 		title: "Notification",
 		icon: BellIcon,
-		redirectTo: "",
+		redirectTo: "/w/notifications",
 	},
 ];
 
@@ -119,6 +119,6 @@ export {
 	featureCardData,
 	sideBar_menu_lists,
 	sidebar_account_lists,
-    statusColors,
-    priorityColors
+	statusColors,
+	priorityColors,
 };

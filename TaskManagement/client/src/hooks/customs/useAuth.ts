@@ -18,6 +18,7 @@ export const useAuth = () => {
 			});
 			const { data } = response;
 			localStorage.setItem("token", data.token);
+			console.log(data.user);
 			dispatch(setUser(data.user));
 			navigate("/w");
 		} catch (err: any) {
