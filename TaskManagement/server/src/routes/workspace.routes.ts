@@ -10,7 +10,10 @@ import {
 	deleteMemberFromWorkspace,
 	addTodo,
 	deleteTodo,
-  updateTodo,
+	getNotifications,
+	updateTodo,
+	acceptInvitation,
+	declineInvitation,
 } from "../controllers/workspace.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
@@ -31,7 +34,12 @@ router
 router
 	.route("/members/:workspaceId/todos")
 	.post(workspaceEditor, addTodo)
-  .patch(workspaceEditor, updateTodo)
+	.patch(workspaceEditor, updateTodo)
 	.delete(workspaceEditor, deleteTodo);
 
+router
+	.route("/notifications")
+	.get(getNotifications)
+	.post(acceptInvitation)
+	.delete(declineInvitation);
 export default router;

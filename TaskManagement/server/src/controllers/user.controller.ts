@@ -106,21 +106,24 @@ const setUsername = asyncHandler(async (req, res) => {
 		throw new ApiError(400, "Username already exists");
 	}
 
-	const createdUser = await UserModel.findOneAndUpdate(
-		{ email: parsedData.data.email },
-		{
-			$set: {
-				username: parsedData.data.username,
-			},
-		}
-	);
+	const createdUser = await UserModel.findByIdAndUpdate(req.member._id, {
+		$set: {
+			username: parsedData.data.username,
+		},
+	});
 	if (!createdUser) {
 		throw new ApiError(500, "Failed to register username");
 	}
 
 	res
 		.status(200)
-		.json(new ApiResponse(200, {}, "Username is set successfully"));
+		.json(
+			new ApiResponse(
+				200,
+				{ username: createdUser.username },
+				"Username is set successfully"
+			)
+		);
 });
 
 const userLoginWithEmailAndPassword = asyncHandler(async (req, res) => {

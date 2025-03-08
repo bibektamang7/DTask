@@ -18,6 +18,7 @@ const userSchema = new Schema<User>(
 		username: {
 			type: String,
 			index: true,
+			unique: true,
 		},
 		googleId: {
 			type: String,

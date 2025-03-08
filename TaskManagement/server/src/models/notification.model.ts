@@ -5,13 +5,13 @@ const notificationSchema = new Schema(
 		recipient: [
 			{
 				type: Schema.Types.ObjectId,
-				ref: "WorkspaceMember",
+				ref: "User",
 				required: true,
 			},
 		],
 		sender: {
 			type: Schema.Types.ObjectId,
-			ref: "WorkspaceMember",
+			ref: "User",
 			required: true,
 		},
 		purpose: {
@@ -20,12 +20,14 @@ const notificationSchema = new Schema(
 				"MENTION",
 				"TASK_ASSIGEND",
 				"INVITE",
+				"JOINED",
+				"REJECTED",
 				"STATUS",
 				"PRIORITY",
 				"DUE_DATE",
 				"COMMENT",
 				"TASK_EDITOR",
-				"TAGS"
+				"TAGS",
 			],
 		},
 		reference: {
@@ -36,7 +38,7 @@ const notificationSchema = new Schema(
 		referenceModel: {
 			type: String,
 			required: true,
-			enum: ["Task", "WorkspaceMember", "Comment"],
+			enum: ["Task", "Workspace", "Comment"],
 		},
 		message: {
 			type: String,
@@ -60,7 +62,7 @@ const notificationSchema = new Schema(
 	{ timestamps: true }
 );
 
-export const NotificationSchema = mongoose.model(
+export const NotificationModel= mongoose.model(
 	"Notification",
 	notificationSchema
 );

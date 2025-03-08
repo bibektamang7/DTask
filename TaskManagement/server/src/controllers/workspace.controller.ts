@@ -4,11 +4,12 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
 import {
+	acceptInvitationSchema,
 	addMemeberInWorkspaceSchema,
 	createWorkspaceSchema,
 	updateWorkspaceNameSchema,
 } from "../helpers/validation";
-import { NotificationSchema } from "../models/notification.model";
+import { NotificationModel } from "../models/notification.model";
 import mongoose from "mongoose";
 import { TaskModel } from "../models/tasks/task.model";
 import { AttachmentModel } from "../models/attachment.model";
@@ -387,37 +388,45 @@ const addMemeberInWorkspace = asyncHandler(async (req, res) => {
 			throw new ApiError(500, "Internal server error");
 		}
 
-		const workspace = await WorkspaceModel.findByIdAndUpdate(
-			req.workspaceMember.workspace,
-			{
-				$push: {
-					members: workspaceMember,
-				},
-			},
-			{ session: session, new: true }
-		).populate({
-			path: "members",
-			populate: {
-				path: "user",
-				select: "avatar username",
-			},
-		});
+		// const workspace = await WorkspaceModel.findByIdAndUpdate(
+		// 	req.workspaceMember.workspace,
+		// 	{
+		// 		$push: {
+		// 			members: workspaceMember,
+		// 		},
+		// 	},
+		// 	{ session: session, new: true }
+		// ).populate({
+		// 	path: "members",
+		// 	populate: {
+		// 		path: "user",
+		// 		select: "avatar username",
+		// 	},
+		// });
 
-		if (!workspace) {
-			throw new ApiError(500, "Failed to update workspace");
-		}
-		//TOOD:ThIS IS NOT COMPLETE NEED TO CONSIDER,
-		// const invitationNotification = await NotificationSchema.create([{
-		// 	recipient: workspaceMember[0].userId,
-		// 	sender: req.member._id,
-		// 	purpose: "INVITE",
-		// 	message: "",
-
-		// }], {session: session});
-
-		// if(!invitationNotification) {
-		// 	throw new ApiError(500, "Failed to send notification");
+		// if (!workspace) {
+		// 	throw new ApiError(500, "Failed to update workspace");
 		// }
+		const invitationNotification = await NotificationModel.create(
+			[
+				{
+					recipient: [workspaceMember[0].user],
+					sender: req.member._id,
+					purpose: "INVITE",
+					message: "invited you to",
+					reference: req.workspace._id,
+					referenceModel: "Workspace",
+					metadata: {
+						recipentWorkspaceMemberId: workspaceMember[0]._id,
+					},
+				},
+			],
+			{ session: session }
+		);
+		console.log("this is notification", invitationNotification);
+		if (!invitationNotification) {
+			throw new ApiError(500, "Failed to send notification");
+		}
 		await session.commitTransaction();
 
 		res
@@ -523,8 +532,56 @@ const deleteMemberFromWorkspace = asyncHandler(async (req, res) => {
 });
 
 // //Invitation controller
-// const acceptInvitation = asyncHandler(async (req, res) => {});
-// const declineInvitation = asyncHandler(async (req, res) => {});
+const acceptInvitation = asyncHandler(async (req, res) => {
+	const parsedData = acceptInvitationSchema.safeParse(req.body);
+	if (!parsedData.success) {
+		throw new ApiError(400, "Validation error");
+	}
+
+	const notification = await NotificationModel.findById(
+		parsedData.data.notificationId
+	);
+	if (!notification) {
+		throw new ApiError(400, "Notification not found");
+	}
+
+	const workspaceMember = await WorkspaceMemberModel.findByIdAndUpdate(
+		notification.metadata.get("recipentWorkspaceMemberId"),
+		{
+			$set: {
+				isJoined: true,
+			},
+		}
+	);
+	if (!workspaceMember) {
+		throw new ApiError(400, "Invalid workspace member");
+	}
+	const workspace = await WorkspaceModel.findByIdAndUpdate(
+		notification.reference,
+		{
+			$push: {
+				members: workspaceMember._id,
+			},
+		}
+	);
+	if (!workspace) {
+		throw new ApiError(500, "Failed to accept invitation");
+	}
+	await NotificationModel.findByIdAndDelete(notification._id);
+	res.status(200).json(new ApiResponse(200, {}));
+});
+const declineInvitation = asyncHandler(async (req, res) => {
+	const { notificationId } = req.body;
+	if (!notificationId) {
+		throw new ApiError(400, "Notification required");
+	}
+	const notification = await NotificationModel.findById(notificationId);
+	if (!notification) {
+		throw new ApiError(400, "Notification not found");
+	}
+	await NotificationModel.findByIdAndDelete(notification._id);
+	res.status(200).json(new ApiResponse(200, {}, "Invitation declined"));
+});
 
 const addTodo = asyncHandler(async (req, res) => {
 	const { title } = req.body;
@@ -554,7 +611,7 @@ const addTodo = asyncHandler(async (req, res) => {
 const updateTodo = asyncHandler(async (req, res) => {
 	const { todoId, isTick } = req.body;
 	console.log(todoId, isTick);
-	
+
 	const todo = await TodoModel.findByIdAndUpdate(
 		todoId,
 		{
@@ -592,6 +649,21 @@ const deleteTodo = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, deletedTodo, "Todo Deleted Successfully"));
 });
 
+const getNotifications = asyncHandler(async (req, res) => {
+	const notifications = await NotificationModel.find({
+		recipient: req.member._id,
+	}).populate("recipient sender reference");
+
+	if (!notifications) {
+		throw new ApiError(500, "Failed to fetch notifications");
+	}
+	res
+		.status(200)
+		.json(
+			new ApiResponse(200, notifications, "Notification fetched successfullyy")
+		);
+});
+
 export {
 	createWorkspace,
 	deleteWorkspace,
@@ -603,4 +675,7 @@ export {
 	addTodo,
 	updateTodo,
 	deleteTodo,
+	getNotifications,
+	acceptInvitation,
+	declineInvitation,
 };

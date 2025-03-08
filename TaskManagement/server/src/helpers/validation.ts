@@ -11,7 +11,6 @@ const signupSchema = z.object({
 });
 
 const setUsernameSchema = z.object({
-	email: z.string(),
 	username: z.string().min(6).max(20),
 });
 
@@ -34,7 +33,6 @@ const addMemeberInWorkspaceSchema = z.object({
 	member: z.object({
 		userId: z.string(),
 		role: z.enum(["Member", "Editor", "Admin"]).default("Member"),
-		workspaceId: z.string(),
 		isJoined: z.boolean().default(false),
 	}),
 });
@@ -57,7 +55,7 @@ const updateTaskSchema = z.object({
 	priority: z.enum(["Low", "Medium", "High", "Urgent"]).optional(),
 	startDate: z.string().optional(),
 	dueDate: z.string().optional(),
-})
+});
 
 const deleteTaskSchema = z.object({
 	workspaceId: z.string(),
@@ -86,11 +84,16 @@ const createChatSchema = z.object({
 	members: z.array(z.string()).min(1),
 });
 
-const sendMessageSchema = z.object({ 
+const sendMessageSchema = z.object({
 	content: z.string().optional(),
+});
+
+const acceptInvitationSchema = z.object({
+	notificationId: z.string(),
 })
 
 export {
+	acceptInvitationSchema,
 	sendMessageSchema,
 	createChatSchema,
 	deleteCommentSchema,
@@ -105,5 +108,5 @@ export {
 	setUsernameSchema,
 	signupSchema,
 	userLoginWithEmailAndPasswordSchema,
-	updateTaskSchema
+	updateTaskSchema,
 };
