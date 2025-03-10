@@ -7,7 +7,6 @@ import { WorkspaceModel } from "../models/workspaces/workspace.model";
 export const workspaceEditor = asyncHandler(
 	async (req: Request, _, next: NextFunction) => {
 		const { workspaceId } = req.params;
-		console.log(workspaceId);
 		
 		if (!workspaceId) {
 			throw new ApiError(400, "Workspace id required");

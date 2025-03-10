@@ -230,7 +230,7 @@ const getChats = asyncHandler(async (req, res) => {
 	const chats = await ChatModel.aggregate([
 		{
 			$match: {
-				creator: req.workspaceMember._id,
+				members: req.workspaceMember._id,
 			},
 		},
 		{
@@ -242,11 +242,18 @@ const getChats = asyncHandler(async (req, res) => {
 			},
 		},
 		{
+			$unwind: {
+				path: "$lastMessage",
+				preserveNullAndEmptyArrays: true,
+			},
+		},
+		{
 			$project: {
 				messages: 0,
 			},
 		},
 	]);
+
 	res
 		.status(200)
 		.json(new ApiResponse(200, chats, "Chats fetched successfully"));

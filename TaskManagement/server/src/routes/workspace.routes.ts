@@ -14,6 +14,7 @@ import {
 	updateTodo,
 	acceptInvitation,
 	declineInvitation,
+	getWorkspaces,
 } from "../controllers/workspace.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
@@ -23,7 +24,7 @@ const router = Router();
 router.use(authMiddleware);
 
 router.route("/").post(createWorkspace).get(getWorkspace);
-
+router.route("/:workspaceId/get-workspaces").get(workspaceEditor, getWorkspaces);
 router.route("/delete-workspace/:workspaceId").delete(deleteWorkspace);
 router.route("/update-workspace/:workspaceId").patch(updateWorkspace);
 router

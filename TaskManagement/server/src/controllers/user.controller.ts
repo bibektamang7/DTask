@@ -147,9 +147,7 @@ const userLoginWithEmailAndPassword = asyncHandler(async (req, res) => {
 	if (!isPasswordCorrect) {
 		throw new ApiError(400, "Incorrect password");
 	}
-	if (!user.username) {
-		res.status(200).json(new ApiResponse(200, {}, "Username is not set"));
-	}
+	
 
 	const { refreshToken, accessToken } = generateAccessAndRefreshToken(
 		user._id.toString()

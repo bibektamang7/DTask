@@ -263,15 +263,30 @@ const updateWorkspace = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, workspace, "Workspace updated successfully"));
 });
 
+const getWorkspaces = asyncHandler(async (req, res) => {
+	const currentUserWorkspaceMembers = await WorkspaceMemberModel.find({
+		user: req.member._id,
+	});
+	const curretnUserWorkspaceMembersId = currentUserWorkspaceMembers.map(
+		(member) => member.workspace
+	);
+	const workspaces = await WorkspaceModel.find({
+		_id: { $in: curretnUserWorkspaceMembersId },
+	});
+	res.status(200).json(new ApiResponse(200, workspaces));
+});
 const getWorkspace = asyncHandler(async (req, res) => {
-	const { workspaceId } = req.params;
+	const { workspaceId } = req.query;
 	const userId = req.member._id;
 
 	if (!workspaceId && !userId) {
 		throw new ApiError(400, "Workspace ID or User ID is required");
 	}
 
-	const matchCondition = workspaceId ? { _id: workspaceId } : { owner: userId };
+	const matchCondition = workspaceId
+		? { _id: new mongoose.Types.ObjectId(workspaceId.toString()) }
+		: { owner: userId };
+	console.log(matchCondition);
 
 	const workspace = await WorkspaceModel.aggregate([
 		{
@@ -678,4 +693,5 @@ export {
 	getNotifications,
 	acceptInvitation,
 	declineInvitation,
+	getWorkspaces,
 };
