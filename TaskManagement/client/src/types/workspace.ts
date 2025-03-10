@@ -14,7 +14,6 @@ export interface Workspace {
 	name: string;
 	owner: User;
 	members: WorkspaceMember[];
-	tasks: Task[];
 }
 
 export interface Todo {

@@ -7,12 +7,14 @@ import { chatApi } from "@/redux/services/chatApi";
 
 export const workspaceLoader = async () => {
 	const token = localStorage.getItem("token");
-
+	const workspaceId = localStorage.getItem("workspace");
 	if (!token) return redirect("/login");
 
 	try {
 		const workspaceResult = await store
-			.dispatch(workspaceApi.endpoints.getWorkspace.initiate(token))
+			.dispatch(
+				workspaceApi.endpoints.getWorkspace.initiate({ token, workspaceId })
+			)
 			.unwrap();
 		const taskResult = await store
 			.dispatch(
@@ -22,6 +24,11 @@ export const workspaceLoader = async () => {
 				})
 			)
 			.unwrap();
+
+		const workspacesResult = await store.dispatch(
+			workspaceApi.endpoints.getWorkspaces.initiate({workspaceId})
+		);
+		
 
 		if (workspaceResult.error || taskResult.error) return redirect("/login");
 		return workspaceResult.data;

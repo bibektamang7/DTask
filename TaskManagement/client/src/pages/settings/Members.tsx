@@ -179,14 +179,7 @@ const MembersContent = () => {
 										{member.user.email}
 									</div>
 									<div className="col-span-2">
-										<select
-											defaultValue={member.role}
-											className="px-2 py-1 rounded text-xs bg-gray-700 border-gray-600 text-gray-200 w-full"
-										>
-											<option value="Admin">Admin</option>
-											<option value="Editor">Editor</option>
-											<option value="Viewer">Member</option>
-										</select>
+										<span className="text-sm text-gray-400 truncate">{member.role}</span>
 									</div>
 									<div className="col-span-1 flex justify-end">
 										<Button

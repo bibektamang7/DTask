@@ -7,32 +7,33 @@ import { Badge } from "@/components/ui/badge";
 import { useSelector } from "react-redux";
 
 const ProfileContent = () => {
-	const profile = useSelector((state: RootState) => state.Users.user);
+	const currentUser = localStorage.getItem("currentUser");
 	const workspaceMembers = useSelector(
 		(state: RootState) => state.Workspaces.workspace.members
 	);
 	const currentWorkspaceMember = workspaceMembers.find(
-		(member) => member.user._id === profile._id
+		(member) => member.user._id === currentUser
 	);
-	console.log(profile);
 	return (
 		<div className="space-y-6">
 			<div className="flex items-start gap-4">
 				<Avatar className="h-16 w-16 rounded-full">
 					<AvatarImage
 						src=""
-						alt={profile.username}
+						alt={currentWorkspaceMember?.user.username}
 						className="rounded-full"
 					/>
 					<AvatarFallback className="rounded-full flex items-center justify-center text-xl">
-						{profile.username.charAt(0)}
+						{currentWorkspaceMember?.user.username.charAt(0)}
 					</AvatarFallback>
 				</Avatar>
 				<div>
 					<h2 className="text-xl font-semibold text-gray-100">
-						{profile.username}
+						{currentWorkspaceMember?.user.username}
 					</h2>
-					<p className="text-sm text-gray-400">{profile.email}</p>
+					<p className="text-sm text-gray-400">
+						{currentWorkspaceMember?.user.email}
+					</p>
 					<div className="flex items-center gap-2 mt-1">
 						<Badge className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30">
 							{currentWorkspaceMember?.role}
@@ -56,7 +57,7 @@ const ProfileContent = () => {
 						</Label>
 						<Input
 							id="display-name"
-							defaultValue={profile.username}
+							defaultValue={currentWorkspaceMember?.user.username}
 							className="bg-gray-800 border-gray-700 text-gray-200"
 						/>
 					</div>
@@ -70,7 +71,7 @@ const ProfileContent = () => {
 						</Label>
 						<Input
 							id="email"
-							defaultValue={profile.email}
+							defaultValue={currentWorkspaceMember?.user.email}
 							className="bg-gray-800 border-gray-700 text-gray-200"
 						/>
 					</div>

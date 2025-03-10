@@ -4,6 +4,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface UserInitialStateProps {
 	user: User;
+	workspaces: {}
 }
 const userInitialState: UserInitialStateProps = {
 	user: {
@@ -12,6 +13,12 @@ const userInitialState: UserInitialStateProps = {
 		email: "",
 		username: "",
 	},
+	workspaces: {
+		_id: "",
+		name: "",
+		members: [],
+		owner: "",
+	}
 };
 const userSlice = createSlice({
 	name: "User",
@@ -23,9 +30,12 @@ const userSlice = createSlice({
 		setCurrentUsername: (state, action) => {
 			state.user.username = action.payload
 		},
+		setWorkspaces: (state, action) => {
+			state.workspaces = action.payload
+		},
 		logout: () => {},
 	},
 });
 
-export const { setUser, logout, setCurrentUsername} = userSlice.actions;
+export const { setUser, logout, setCurrentUsername, setWorkspaces} = userSlice.actions;
 export default userSlice;

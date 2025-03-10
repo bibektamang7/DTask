@@ -7,7 +7,6 @@ import { useToast } from "../use-toast";
 export const useAuth = () => {
 	const [loginUser, { isLoading }] = useLoginUserMutation();
 	const { toast } = useToast();
-	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const login = async (email: string, password: string) => {
 		try {
@@ -17,9 +16,8 @@ export const useAuth = () => {
 				variant: "default",
 			});
 			const { data } = response;
+			localStorage.setItem("currentUser", data.user._id);
 			localStorage.setItem("token", data.token);
-			console.log(data.user);
-			dispatch(setUser(data.user));
 			navigate("/w");
 		} catch (err: any) {
 			toast({

@@ -16,14 +16,22 @@ export const workspaceApi = createApi({
 	tagTypes: ["Todo", "Workspace"],
 	endpoints: (builder) => ({
 		getWorkspace: builder.query({
-			query: (token: string) => ({
-				url: "/workspaces",
+			query: ({ token, workspaceId }) => ({
+				url: workspaceId
+					? `/workspaces?workspaceId=${workspaceId}`
+					: "/workspaces",
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
 				credentials: "include",
 			}),
 			providesTags: ["Workspace", "Todo"],
+		}),
+		getWorkspaces: builder.query({
+			query: ({workspaceId}) => ({
+				url: `/workspaces/${workspaceId}/get-workspaces`,
+				credentials: "include",
+			}),
 		}),
 		createWorkspace: builder.mutation({
 			query: ({ workspaceInfo }) => ({
@@ -94,6 +102,21 @@ export const workspaceApi = createApi({
 				credentials: "include",
 			}),
 		}),
+		acceptInvitaion: builder.mutation({
+			query: ({ notificationId }) => ({
+				url: `/workspaces/notifications`,
+				credentials: "include",
+				body: { notificationId },
+				method: "POST",
+			}),
+		}),
+		declineInvitation: builder.mutation({
+			query: () => ({
+				url: ``,
+				method: "DELETE",
+				credentials: "include",
+			}),
+		}),
 	}),
 });
 
@@ -107,4 +130,8 @@ export const {
 	useDeleteTodoMutation,
 	useUpdateTodoMutation,
 	useGetNotificationsQuery,
+	useAcceptInvitaionMutation,
+	useDeclineInvitationMutation,
+	useGetWorkspacesQuery,
+	useLazyGetWorkspacesQuery
 } = workspaceApi;

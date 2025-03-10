@@ -29,9 +29,13 @@ import CustomEditor from "@/components/workspace/tasks/Editor";
 import { useLoaderData } from "react-router";
 import { WorkspaceMember } from "@/types/workspace";
 import { Attachment } from "@/types/task";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 const Task: React.FC = () => {
 	const loaderData = useLoaderData();
-	console.log(loaderData);
+	const workspaceMembers = useSelector(
+		(state: RootState) => state.Workspaces.workspace.members
+	);
 
 	return (
 		<div className="w-full h-full flex justify-end">
@@ -158,14 +162,19 @@ const Task: React.FC = () => {
 									</span>
 								</div>
 								<div>
-									{loaderData.assignees.map((assignee: WorkspaceMember) => (
-										<Avatar>
-											<AvatarImage src={assignee.user.avatar} />
-											<AvatarFallback>
-												{assignee.user.username.charAt(0)}
-											</AvatarFallback>
-										</Avatar>
-									))}
+									{loaderData.assignees.map((assignee: String) =>
+										workspaceMembers.map(
+											(member) =>
+												assignee === member._id && (
+													<Avatar>
+														<AvatarImage src={member.user.avatar} />
+														<AvatarFallback>
+															{member.user.username.charAt(0)}
+														</AvatarFallback>
+													</Avatar>
+												)
+										)
+									)}
 								</div>
 							</div>
 						</div>

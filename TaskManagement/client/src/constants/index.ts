@@ -76,19 +76,19 @@ const sideBar_menu_lists = [
 		icon: CheckSquareIcon,
 		redirectTo: "/w/tasks",
 	},
-	{
-		title: "Calendar",
-		icon: CalendarIcon,
-		redirectTo: "/w/calendar",
-	},
+	// {
+	// 	title: "Calendar",
+	// 	icon: CalendarIcon,
+	// 	redirectTo: "/w/calendar",
+	// },
 ];
 
 const sidebar_account_lists = [
-	{
-		title: "User",
-		icon: UserIcon,
-		redirectTo: "",
-	},
+	// {
+	// 	title: "User",
+	// 	icon: UserIcon,
+	// 	redirectTo: "",
+	// },
 	{
 		title: "Chat",
 		icon: MessageSquareIcon,

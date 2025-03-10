@@ -55,14 +55,16 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
 						<div className="flex items-center justify-between">
 							<h3 className="font-medium truncate">{chat.name}</h3>
 							<span className="text-xs text-muted-foreground">
-								{chat.lastMessage.createdAt &&
+								{chat.lastMessage &&
+									chat.lastMessage.createdAt &&
 									new Date(chat.lastMessage.createdAt).getUTCHours().toString()}
 							</span>
 						</div>
 						<p className="text-sm text-muted-foreground truncate">
-							{chat.lastMessage.content ||
-							(chat.lastMessage.attachments &&
-								chat.lastMessage.attachments.length > 0)
+							{chat.lastMessage &&
+							(chat.lastMessage.content ||
+								(chat.lastMessage.attachments &&
+									chat.lastMessage.attachments.length > 0))
 								? "Attachments"
 								: "No messages yet."}
 						</p>
@@ -317,9 +319,9 @@ const SelectedChat: React.FC<SelectedChatProps> = ({
 };
 
 export default function WorkspaceChat() {
+	const workspaceId = localStorage.getItem("workspace");
 	const chatsFromLoader = useLoaderData();
-	const currentUserId = useSelector((state: RootState) => state.Users.user._id);
-	console.log(currentUserId);
+	const currentUserId = localStorage.getItem("currentUser");
 	const currentMember = useSelector(
 		(state: RootState) => state.Workspaces.workspace.members
 	).find((member: WorkspaceMember) => member.user._id === currentUserId);
@@ -333,7 +335,7 @@ export default function WorkspaceChat() {
 	const [files, setFiles] = useState<File[]>([]);
 	const { data: fetchedMessage, isLoading } = useGetChatMessageQuery(
 		{
-			workspaceId: currentMember?.workspace,
+			workspaceId,
 			chatId: selectedChat?._id,
 		},
 		{
@@ -343,8 +345,9 @@ export default function WorkspaceChat() {
 	const [messageInput, setMessageInput] = useState<string>("");
 
 	useEffect(() => {
-		const localCurrentChat = localStorage.getItem("currentChat");
+		const localCurrentChat = JSON.parse(localStorage.getItem("currentChat")!);
 		if (localCurrentChat) {
+			setSelectedChat(localCurrentChat);
 		}
 	}, []);
 	useEffect(() => {
