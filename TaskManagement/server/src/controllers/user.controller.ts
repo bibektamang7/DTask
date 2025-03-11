@@ -131,8 +131,6 @@ const userLoginWithEmailAndPassword = asyncHandler(async (req, res) => {
 	if (!parsedData.success) {
 		throw new ApiError(400, "Validation Error");
 	}
-	console.log(parsedData.data);
-
 	const user = await UserModel.findOne({
 		email: parsedData.data.email,
 	});

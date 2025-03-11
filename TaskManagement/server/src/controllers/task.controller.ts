@@ -38,11 +38,8 @@ const createTask = asyncHandler(async (req, res) => {
 	}
 	const parsedData = createTaskSchema.safeParse(req.body);
 	if (!parsedData.success) {
-		console.log(parsedData.error.message);
-
 		throw new ApiError(400, "Validation error");
 	}
-	console.log(req.workspaceMember.workspace);
 	const workspaceMembers = await Promise.all(
 		parsedData.data.assignees.map(async (userId) => {
 			const isValid = await isMemberInWorkspace(userId);
@@ -122,8 +119,6 @@ const createTask = asyncHandler(async (req, res) => {
 });
 
 const getTasks = asyncHandler(async (req, res) => {
-	console.log(req.workspace);
-
 	const tasks = await TaskModel.aggregate([
 		{
 			$match: {
@@ -150,8 +145,6 @@ const getTasks = asyncHandler(async (req, res) => {
 	if (!tasks) {
 		throw new ApiError(400, "Tasks not found");
 	}
-	console.log(tasks);
-
 	res.status(200).json(new ApiResponse(200, tasks, "Fetched tasks"));
 });
 
@@ -641,8 +634,6 @@ const createComment = asyncHandler(async (req, res) => {
 		}
 		await session.commitTransaction();
 		//TODO:emit socket event
-		console.log("THis is comment created");
-		console.log(updatedTask);
 
 		// TODO: CONSIDER ADDING FULL DETAILS OF COMMENT SO THAT USER WILL BE UPDATED AT REAL TIEM
 		taskClient.publish(
@@ -671,9 +662,7 @@ const createComment = asyncHandler(async (req, res) => {
 });
 
 const deleteComment = asyncHandler(async (req, res) => {
-	console.log("yea ko k xa");
 	const { commentId } = req.query;
-	console.log(commentId);
 	if (!commentId) {
 		throw new ApiError(400, "Comment id required");
 	}
@@ -697,7 +686,6 @@ const deleteComment = asyncHandler(async (req, res) => {
 		req.workspaceMember.role !== "Admin" &&
 		comment.createdBy.toString() !== req.member._id.toString()
 	) {
-		console.log(req.workspaceMember.role);
 		throw new ApiError(401, "Unauthorized to delete comment");
 	}
 	const session = await mongoose.startSession();
@@ -736,8 +724,6 @@ const deleteComment = asyncHandler(async (req, res) => {
 			.status(200)
 			.json(new ApiResponse(200, {}, "Comment Deleted successfully"));
 	} catch (error: any) {
-		console.log(error);
-
 		await session.abortTransaction();
 		throw new ApiError(
 			500,

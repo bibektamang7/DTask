@@ -27,8 +27,6 @@ app.use("/api/v1/workspaces", WorkspaceRouter);
 app.use("/api/v1/chats", ChatRouter);
 
 app.use((err: ApiError, req: Request, res: Response, next: NextFunction) => {
-	console.log(err);
-	console.log(err.message)
 	res.status(err.statusCode).json({error: err.message})
 });
 

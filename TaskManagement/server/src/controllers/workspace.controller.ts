@@ -112,8 +112,6 @@ const createWorkspaceService = async (data: any) => {
 
 		return updatedWorkspace;
 	} catch (error: any) {
-		console.log(error);
-
 		await session.abortTransaction();
 		session.endSession();
 		throw new ApiError(500, "Something went wrong while creating workspace");
@@ -204,7 +202,6 @@ const deleteWorkspace = asyncHandler(async (req, res) => {
 		);
 	} catch (error: any) {
 		await session.abortTransaction();
-		console.log(error);
 		throw new ApiError(500, "Internal server error");
 	} finally {
 		session.endSession();
@@ -279,6 +276,7 @@ const getWorkspace = asyncHandler(async (req, res) => {
 	const { workspaceId } = req.query;
 	const userId = req.member._id;
 
+	console.log("domt ot sca,e jere")
 	if (!workspaceId && !userId) {
 		throw new ApiError(400, "Workspace ID or User ID is required");
 	}
@@ -286,8 +284,6 @@ const getWorkspace = asyncHandler(async (req, res) => {
 	const matchCondition = workspaceId
 		? { _id: new mongoose.Types.ObjectId(workspaceId.toString()) }
 		: { owner: userId };
-	console.log(matchCondition);
-
 	const workspace = await WorkspaceModel.aggregate([
 		{
 			$match: matchCondition,
@@ -438,7 +434,6 @@ const addMemeberInWorkspace = asyncHandler(async (req, res) => {
 			],
 			{ session: session }
 		);
-		console.log("this is notification", invitationNotification);
 		if (!invitationNotification) {
 			throw new ApiError(500, "Failed to send notification");
 		}
@@ -454,8 +449,6 @@ const addMemeberInWorkspace = asyncHandler(async (req, res) => {
 				)
 			);
 	} catch (error: any) {
-		console.log(error);
-
 		await session.abortTransaction();
 		throw new ApiError(500, error.message || "Internal server error");
 	} finally {
@@ -625,8 +618,6 @@ const addTodo = asyncHandler(async (req, res) => {
 
 const updateTodo = asyncHandler(async (req, res) => {
 	const { todoId, isTick } = req.body;
-	console.log(todoId, isTick);
-
 	const todo = await TodoModel.findByIdAndUpdate(
 		todoId,
 		{
