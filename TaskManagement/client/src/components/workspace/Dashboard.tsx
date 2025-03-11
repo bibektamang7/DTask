@@ -9,13 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-	MessageSquare,
-	MoreVertical,
-	Paperclip,
-	PencilIcon,
-	Quote,
-} from "lucide-react";
+import { MessageSquare, MoreVertical, Paperclip } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { useWorkspace } from "@/hooks/customs/useWorkspace";
 import { useTask } from "@/hooks/customs/useTask";
@@ -34,6 +28,7 @@ import { priorityColors, statusColors } from "@/constants";
 import { format } from "date-fns";
 import Todo from "./Todo";
 import QuoteOfTheDay from "./QuoteOfTheDay";
+import { useSocket } from "@/context/SocketContex";
 
 type TaskOptionProp = "Todo" | "In Progress" | "Completed";
 
@@ -57,13 +52,14 @@ export default function DashboardPage() {
 	const [todoTasks, setTodoTasks] = useState<any[]>([]);
 	const [inProgressTasks, setInProgressTasks] = useState<any[]>([]);
 	const [recentTasks, setRecentTasks] = useState<any[]>([]);
-	const [teamMembers, setTeamMembers] = useState<WorkspaceMember[]>([]);
+	const socket = useSocket();
 
-	useEffect(() => {
-		if (workspaceMembers) {
-			setTeamMembers(workspaceMembers);
-		}
-	}, []);
+	const selectedTasks =
+		taskOption === "Completed"
+			? completedTasks
+			: taskOption === "Todo"
+			? todoTasks
+			: inProgressTasks;
 
 	useEffect(() => {
 		if (taskData) {
@@ -91,12 +87,25 @@ export default function DashboardPage() {
 			setRecentTasks(recentTasksList);
 		}
 	}, []);
-	const selectedTasks =
-		taskOption === "Completed"
-			? completedTasks
-			: taskOption === "Todo"
-			? todoTasks
-			: inProgressTasks;
+
+	useEffect(() => {
+		if (!socket) return;
+		socket.onmessage = (event) => {
+			const message = JSON.parse(event.data.toString());
+			switch (message.type) {
+				case "workspaceCreated":
+					break;
+				case "workspaceDeleted":
+					break;
+				case "workspaceNameUpdate":
+					break;
+				case "removeMemberFromWorkspace":
+					break;
+				case "workspaceInvitation":
+					break;
+			}
+		};
+	}, [socket]);
 
 	return (
 		<main className="relative lg:flex lg:flex-1 w-full">
@@ -348,8 +357,8 @@ export default function DashboardPage() {
 							</Button>
 						</div>
 						<div className="space-y-4">
-							{teamMembers.length > 0 ? (
-								teamMembers.map((member, index) => (
+							{workspaceMembers.length > 0 ? (
+								workspaceMembers.map((member, index) => (
 									<div
 										key={index}
 										className="flex items-center gap-3"

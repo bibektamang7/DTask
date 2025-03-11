@@ -7,14 +7,15 @@ export interface ChatSchema {
 	creator: string;
 	lastMessage: MessageSchema;
 	messages: MessageSchema[];
-	members: WorkspaceMember[];
+	members: string[];
 	unreadCounts: Record<string, number>;
 	name: string;
 }
 export interface MessageSchema {
 	_id: string;
+	chat: string;
 	sender: string;
 	content: string;
 	attachments: Attachment[];
-	createdAt: Date,
+	createdAt: Date;
 }

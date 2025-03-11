@@ -24,42 +24,42 @@ export const chatApi = createApi({
 			invalidatesTags: ["Chat"],
 		}),
 		deleteChat: builder.mutation({
-			query: (chatInfo) => ({
-				url: "/chats/delete-chat",
+			query: ({ workspaceId, chatId }) => ({
+				url: `/chats/${workspaceId}?chatId=${chatId}`,
 				method: "DELETE",
-				body: chatInfo,
 				credentials: "include",
 			}),
+			invalidatesTags: ["Chat"],
 		}),
 
 		sendMessage: builder.mutation({
 			query: ({ workspaceId, chatId, messageInfo }) => ({
 				url: `/chats/${workspaceId}/${chatId}/messages`,
-				method:"POST",
+				method: "POST",
 				body: messageInfo,
 				credentials: "include",
 			}),
 			invalidatesTags: ["Message"],
 		}),
 		deleteMessage: builder.mutation({
-			query: (deletedMessageInfo) => ({
-				url: "/chats/delete-message",
-				body: deletedMessageInfo,
+			query: ({ workspaceId, chatId, messageId }) => ({
+				url: `/chats/${workspaceId}/${chatId}/messages?messageId=${messageId}`,
+				method: "DELETE",
 				credentials: "include",
 			}),
 			invalidatesTags: ["Message"],
 		}),
 		addMember: builder.mutation({
-			query: (memeberInfo) => ({
-				url: "/chats/add-member",
-				body: memeberInfo,
+			query: ({ workspaceId, chatId, memberId }) => ({
+				url: `/chats/${workspaceId}/${chatId}/members/${memberId}`,
+				method: "POST",
 				credentials: "include",
 			}),
 		}),
 		removeMemeber: builder.mutation({
-			query: (removedMemberInfo) => ({
-				url: "/chats/send-message",
-				body: removedMemberInfo,
+			query: ({ workspaceId, chatId, memberId }) => ({
+				url: `/chats/${workspaceId}/${chatId}/members/${memberId}`,
+				method: "DELETE",
 				credentials: "include",
 			}),
 		}),
@@ -78,11 +78,11 @@ export const chatApi = createApi({
 			providesTags: ["Message"],
 		}),
 		getChatMessage: builder.query({
-			query: ({workspaceId, chatId}) => ({
+			query: ({ workspaceId, chatId }) => ({
 				url: `/chats/${workspaceId}/${chatId}/messages`,
-				credentials: "include"
+				credentials: "include",
 			}),
-			providesTags: ["Message"]
+			providesTags: ["Message"],
 		}),
 	}),
 });

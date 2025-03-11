@@ -21,12 +21,13 @@ const MembersContent = () => {
 	const [searchEmail, setSearchQuery] = useState("");
 	const [inviteEmail, setInviteEmail] = useState("");
 	const [selectedRole, setSelectedRole] =
-		useState<WorkspaceMember["role"]>("Member");
+		useState<WorkspaceMember["role"]>("Editor");
 
 	const [getUser, { isLoading }] = useLazyGetUsersByEmailQuery();
 	const { handleAddMember, addMemberLoading } = useAddMember();
 
 	const handleSendInvitation = async () => {
+		console.log(selectedRole);
 		await handleAddMember({
 			member: {
 				userId: searchedUser?._id,
@@ -127,6 +128,7 @@ const MembersContent = () => {
 									</p>
 									<select
 										value={selectedRole}
+										defaultValue={"Editor"}
 										onChange={(e) =>
 											setSelectedRole(e.target.value as WorkspaceMember["role"])
 										}
@@ -179,7 +181,9 @@ const MembersContent = () => {
 										{member.user.email}
 									</div>
 									<div className="col-span-2">
-										<span className="text-sm text-gray-400 truncate">{member.role}</span>
+										<span className="text-sm text-gray-400 truncate">
+											{member.role}
+										</span>
 									</div>
 									<div className="col-span-1 flex justify-end">
 										<Button

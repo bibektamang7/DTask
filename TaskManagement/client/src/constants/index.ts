@@ -114,6 +114,16 @@ const priorityColors = {
 	Low: "bg-green-500/10 text-green-500",
 };
 
+const ChatEvent = Object.freeze({
+	JOIN_CHAT: "join-chat",
+	LEAVE_CHAT: "leave-chat",
+	NEW_CHAT: "new-chat",
+	ADD_MEMBER: "add-chat-member",
+	REMOVE_MEMBER: "remove-member",
+	DELETE_CHAT: "delete-chat",
+	DELETE_MESSAGE: "delete-chat-message",
+	ADD_MESSAGE: "add-chat-message",
+});
 export {
 	HeaderList,
 	featureCardData,
@@ -121,4 +131,5 @@ export {
 	sidebar_account_lists,
 	statusColors,
 	priorityColors,
+	ChatEvent
 };

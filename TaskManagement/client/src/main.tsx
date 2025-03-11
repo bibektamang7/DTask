@@ -9,9 +9,9 @@ import { Toaster } from "./components/ui/toaster.tsx";
 
 createRoot(document.getElementById("root")!).render(
 	// <StrictMode>
-		<Provider store={store}>
-			<App />
-			<Toaster/>
-		</Provider>
+	<Provider store={store}>
+		<App />
+		<Toaster />
+	</Provider>
 	// {/* </StrictMode> */}
 );

@@ -1,322 +1,17 @@
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-	Search,
-	Phone,
-	Video,
-	MoreVertical,
-	ArrowLeft,
-	CirclePlus,
-	SendHorizonal,
-	Paperclip,
-} from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import { Search, CirclePlus } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { useLoaderData } from "react-router";
 import { ChatSchema, MessageSchema } from "@/types/chat";
 import NewChatForm from "@/components/workspace/chats/NewChatForm";
 import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-import { cn } from "@/lib/utils";
-import { WorkspaceMember } from "@/types/workspace";
-import { useForm } from "react-hook-form";
-import { useSendMessage } from "@/hooks/customs/useSendMessage";
-import { toast } from "@/hooks/use-toast";
 import { useGetChatMessageQuery } from "@/redux/services/chatApi";
-
-interface ChatRoomListProps {
-	chats: ChatSchema[];
-	setSelectedChat: React.Dispatch<React.SetStateAction<ChatSchema | null>>;
-	setShowMobileChatList: React.Dispatch<React.SetStateAction<boolean>>;
-}
-const ChatRoomList: React.FC<ChatRoomListProps> = ({
-	chats,
-	setSelectedChat,
-	setShowMobileChatList,
-}) => {
-	const handelOnChatSelect = (chat: ChatSchema) => {
-		localStorage.setItem("currentChat", JSON.stringify(chat));
-		setSelectedChat(chat);
-		setShowMobileChatList(false);
-	};
-	return (
-		<ScrollArea className="h-[calc(100vh-5rem)]">
-			{chats.map((chat, index) => (
-				<div
-					key={chat._id}
-					className="flex items-center gap-3 p-4 hover:bg-muted/50 cursor-pointer"
-					onClick={() => handelOnChatSelect(chat)}
-				>
-					<Avatar className="h-10 w-10">
-						<AvatarFallback>DC</AvatarFallback>
-					</Avatar>
-					<div className="flex-1 min-w-0">
-						<div className="flex items-center justify-between">
-							<h3 className="font-medium truncate">{chat.name}</h3>
-							<span className="text-xs text-muted-foreground">
-								{chat.lastMessage &&
-									chat.lastMessage.createdAt &&
-									new Date(chat.lastMessage.createdAt).getUTCHours().toString()}
-							</span>
-						</div>
-						<p className="text-sm text-muted-foreground truncate">
-							{chat.lastMessage &&
-							(chat.lastMessage.content ||
-								(chat.lastMessage.attachments &&
-									chat.lastMessage.attachments.length > 0))
-								? "Attachments"
-								: "No messages yet."}
-						</p>
-					</div>
-				</div>
-			))}
-		</ScrollArea>
-	);
-};
-
-interface ChatHeaderProps {
-	onBack?: () => void;
-	currentChat: ChatSchema;
-}
-
-const ChatHeader: React.FC<ChatHeaderProps> = ({ onBack, currentChat }) => {
-	return (
-		<div className="flex items-center justify-between p-4 border-b border-border">
-			<div className="flex items-center gap-3">
-				{onBack && (
-					<Button
-						variant="ghost"
-						size="icon"
-						onClick={onBack}
-						className="md:hidden"
-					>
-						<ArrowLeft className="h-5 w-5" />
-					</Button>
-				)}
-				<Avatar className="h-10 w-10">
-					<AvatarFallback>DC</AvatarFallback>
-				</Avatar>
-				<div>
-					<h2 className="font-semibold">{currentChat.name}</h2>
-					<p className="text-sm text-muted-foreground">
-						{currentChat.members.length} members
-					</p>
-				</div>
-			</div>
-			<div className="flex items-center gap-2">
-				<Button
-					variant="ghost"
-					size="icon"
-					className="hidden md:inline-flex"
-				>
-					<Phone className="h-5 w-5" />
-				</Button>
-				<Button
-					variant="ghost"
-					size="icon"
-					className="hidden md:inline-flex"
-				>
-					<Video className="h-5 w-5" />
-				</Button>
-				<Button
-					variant="ghost"
-					size="icon"
-				>
-					<MoreVertical className="h-5 w-5" />
-				</Button>
-			</div>
-		</div>
-	);
-};
-
-interface ChatMessagesProps {
-	currentMember: WorkspaceMember;
-	messages: MessageSchema[];
-}
-const ChatMessages: React.FC<ChatMessagesProps> = ({
-	messages,
-	currentMember,
-}) => {
-	return (
-		<ScrollArea className="flex-1 p-4">
-			<div className="space-y-4">
-				{messages.map((message) => (
-					<div
-						key={message._id}
-						className={`flex ${
-							message.sender === currentMember?._id
-								? "justify-end"
-								: "justify-start"
-						}`}
-					>
-						<div
-							className={`flex gap-2 max-w-[70%] ${
-								message.sender === currentMember?._id ? "flex-row-reverse" : ""
-							}`}
-						>
-							<Avatar className="h-8 w-8">
-								<AvatarFallback>
-									{message.sender
-										.split(" ")
-										.map((n) => n[0])
-										.join("")}
-								</AvatarFallback>
-							</Avatar>
-							<div>
-								<div className="flex items-center gap-2 mb-1">
-									<span className="text-sm font-medium">{message.sender}</span>
-									<span className="text-xs text-muted-foreground">
-										{new Date(message.createdAt).toDateString()}
-									</span>
-								</div>
-								{message.content.length > 0 ? (
-									<div
-										className={`rounded-lg p-2  ${
-											message.sender === currentMember?._id
-												? "bg-primary text-primary-foreground"
-												: "bg-muted"
-										}`}
-									>
-										{message.content}
-									</div>
-								) : (
-									<div>
-										{message.attachments.length > 0 &&
-											message.attachments.map((attachment) => (
-												<div key={attachment._id}>
-													<img
-														src={attachment.fileUrl}
-														alt={attachment.fileName}
-													/>
-												</div>
-											))}
-									</div>
-								)}
-							</div>
-						</div>
-					</div>
-				))}
-			</div>
-		</ScrollArea>
-	);
-};
-interface SelectedChatProps {
-	selectedChat: ChatSchema;
-	setShowMobileChatList: React.Dispatch<React.SetStateAction<boolean>>;
-	currentMember: WorkspaceMember;
-	messages: MessageSchema[];
-	files: File[];
-	setFiles: React.Dispatch<React.SetStateAction<File[]>>;
-	messageInput: string;
-	setMessageInput: React.Dispatch<React.SetStateAction<string>>;
-}
-const SelectedChat: React.FC<SelectedChatProps> = ({
-	selectedChat,
-	setShowMobileChatList,
-	currentMember,
-	messages,
-	files,
-	setFiles,
-	messageInput,
-	setMessageInput,
-}) => {
-	const { handleSendMessage, sendMessageLoading } = useSendMessage(
-		selectedChat._id
-	);
-	const handleMessageSend = async () => {
-		const formData = new FormData();
-		formData.append("content", messageInput);
-		if (files.length > 0) {
-			files.forEach((file) => formData.append("chatFiles", file));
-		}
-		const response = await handleSendMessage(formData);
-		console.log(response);
-	};
-	useEffect(() => {
-		return () => {
-			files.forEach((file) => URL.revokeObjectURL(String(file)));
-		};
-	}, [files]);
-
-	return (
-		<div className="flex-1 flex flex-col max-h-screen">
-			<ChatHeader
-				currentChat={selectedChat!}
-				onBack={() => setShowMobileChatList(true)}
-			/>
-			<ChatMessages
-				currentMember={currentMember!}
-				messages={messages}
-			/>
-			<div className="p-4 border-t border-border flex flex-col gap-4">
-				{files.length > 0 && (
-					<div className="flex items-center gap-4">
-						{files.length > 0 &&
-							files.map((file) => (
-								<div
-									key={file.name}
-									className="relative w-16 h-12"
-								>
-									<span
-										onClick={() =>
-											setFiles((prev) =>
-												prev.filter(
-													(selectedFile) => selectedFile.name !== file.name
-												)
-											)
-										}
-										className="absolute right-0 -top-2 text-xs hover:cursor-pointer hover:scale-110"
-									>
-										x
-									</span>
-									<img
-										src={URL.createObjectURL(file)}
-										className="w-full h-full object-cover"
-									/>
-								</div>
-							))}
-					</div>
-				)}
-				<div className="flex gap-4  items-center ">
-					<Paperclip
-						className="hover:cursor-pointer"
-						onClick={() => document.getElementById("chatFiles")?.click()}
-						size={20}
-					/>
-					<div className="flex-1">
-						<Input
-							placeholder="Type a message..."
-							className="bg-muted"
-							value={messageInput}
-							onChange={(e) => setMessageInput(e.target.value)}
-						/>
-						<Input
-							id="chatFiles"
-							type="file"
-							multiple
-							className="hidden"
-							max={5}
-							onChange={(e) =>
-								setFiles((prev) => [
-									...prev,
-									...Array.from(e.target.files || []),
-								])
-							}
-						/>
-					</div>
-					{(messageInput.length > 0 || files.length > 0) && (
-						<SendHorizonal
-							onClick={handleMessageSend}
-							className={cn("hover:cursor-pointer")}
-							size={20}
-						/>
-					)}
-				</div>
-			</div>
-		</div>
-	);
-};
+import { useSocket } from "@/context/SocketContex";
+import { ChatEvent } from "@/constants";
+import ChatRoomList from "@/components/workspace/chats/ChatRoomList";
+import { RootState } from "@/redux/store";
+import { WorkspaceMember } from "@/types/workspace";
+import SelectedChat from "@/components/workspace/chats/SelectedChat";
 
 export default function WorkspaceChat() {
 	const workspaceId = localStorage.getItem("workspace");
@@ -330,8 +25,12 @@ export default function WorkspaceChat() {
 	const [chats, setChats] = useState<ChatSchema[]>(chatsFromLoader || []);
 	const [showMobileChatList, setShowMobileChatList] = useState(true);
 
+	const socket = useSocket();
+
 	const [selectedChat, setSelectedChat] = useState<ChatSchema | null>(null);
 	const [messages, setMessages] = useState<MessageSchema[]>([]);
+
+	// This is to store files from chat message input
 	const [files, setFiles] = useState<File[]>([]);
 	const { data: fetchedMessage, isLoading } = useGetChatMessageQuery(
 		{
@@ -344,6 +43,20 @@ export default function WorkspaceChat() {
 	);
 	const [messageInput, setMessageInput] = useState<string>("");
 
+	const onMessageReceived = (message: MessageSchema) => {
+		if (message.chat === selectedChat?._id) {
+			setMessages((prev) => [...prev, message]);
+		}
+
+		setChats((prev) =>
+			prev
+				.map((chat) =>
+					chat._id === message.chat ? { ...chat, lastMessage: message } : chat
+				)
+				.sort((a, b) => (a._id === message.chat ? -1 : 1))
+		);
+	};
+
 	useEffect(() => {
 		const localCurrentChat = JSON.parse(localStorage.getItem("currentChat")!);
 		if (localCurrentChat) {
@@ -353,6 +66,30 @@ export default function WorkspaceChat() {
 	useEffect(() => {
 		if (fetchedMessage) setMessages(fetchedMessage.data);
 	}, [fetchedMessage]);
+
+	useEffect(() => {
+		if (!socket) return;
+
+		socket.onmessage = (event) => {
+			const message = JSON.parse(event.data);
+			switch (message.type) {
+				case ChatEvent.NEW_CHAT:
+					break;
+				case ChatEvent.DELETE_CHAT:
+					break;
+				case ChatEvent.ADD_MESSAGE:
+					onMessageReceived(message.data.message);
+					break;
+				case ChatEvent.DELETE_MESSAGE:
+					break;
+				case ChatEvent.ADD_MEMBER:
+					break;
+				case ChatEvent.REMOVE_MEMBER:
+					break;
+			}
+		};
+	}, [socket]);
+
 	return (
 		<>
 			{isNewChat && <NewChatForm onClose={() => setIsNewChat(false)} />}
