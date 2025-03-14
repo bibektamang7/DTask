@@ -55,6 +55,7 @@ const updateTaskSchema = z.object({
 	priority: z.enum(["Low", "Medium", "High", "Urgent"]).optional(),
 	startDate: z.string().optional(),
 	dueDate: z.string().optional(),
+	taskEditorData: z.string().optional(),
 });
 
 const deleteTaskSchema = z.object({
@@ -69,9 +70,6 @@ const deleteAttachmentSchema = z.object({
 
 const createCommentSchema = z.object({
 	message: z.string().optional(),
-	taskId: z.string(),
-	createdBy: z.string(),
-	workspaceId: z.string(),
 });
 
 const deleteCommentSchema = z.object({
@@ -90,7 +88,7 @@ const sendMessageSchema = z.object({
 
 const acceptInvitationSchema = z.object({
 	notificationId: z.string(),
-})
+});
 
 export {
 	acceptInvitationSchema,

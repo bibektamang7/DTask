@@ -61,15 +61,14 @@ const taskSchema = new Schema(
 			},
 		],
 		taskEditorData: {
-			type: Schema.Types.Mixed,
+			type: String,
 		},
 		taskActivities: [
 			{
 				type: Schema.Types.ObjectId,
-				ref: "Notification"
-			}
-		]
-
+				ref: "Notification",
+			},
+		],
 	},
 	{ timestamps: true }
 );

@@ -200,7 +200,7 @@ const getTask = asyncHandler(async (req, res) => {
 							from: "attachments",
 							localField: "attachments",
 							foreignField: "_id",
-							as: "attachemnts",
+							as: "attachments",
 							pipeline: [
 								{
 									$project: {
@@ -562,16 +562,18 @@ const deleteAttachmentFromTask = asyncHandler(async (req, res) => {
 
 // comments handlers
 const createComment = asyncHandler(async (req, res) => {
+	console.log("yeta asko rehexa");
+	const { taskId } = req.params;
 	const parsedData = createCommentSchema.safeParse(req.body);
 	if (!parsedData.success) {
 		throw new ApiError(400, "Validation Error");
 	}
-
-	if (!parsedData.data.message && !req.file) {
+	const files = req.files as Express.Multer.File[];
+	if (!parsedData.data.message && (!files || files.length === 0)) {
 		throw new ApiError(400, "Either message or file is required");
 	}
 	// TODO:EXTRACT USERID FROM ASSIGNEES
-	const task = await TaskModel.findById(parsedData.data.taskId).populate({
+	const task = await TaskModel.findById(taskId).populate({
 		path: "assignees",
 		populate: {
 			path: "user",
@@ -586,32 +588,42 @@ const createComment = asyncHandler(async (req, res) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
 	try {
-		let attachment = null;
-		if (req.file) {
-			const fileUploadResponse = await uploadOnCloudinary(
-				req.file.path,
-				`/tasks/${task._id}`
+		let attachments: any = [];
+		if (files && files.length > 0) {
+			attachments = await Promise.all(
+				files.map(async (file) => {
+					const uploadResponse = await uploadOnCloudinary(
+						file.path,
+						`/tasks/${task._id}/comments`
+					);
+
+					return (
+						await AttachmentModel.create(
+							[
+								{
+									filename: uploadResponse?.filename,
+									publicId: uploadResponse?.publicId,
+									fileUrl: uploadResponse?.url,
+									fileType: uploadResponse?.format,
+									chatId: task._id,
+								},
+							],
+							{ session: session }
+						)
+					)[0]._id;
+				})
 			);
-			attachment = await AttachmentModel.create(
-				[
-					{
-						filename: fileUploadResponse?.filename,
-						fileType: fileUploadResponse?.format,
-						fileUrl: fileUploadResponse?.url,
-						taskId: task._id,
-					},
-				],
-				{ session: session }
-			);
-			if (!attachment) {
-				throw new ApiError(500, "Failed to create attachment");
-			}
 		}
 
 		const comment = await CommentModel.create(
-			//TODO:SEE WHAT CAN YOU DO HERE
-			// @ts-ignore
-			[{ ...parsedData.data, attachments: attachment?._id || undefined }],
+			[
+				{
+					createdBy: req.workspaceMember._id,
+					message: parsedData.data.message,
+					attachments: attachments,
+					taskId: task._id,
+				},
+			],
 			{
 				session: session,
 			}
@@ -692,7 +704,7 @@ const deleteComment = asyncHandler(async (req, res) => {
 	session.startTransaction();
 
 	try {
-		if (comment.attachments) {
+		if (comment.attachments.length > 0) {
 			const deleteAttachment = await AttachmentModel.findByIdAndDelete(
 				comment.attachments,
 				{ session: session }

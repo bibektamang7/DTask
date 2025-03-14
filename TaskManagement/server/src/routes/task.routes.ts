@@ -27,15 +27,17 @@ router
 	.delete(workspaceEditor, deleteTask);
 
 router.route("/:workspaceId/getTasks").get(workspaceEditor, getTasks);
-router.route("/:workspaceId/updateTask/:taskId").patch(workspaceEditor, updateTask)
+router
+	.route("/:workspaceId/updateTask/:taskId")
+	.patch(workspaceEditor, updateTask);
 router
 	.route("/:workspaceId/attachments/:taskId")
 	.post(upload.array("taskFiles", 5), workspaceEditor, addAttachmentInTask)
 	.delete(workspaceEditor, deleteAttachmentFromTask);
-upload;
 router
 	.route("/:workspaceId/:taskId/comments")
-	.post(upload.single("commentImage"), workspaceEditor, createComment)
+	.post(upload.array("commentImage", 3), workspaceEditor, createComment)
 	.delete(workspaceEditor, deleteComment);
+
 
 export default router;
