@@ -70,8 +70,8 @@ export const taskApi = createApi({
 			invalidatesTags: ["Attachment", "Task"],
 		}),
 		createComment: builder.mutation({
-			query: (commentInfo) => ({
-				url: "/tasks/comments",
+			query: ({ workspaceId, taskId, commentInfo }) => ({
+				url: `/tasks/${workspaceId}/${taskId}/comments`,
 				method: "POST",
 				body: commentInfo,
 				credentials: "include",
@@ -79,10 +79,9 @@ export const taskApi = createApi({
 			invalidatesTags: ["Comment", "Task"],
 		}),
 		deleteComment: builder.mutation({
-			query: (deletedComment) => ({
-				url: "/tasks/comments",
+			query: ({ workspaceId, taskId, commentId }) => ({
+				url: `/tasks/${workspaceId}/${taskId}/comments?commentId=${commentId}`,
 				method: "DELETE",
-				body: deletedComment,
 				credentials: "include",
 			}),
 			invalidatesTags: ["Comment", "Task"],

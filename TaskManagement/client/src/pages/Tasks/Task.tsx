@@ -321,7 +321,10 @@ const Task: React.FC = () => {
 												/>
 											</TabsContent>
 											<TabsContent value="Comments">
-												<Comment comments={loaderData.comments} />
+												<Comment
+													taskId={loaderData._id}
+													comments={loaderData.comments}
+												/>
 											</TabsContent>
 										</Tabs>
 									</CardContent>

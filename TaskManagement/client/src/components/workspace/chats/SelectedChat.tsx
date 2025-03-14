@@ -100,6 +100,7 @@ const SelectedChat: React.FC<SelectedChatProps> = ({
 							className="bg-muted"
 							value={messageInput}
 							onChange={(e) => setMessageInput(e.target.value)}
+							accept=".jpg, .jpeg, .pdf, .doc, .docx"
 						/>
 						<Input
 							id="chatFiles"

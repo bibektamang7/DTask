@@ -25,7 +25,7 @@ export interface Comment {
     message: string;
     taskId: string;
     createdBy: string;
-    attachment: Attachment;
+    attachments: Attachment[];
     likes: number;    
     createdAt: Date;
 }
@@ -43,7 +43,7 @@ type Referece = Task | Workspace | Comment
 export interface Notification {
     _id: string;
     recipient: User[];
-    sender: User;
+    sender: string;
     purpose:string;
     reference: Referece;
     referenceModal: string;

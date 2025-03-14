@@ -18,9 +18,9 @@ const MyWork: React.FC<MyWorkProps> = ({ activities, comments }) => {
 	const assignees = useSelector(
 		(state: RootState) => state.Workspaces.workspace.members
 	);
-  const currentUserId = useSelector((state: RootState) => state.Users.user._id)
-
+	const currentUserId = localStorage.getItem("currentUser");
 	useEffect(() => {
+		// const fileterComments = comments.filter(comment => comment.createdBy === )
 		setMyActivities(activities);
 		setMyComments(comments);
 	}, []);
@@ -34,9 +34,15 @@ const MyWork: React.FC<MyWorkProps> = ({ activities, comments }) => {
 						{myActivities.length > 0 ? (
 							myActivities.map((activityElement: Notification) => {
 								return assignees.map((assignee: WorkspaceMember) => {
-									if (assignee._id === activityElement.sender && assignee.user._id === currentUserId) {
+									if (
+										assignee._id === activityElement.sender &&
+										assignee.user._id === currentUserId
+									) {
 										return (
-											<div className="flex tex-sm gap-2 mt-2">
+											<div
+												className="flex tex-sm gap-2 mt-2"
+												key={activityElement._id}
+											>
 												<Avatar className="w-16 h-8">
 													<AvatarImage
 														src={assignee.user.avatar}
@@ -74,9 +80,15 @@ const MyWork: React.FC<MyWorkProps> = ({ activities, comments }) => {
 						{myComments.length > 0 ? (
 							myComments.map((comment) =>
 								assignees.map((assignee: WorkspaceMember) => {
-									if (assignee._id === comment.createdBy && currentUserId === assignee.user._id) {
+									if (
+										assignee._id === comment.createdBy &&
+										currentUserId === assignee.user._id
+									) {
 										return (
-											<div className="mt-4">
+											<div
+												className="mt-4"
+												key={comment._id}
+											>
 												<div className="flex text-sm gap-2 mt-2">
 													<Avatar className="w-16 h-8">
 														<AvatarImage
@@ -87,10 +99,10 @@ const MyWork: React.FC<MyWorkProps> = ({ activities, comments }) => {
 															{assignee.user.username.charAt(0)}
 														</AvatarFallback>
 													</Avatar>
-													<div className="flex items-start gap-1 flex-col justify-center pr-2">
+													<div className="flex flex-1 items-start gap-1 flex-col justify-center pr-2">
 														<div className="flex items-center justify-between w-full">
-															<div className="flex items-center justify-center gap-2">
-																<strong className="text-[0.8rem] font-semibold">
+															<div className="flex items-center justify-between gap-2">
+																<strong className="text-[0.9rem] font-semibold">
 																	{assignee.user.username}
 																</strong>
 																<span className="text-[0.7rem] font-light">
@@ -102,6 +114,22 @@ const MyWork: React.FC<MyWorkProps> = ({ activities, comments }) => {
 														<p className="text-[0.7rem] text-light tracking-tight">
 															{comment.message}
 														</p>
+														{comment.attachments && (
+															<div>
+																{comment.attachments.map((attachment) => (
+																	<div
+																		className="w-24 h-24"
+																		key={attachment._id}
+																	>
+																		<img
+																			src={attachment.fileUrl}
+																			alt={attachment._id}
+																			className="w-full h-full object-cover"
+																		/>
+																	</div>
+																))}
+															</div>
+														)}
 													</div>
 												</div>
 											</div>

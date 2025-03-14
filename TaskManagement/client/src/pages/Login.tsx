@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { useRegisterWithGoogleMutation } from "@/redux/services/authApi";
 import { cn } from "@/lib/utils";
@@ -74,13 +74,13 @@ const Login = () => {
 							</div>
 							<div className="flex items-center justify-between">
 								<div
-									onClick={() => setIsRemember(prev => !prev)}
+									onClick={() => setIsRemember((prev) => !prev)}
 									className="flex items-center space-x-2"
 								>
 									<input
 										checked={isRemember}
 										type="checkbox"
-										onChange={() => setIsRemember(prev => !prev)}
+										onChange={() => setIsRemember((prev) => !prev)}
 									/>
 									<label
 										htmlFor="terms"
