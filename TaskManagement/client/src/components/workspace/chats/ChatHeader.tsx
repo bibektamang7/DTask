@@ -16,7 +16,6 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
 import {
 	Select,
 	SelectContent,
@@ -36,9 +35,14 @@ import { useSelector } from "react-redux";
 interface ChatHeaderProps {
 	onBack?: () => void;
 	currentChat: ChatSchema;
+	onDeleteChat: (chatId: string) => void;
 }
 
-const ChatHeader: React.FC<ChatHeaderProps> = ({ onBack, currentChat }) => {
+const ChatHeader: React.FC<ChatHeaderProps> = ({
+	onBack,
+	currentChat,
+	onDeleteChat,
+}) => {
 	const [isAddChatMember, setIsAddChatMember] = useState<boolean>(false);
 	const [addingMember, setAddingMember] = useState<string>("");
 	const { handleDeleteChat } = useDeleteChat();
@@ -46,11 +50,16 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ onBack, currentChat }) => {
 	const workspaceMembers = useSelector(
 		(state: RootState) => state.Workspaces.workspace.members
 	);
-	console.log(addingMember);
 	const handleAddMemberInChat = () => {
 		handleAddChatMember(currentChat._id, addingMember);
 		setAddingMember("");
 		setIsAddChatMember(false);
+	};
+	const handleChatDelete = async () => {
+		const result = await handleDeleteChat(currentChat._id);
+		if (result) {
+			onDeleteChat(currentChat._id);
+		}
 	};
 	return (
 		<>
@@ -174,9 +183,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ onBack, currentChat }) => {
 								Add Member
 							</DropdownMenuItem>
 							<DropdownMenuItem
-								onClick={() => {
-									handleDeleteChat(currentChat._id);
-								}}
+								onClick={() => handleChatDelete()}
 								className="text-xs text-gray-400 hover:text-inherit hover:cursor-pointer"
 							>
 								Delete Chat

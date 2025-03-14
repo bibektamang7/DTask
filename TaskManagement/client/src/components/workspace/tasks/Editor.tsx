@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -58,10 +58,39 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { Toolbar } from "@/components/editor/toolbar";
+import { useTaskUpdate } from "@/hooks/customs/useTaskUpdate";
+import Loader from "@/components/Loader";
 
-const ToolbarPlugin = () => {
+const ToolbarPlugin = ({
+	taskId,
+	initialContent,
+}: {
+	taskId: string;
+	initialContent: string;
+}) => {
 	const [editor] = useLexicalComposerContext();
+	const [prevEditorState, setPrevEditorState] = useState(
+		editor.getEditorState()
+	);
+	useEffect(() => {
+		const content = editor.parseEditorState(initialContent);
+		editor.setEditorState(content);
+	}, []);
 
+	const { handleUpdate, taskUpdateLoading } = useTaskUpdate();
+	const handleSaveEditorData = async () => {
+		if (
+			JSON.stringify(editor.getEditorState().toJSON()) !==
+			JSON.stringify(prevEditorState.toJSON())
+		) {
+			const response = await handleUpdate(taskId, {
+				taskEditorData: JSON.stringify(editor.getEditorState()),
+			});
+			if (response) {
+				setPrevEditorState(editor.getEditorState());
+			}
+		}
+	};
 	const formatParagraph = useCallback(() => {
 		editor.update(() => {
 			const selection = $getSelection();
@@ -354,6 +383,13 @@ const ToolbarPlugin = () => {
 				>
 					<Redo className="h-4 w-4" />
 				</Button>
+				<Button
+					variant="ghost"
+					size="sm"
+					onClick={() => handleSaveEditorData()}
+				>
+					{taskUpdateLoading ? <Loader /> : "Save"}
+				</Button>
 			</div>
 		</Toolbar>
 	);
@@ -388,11 +424,20 @@ const editorConfig = {
 		console.error(error);
 	},
 };
-
-export default function CustomEditor() {
+interface CustomEditorProps {
+	taskId: string;
+	initialContent: string;
+}
+const CustomEditor: React.FC<CustomEditorProps> = ({
+	taskId,
+	initialContent,
+}) => {
 	return (
 		<LexicalComposer initialConfig={editorConfig}>
-				<ToolbarPlugin />
+			<ToolbarPlugin
+				taskId={taskId}
+				initialContent={initialContent}
+			/>
 			<div className="relative">
 				<RichTextPlugin
 					contentEditable={<ContentEditable className="min-h-[200px]" />}
@@ -410,4 +455,6 @@ export default function CustomEditor() {
 			<LinkPlugin />
 		</LexicalComposer>
 	);
-}
+};
+
+export default CustomEditor;

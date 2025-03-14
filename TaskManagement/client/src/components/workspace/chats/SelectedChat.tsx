@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 
 interface SelectedChatProps {
 	selectedChat: ChatSchema;
+	onDeleteChat: (chatId: string) => void;
 	setShowMobileChatList: React.Dispatch<React.SetStateAction<boolean>>;
 	currentMember: WorkspaceMember;
 	messages: MessageSchema[];
@@ -27,6 +28,7 @@ const SelectedChat: React.FC<SelectedChatProps> = ({
 	setFiles,
 	messageInput,
 	setMessageInput,
+	onDeleteChat
 }) => {
 	const { handleSendMessage, sendMessageLoading } = useSendMessage(
 		selectedChat._id
@@ -51,6 +53,7 @@ const SelectedChat: React.FC<SelectedChatProps> = ({
 			<ChatHeader
 				currentChat={selectedChat!}
 				onBack={() => setShowMobileChatList(true)}
+				onDeleteChat={onDeleteChat}
 			/>
 			<ChatMessages
 				currentMember={currentMember!}

@@ -14,11 +14,7 @@ import {
 	Tag,
 	Users,
 } from "lucide-react";
-import React, {
-	useCallback,
-	useEffect,
-	useRef,
-} from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router";
 
@@ -163,7 +159,7 @@ const Task: React.FC<TaskProps> = ({ onClose, taskId }) => {
 									</span>
 								</div>
 								{task?.tags.map((tag: string) => (
-									<Badge>{tag}</Badge>
+									<Badge key={tag}>{tag}</Badge>
 								))}
 							</div>
 							<div className="mt-4 flex items-center justify-between">
@@ -179,7 +175,7 @@ const Task: React.FC<TaskProps> = ({ onClose, taskId }) => {
 								</div>
 								<div className="flex -gap-2">
 									{task?.assignees.map((assignee: WorkspaceMember) => (
-										<Avatar>
+										<Avatar key={assignee._id}>
 											<AvatarImage
 												src={assignee.user.avatar}
 												alt={assignee.user.username}

@@ -13,7 +13,7 @@ import { RootState } from "@/redux/store";
 import { WorkspaceMember } from "@/types/workspace";
 import SelectedChat from "@/components/workspace/chats/SelectedChat";
 
-export default function WorkspaceChat() {
+const WorkspaceChat = () => {
 	const workspaceId = localStorage.getItem("workspace");
 	const chatsFromLoader = useLoaderData();
 	const currentUserId = localStorage.getItem("currentUser");
@@ -41,6 +41,14 @@ export default function WorkspaceChat() {
 			skip: !Boolean(selectedChat),
 		}
 	);
+
+	const onChatDelete = (chatId: string) => {
+		if (chatId === selectedChat?._id) {
+			setSelectedChat(null);
+		}
+		setChats((prev) => prev.filter((chat) => chat._id !== chatId));
+	};
+
 	const [messageInput, setMessageInput] = useState<string>("");
 
 	const onMessageReceived = (message: MessageSchema) => {
@@ -118,6 +126,7 @@ export default function WorkspaceChat() {
 						</>
 					) : selectedChat ? (
 						<SelectedChat
+							onDeleteChat={onChatDelete}
 							currentMember={currentMember!}
 							messages={messages}
 							selectedChat={selectedChat}
@@ -162,6 +171,7 @@ export default function WorkspaceChat() {
 
 					{selectedChat ? (
 						<SelectedChat
+							onDeleteChat={onChatDelete}
 							currentMember={currentMember!}
 							messages={messages}
 							selectedChat={selectedChat}
@@ -180,4 +190,5 @@ export default function WorkspaceChat() {
 			</div>
 		</>
 	);
-}
+};
+export default WorkspaceChat;

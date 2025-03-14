@@ -90,6 +90,7 @@ const MySidebar: React.FC<MySidebarProps> = ({
 										workspaces.length > 0 &&
 										workspaces.map((workspace) => (
 											<DropdownMenuItem
+												key={workspace._id}
 												onClick={() => handleChangeWorkspace(workspace._id)}
 												className="hover:cursor-pointer hover:ease-in  hover:bg-muted"
 											>

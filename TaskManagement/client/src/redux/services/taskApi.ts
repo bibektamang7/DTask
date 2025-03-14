@@ -34,13 +34,13 @@ export const taskApi = createApi({
 			invalidatesTags: ["Task"],
 		}),
 		updateTask: builder.mutation({
-			query: ({taskId, workspaceId, taskUpdateInfo}) => ({
+			query: ({ taskId, workspaceId, taskUpdateInfo }) => ({
 				url: `/tasks/${workspaceId}/updateTask/${taskId}`,
-				method: "PATCH",	
+				method: "PATCH",
 				credentials: "include",
 				body: taskUpdateInfo,
 			}),
-			invalidatesTags: ["Task"]
+			invalidatesTags: ["Task"],
 		}),
 		deleteTask: builder.mutation({
 			query: (deletedTaskInfo) => ({
@@ -52,8 +52,8 @@ export const taskApi = createApi({
 			invalidatesTags: ["Task"],
 		}),
 		addAttachment: builder.mutation({
-			query: (attachmentInfo) => ({
-				url: "/tasks/attachments",
+			query: ({ workspaceId, taskId, attachmentInfo }) => ({
+				url: `/tasks/${workspaceId}/attachments/${taskId}`,
 				method: "POST",
 				body: attachmentInfo,
 				credentials: "include",
@@ -93,7 +93,7 @@ export const taskApi = createApi({
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
-				credentials: "include"
+				credentials: "include",
 			}),
 			providesTags: ["Task"],
 		}),

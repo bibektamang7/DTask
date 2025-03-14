@@ -18,9 +18,7 @@ import DashboardPage from "./components/workspace/Dashboard";
 import BoardView from "./pages/Tasks/BoardView";
 import WorkspaceChat from "./pages/chats/Chat";
 import WorkspaceLayout from "./components/workspace/WorkspaceLayout";
-import ChatLayout from "./components/workspace/chats/ChatLayout";
 import TaskLayout from "./components/workspace/tasks/TaskLayout";
-import { Calendar } from "./components/ui/calendar";
 import AuthLayout from "./components/AuthLayout";
 
 import {

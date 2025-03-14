@@ -15,7 +15,7 @@ import { RootState } from "@/redux/store";
 import useCreateChat from "@/hooks/customs/useCreateChat";
 
 interface NewChatFormProps {
-	onClose: any;
+	onClose: () => void;
 }
 
 const NewChatForm: React.FC<NewChatFormProps> = ({ onClose }) => {

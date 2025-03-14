@@ -12,12 +12,14 @@ const useDeleteChat = () => {
 				title: "Chat delete",
 			});
 			localStorage.removeItem("currentChat");
+			return true;
 		} catch (error: any) {
 			toast({
 				title: error.data.error,
 				description: "Please try again",
 				variant: "destructive",
 			});
+			return false;
 		}
 	};
 	return { handleDeleteChat };
