@@ -14,6 +14,7 @@ import { CommentModel } from "../models/tasks/comment.model";
 import { uploadOnCloudinary } from "../helpers/fileUpload.cloudinary";
 
 import { createClient } from "redis";
+import { NotificationModel } from "../models/notification.model";
 
 const taskClient = createClient({ url: "redis://localhost:6379" });
 taskClient.connect().then(() => console.log("Task client connected"));
@@ -103,13 +104,26 @@ const createTask = asyncHandler(async (req, res) => {
 			},
 		},
 	]);
+	const members = extractUser(req.workspace.members, task.assignees);
+	const notification = await NotificationModel.create({
+		recipient: members.map((member) => member._id),
+		sender: req.member._id,
+		purpose: "TASK_ASSIGNED",
+		reference: task._id,
+		referenceModel: "Task",
+		message: `assigned you a task`,
+		metadata: {
+			taskTitle: task.title,
+		},
+	});
 	await taskClient.publish(
 		"taskCreated",
 		JSON.stringify({
 			userId: req.member._id,
 			workspaceId: req.workspaceMember.workspace,
 			task: createdTask[0],
-			members: req.workspace.members,
+			notification,
+			members,
 		})
 	);
 
@@ -166,6 +180,7 @@ const getTask = asyncHandler(async (req, res) => {
 	const yesterdayEnd = new Date();
 	yesterdayEnd.setDate(yesterdayEnd.getDate() - 1);
 	yesterdayEnd.setHours(23, 59, 59, 999);
+
 	const task = await TaskModel.aggregate([
 		{
 			$match: {
@@ -295,6 +310,81 @@ const updateTask = asyncHandler(async (req, res) => {
 	if (!updatedTask) {
 		throw new ApiError(500, "Failed to update task");
 	}
+	let notification;
+	if (parsedData.data.status) {
+		notification = await NotificationModel.create({
+			sender: req.member._id,
+			purpose: "STATUS",
+			reference: task._id,
+			referenceModel: "Task",
+			message: `changed status`,
+			metadata: {
+				from: task.status,
+				to: parsedData.data.status,
+			},
+		});
+	} else if (parsedData.data.priority) {
+		notification = await NotificationModel.create({
+			sender: req.member._id,
+			purpose: "PRIORITY",
+			reference: task._id,
+			referenceModel: "Task",
+			message: `changed priority`,
+			metadata: {
+				from: task.priority,
+				to: parsedData.data.priority,
+			},
+		});
+	} else if (parsedData.data.description) {
+		notification = await NotificationModel.create({
+			sender: req.member._id,
+			purpose: "TASK_DESCRIPTION",
+			reference: task._id,
+			referenceModel: "Task",
+			message: `updated _'s description`,
+			metadata: {
+				taskTitle: task.title,
+			},
+		});
+	} else if (parsedData.data.title) {
+		notification = await NotificationModel.create({
+			sender: req.member._id,
+			purpose: "TASK_TITLE",
+			reference: task._id,
+			referenceModel: "Task",
+			message: `updated task title`,
+		});
+	}
+
+	if (notification?.purpose) {
+		await TaskModel.findByIdAndUpdate(task._id, {
+			$push: {
+				taskActivities: notification._id,
+			},
+		});
+		console.log("error here");
+		const taskMemberId = new Set(
+			task.assignees.map((member) => member._id.toString())
+		);
+		const members = req.workspace.members.reduce(
+			(acc: { _id: string; username: string }[], member: any) => {
+				if (taskMemberId.has(member._id.toString())) {
+					acc.push(member.user);
+				}
+				return acc;
+			},
+			[]
+		);
+		taskClient.publish(
+			notification.purpose,
+			JSON.stringify({
+				userId: req.member._id,
+				notification: notification,
+				members: members || [],
+			})
+		);
+	}
+
 	res
 		.status(200)
 		.json(new ApiResponse(200, updatedTask, "Task updated successfully"));
@@ -350,6 +440,15 @@ const deleteTask = asyncHandler(async (req, res) => {
 			throw new ApiError(500, "Failed to delete attachments");
 		}
 
+		const deleteNotifications = await NotificationModel.deleteMany(
+			{
+				reference: task._id,
+			},
+			{ session }
+		);
+		if (!deleteNotifications.acknowledged) {
+			throw new ApiError(500, "Failed to delete notifications");
+		}
 		const deleteComments = await CommentModel.deleteMany(
 			{
 				_id: { $in: deletedTask.comments },
@@ -360,7 +459,7 @@ const deleteTask = asyncHandler(async (req, res) => {
 		if (!deleteComments.acknowledged) {
 			throw new ApiError(500, "Failed to delete comments");
 		}
-
+		const members = extractUser(req.workspace.members, task.assignees);
 		await session.commitTransaction();
 		taskClient.publish(
 			"taskDeleted",
@@ -368,7 +467,7 @@ const deleteTask = asyncHandler(async (req, res) => {
 				workspaceId: req.workspace._id,
 				userId: req.member._id,
 				taskId: task._id,
-				members: req.workspace.members,
+				members,
 			})
 		);
 	} catch (error) {
@@ -378,10 +477,33 @@ const deleteTask = asyncHandler(async (req, res) => {
 		session.endSession();
 	}
 
-	// TODO:Emit event for task deletion
+	const members = extractUser(req.workspace.members, task.assignees);
+	taskClient.publish(
+		"TaskDeleted",
+		JSON.stringify({
+			taskId: task._id,
+			workspaceId: req.workspace._id,
+			userId: req.member._id,
+			members,
+		})
+	);
 
 	res.status(200).json(new ApiResponse(200, {}, "Deleted successfully"));
 });
+
+const extractUser = (workspaceMember: any[], users: any[]) => {
+	const memberId = new Set(users.map((member) => member._id.toString()));
+	const members = workspaceMember.reduce(
+		(acc: { _id: string; username: string }[], member: any) => {
+			if (memberId.has(member._id.toString())) {
+				acc.push(member.user);
+			}
+			return acc;
+		},
+		[]
+	);
+	return members;
+};
 
 const addAttachmentInTask = asyncHandler(async (req, res) => {
 	if (req.workspaceMember.role === "Member") {
@@ -460,14 +582,35 @@ const addAttachmentInTask = asyncHandler(async (req, res) => {
 		// TODO: CONSIDER SENDING TASK WITH FULL DETAILS
 		// SO THAT ACTIVE USER WILL BE UPDATED AT REAL TIME
 
+		const notification = await NotificationModel.create({
+			sender: req.member._id,
+			purpose: "ADD_ATTACHMENT",
+			reference: updatedTask._id,
+			referenceModel: "Task",
+			message: `added attachment in`,
+			metadata: {
+				taskTitle: task.title,
+			},
+		});
+
+		if (notification) {
+			await TaskModel.findByIdAndUpdate(task._id, {
+				$push: {
+					taskActivities: notification._id,
+				},
+			});
+		}
+		const members = extractUser(req.workspace.members, task.assignees);
+
 		taskClient.publish(
 			"attachmentAdded",
 			JSON.stringify({
 				workspaceId: req.workspace._id,
 				userId: req.member._id,
 				taskId: updatedTask._id,
-				attachment: updatedTask.attachments,
-				members: req.workspace.members,
+				attachment: attachments,
+				notification,
+				members,
 			})
 		);
 
@@ -539,6 +682,8 @@ const deleteAttachmentFromTask = asyncHandler(async (req, res) => {
 			throw new ApiError(500, "Failed to delete attachment");
 		}
 
+		const members = extractUser(req.workspace.members, task.assignees);
+
 		await session.commitTransaction();
 		taskClient.publish(
 			"attachmentDeleted",
@@ -547,7 +692,7 @@ const deleteAttachmentFromTask = asyncHandler(async (req, res) => {
 				workspaceId: req.workspace._id,
 				taskId: updatedTask._id,
 				attachmentId: attachment._id,
-				members: req.workspace.members,
+				members,
 			})
 		);
 	} catch (error) {
@@ -644,10 +789,31 @@ const createComment = asyncHandler(async (req, res) => {
 		if (!updatedTask) {
 			throw new ApiError(500, "Failed to add comment");
 		}
-		await session.commitTransaction();
-		//TODO:emit socket event
 
-		// TODO: CONSIDER ADDING FULL DETAILS OF COMMENT SO THAT USER WILL BE UPDATED AT REAL TIEM
+		const notification = await NotificationModel.create({
+			sender: req.member._id,
+			purpose: "ADD_COMMENT",
+			reference: task._id,
+			referenceModel: "Task",
+			message: `commented on`,
+			metadata: {
+				taskTitle: task.title,
+			},
+		});
+
+		if (notification) {
+			const updatedActivityTask = await TaskModel.findByIdAndUpdate(
+				task._id,
+				{
+					$push: {
+						taskActivities: notification._id,
+					},
+				},
+				{ new: true, session }
+			);
+		}
+		const members = extractUser(req.workspace.members, task.assignees);
+
 		taskClient.publish(
 			"makeComment",
 			JSON.stringify({
@@ -655,9 +821,11 @@ const createComment = asyncHandler(async (req, res) => {
 				userId: req.member._id,
 				taskId: updatedTask._id,
 				comment: comment,
-				members: req.workspace.members,
+				notification,
+				members,
 			})
 		);
+		await session.commitTransaction();
 
 		res
 			.status(200)
@@ -721,7 +889,20 @@ const deleteComment = asyncHandler(async (req, res) => {
 			throw new ApiError(500, "Failed to delete comment");
 		}
 
-		await session.commitTransaction();
+		const updatedTask = await TaskModel.findByIdAndUpdate(
+			task._id,
+			{
+				$pull: {
+					comments: deletedComment._id,
+				},
+			},
+			{ session }
+		);
+		if (!updatedTask) {
+			throw new ApiError(500, "Failed to updated task");
+		}
+
+		const members = extractUser(req.workspace.members, task.assignees);
 		taskClient.publish(
 			"deletedComment",
 			JSON.stringify({
@@ -729,9 +910,10 @@ const deleteComment = asyncHandler(async (req, res) => {
 				userId: req.member._id,
 				taskId: task._id,
 				commentId: deletedComment._id,
-				members: req.workspace.members,
+				members,
 			})
 		);
+		await session.commitTransaction();
 		res
 			.status(200)
 			.json(new ApiResponse(200, {}, "Comment Deleted successfully"));
@@ -778,7 +960,125 @@ const updateTaskDocument = asyncHandler(async (req, res) => {
 		.json(new ApiResponse(200, task, "Task Editor's data has been updated"));
 });
 
+const addAssigneeInTask = asyncHandler(async (req, res) => {
+	if (req.workspaceMember.role === "Member") {
+		throw new ApiError(401, "Unauthorized to Add Assignee");
+	}
+	const { memberId, taskId } = req.params;
+	if (!memberId) {
+		throw new ApiError(400, "Member is required");
+	}
+	const task = await TaskModel.findById(taskId);
+	if (!task) {
+		throw new ApiError(400, "Task not found");
+	}
+	if (
+		req.workspaceMember._id.toString() !== task.createdBy.toString() &&
+		req.workspaceMember.role !== "Admin"
+	) {
+		throw new ApiError(401, "Unauthorized to add assignee");
+	}
+	if (!isMemberInWorkspace(memberId)) {
+		throw new ApiError(400, "Invalid member");
+	}
+	const updatedTask = await TaskModel.findByIdAndUpdate(
+		task._id,
+		{
+			$addToSet: {
+				assignees: memberId,
+			},
+		},
+		{ new: true }
+	);
+	if (!updatedTask) {
+		throw new ApiError(500, "Failed to add assignee");
+	}
+
+	const member = req.workspace.members.find(
+		(member: { _id: string; user: { _id: string; username: string } }) =>
+			member._id.toString() === memberId
+	);
+	const notification = await NotificationModel.create({
+		recipient: [member.user._id],
+		sender: req.member._id,
+		purpose: "TASK_ASSIGNED",
+		reference: task._id,
+		referenceModel: "Task",
+		message: `assigned you a task`,
+		metadata: {
+			taskTitle: task.title,
+		},
+	});
+	if (notification) {
+		await TaskModel.findByIdAndUpdate(task._id, {
+			$push: {
+				taskActivities: notification._id,
+			},
+		});
+	}
+	taskClient.publish(
+		"taskAssigned",
+		JSON.stringify({
+			taskId: task._id,
+			userId: req.member._id,
+			notification,
+			members: [member.user],
+		})
+	);
+
+	res.status(200).json(new ApiResponse(200, {}, "Added assignee in task"));
+});
+
+const removeAssigneedFromTask = asyncHandler(async (req, res) => {
+	if (req.workspaceMember.role === "Member") {
+		throw new ApiError(401, "Unauthorized to remove assignee");
+	}
+	const { taskId, memberId } = req.params;
+	if (!memberId) {
+		throw new ApiError(400, "Member is required");
+	}
+
+	const task = await TaskModel.findById(taskId);
+	if (!task) {
+		throw new ApiError(400, "Task not found");
+	}
+	if (
+		req.workspaceMember._id.toString() !== task.createdBy.toString() &&
+		req.workspaceMember.role !== "Admin"
+	) {
+		throw new ApiError(401, "Unauthorized to remove assignee");
+	}
+	const updatedTask = await TaskModel.findByIdAndUpdate(
+		task._id,
+		{
+			$pull: {
+				assignees: memberId,
+			},
+		},
+		{ new: true }
+	);
+	if (!updatedTask) {
+		throw new ApiError(500, "Failed to add assignee");
+	}
+
+	const member = req.workspace.members.find(
+		(member: { _id: string; user: { _id: string; username: string } }) =>
+			member._id === memberId
+	);
+	taskClient.publish(
+		"remove_assignee",
+		JSON.stringify({
+			taskId: task._id,
+			userId: req.member._id,
+			members: [member.user],
+		})
+	);
+	res.status(200).json(new ApiResponse(200, {}, "Assignee removed"));
+});
+
 export {
+	addAssigneeInTask,
+	removeAssigneedFromTask,
 	createTask,
 	getTasks,
 	getTask,

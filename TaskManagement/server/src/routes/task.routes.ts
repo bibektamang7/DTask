@@ -10,6 +10,8 @@ import {
 	createComment,
 	deleteComment,
 	updateTaskDocument,
+	addAssigneeInTask,
+	removeAssigneedFromTask,
 } from "../controllers/task.controller";
 import { workspaceEditor } from "../middlewares/workspaceAuth";
 import { authMiddleware } from "../middlewares/auth.middleware";
@@ -38,6 +40,9 @@ router
 	.route("/:workspaceId/:taskId/comments")
 	.post(upload.array("commentImage", 3), workspaceEditor, createComment)
 	.delete(workspaceEditor, deleteComment);
-
+router
+	.route("/:workspaceId/:taskId/members/:memberId")
+	.post(workspaceEditor, addAssigneeInTask)
+	.delete(workspaceEditor, removeAssigneedFromTask);
 
 export default router;

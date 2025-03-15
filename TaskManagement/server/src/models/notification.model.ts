@@ -6,7 +6,6 @@ const notificationSchema = new Schema(
 			{
 				type: Schema.Types.ObjectId,
 				ref: "User",
-				required: true,
 			},
 		],
 		sender: {
@@ -18,16 +17,21 @@ const notificationSchema = new Schema(
 			type: String,
 			enum: [
 				"MENTION",
-				"TASK_ASSIGEND",
+				"TASK_ASSIGNED",
 				"INVITE",
 				"JOINED",
 				"REJECTED",
 				"STATUS",
 				"PRIORITY",
 				"DUE_DATE",
-				"COMMENT",
+				"ADD_COMMENT",
+				"DELETE_COMMENT",
 				"TASK_EDITOR",
 				"TAGS",
+				"TASK_DESCRIPTION",
+				"TASK_TITLE",
+				"ADD_ATTACHMENT",
+				"DELETE_ATTACHMENT",
 			],
 		},
 		reference: {
@@ -62,7 +66,7 @@ const notificationSchema = new Schema(
 	{ timestamps: true }
 );
 
-export const NotificationModel= mongoose.model(
+export const NotificationModel = mongoose.model(
 	"Notification",
 	notificationSchema
 );

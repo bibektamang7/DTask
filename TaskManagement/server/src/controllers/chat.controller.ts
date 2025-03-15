@@ -401,7 +401,6 @@ const sendMessage = asyncHandler(async (req, res) => {
 			},
 			[]
 		);
-		console.log(members);
 		chatClient.publish(
 			"sendMessage",
 			JSON.stringify({
