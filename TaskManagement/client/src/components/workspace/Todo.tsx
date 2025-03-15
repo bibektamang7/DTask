@@ -13,8 +13,6 @@ const MyTodo = () => {
 	const workspace = useSelector(
 		(state: RootState) => state.Workspaces.workspace
 	);
-	console.log("THis is workspace", workspace);
-
 	const [isNewTodo, setIsNewTodo] = useState<boolean>(false);
 	const [todoTitle, setTodoTitle] = useState<string>("");
 	const [todos, setTodos] = useState<Todo[]>([]);

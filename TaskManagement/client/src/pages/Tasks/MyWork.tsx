@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import ActivityWidget from "@/hooks/customs/Tasks/ActivityWidget";
 import { RootState } from "@/redux/store";
 import { Comment, Notification } from "@/types/task";
 import { WorkspaceMember } from "@/types/workspace";
@@ -30,49 +31,12 @@ const MyWork: React.FC<MyWorkProps> = ({ activities, comments }) => {
 			<div className="flex flex-col gap-6">
 				<div className="px-2">
 					<strong className="text-sm">Activity</strong>
-					<div className="mt-2">
-						{myActivities.length > 0 ? (
-							myActivities.map((activityElement: Notification) => {
-								return assignees.map((assignee: WorkspaceMember) => {
-									if (
-										assignee._id === activityElement.sender &&
-										assignee.user._id === currentUserId
-									) {
-										return (
-											<div
-												className="flex tex-sm gap-2 mt-2"
-												key={activityElement._id}
-											>
-												<Avatar className="w-16 h-8">
-													<AvatarImage
-														src={assignee.user.avatar}
-														alt={assignee.user.username}
-													/>
-													<AvatarFallback>
-														{assignee.user.username.charAt(0)}
-													</AvatarFallback>
-												</Avatar>
-												<div className="flex items-start gap-1 flex-col justify-center">
-													<p className="text-[0.7rem] tracking-tight [&>span]:font-semibold font-light">
-														<span>{assignee.user.username} </span>changed the
-														status of <span>"Design Homepage Wireframe"</span>{" "}
-														from <span>Todo</span> to <span>In-Progress</span>
-													</p>
-													<span className="text-[0.7rem]">
-														{new Date(activityElement.createdAt).toDateString()}
-													</span>
-												</div>
-											</div>
-										);
-									}
-								});
-							})
-						) : (
-							<div className="h-16 bg-muted rounded-lg flex items-center justify-center">
-								<p className="text-center text-sm">No activites today yet.</p>
-							</div>
-						)}
-					</div>
+					<ActivityWidget
+						activities={activities}
+						fallbackMessage="No "
+						currentUser={currentUserId!}
+						assignees={assignees}
+					/>
 				</div>
 				<div className="px-2">
 					<strong className="text-sm">Comments</strong>

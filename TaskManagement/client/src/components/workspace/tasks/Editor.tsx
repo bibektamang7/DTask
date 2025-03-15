@@ -18,6 +18,7 @@ import {
 	$createParagraphNode,
 	$createTextNode,
 	$isTextNode,
+	EditorState,
 } from "lexical";
 import { $createHeadingNode, $createQuoteNode } from "@lexical/rich-text";
 import { $setBlocksType } from "@lexical/selection";
@@ -61,6 +62,8 @@ import { Toolbar } from "@/components/editor/toolbar";
 import { useTaskUpdate } from "@/hooks/customs/useTaskUpdate";
 import Loader from "@/components/Loader";
 
+// TODO: IMPORTANT ONE, ASK YOUR TO SAVE BEFORE LEAVING
+
 const ToolbarPlugin = ({
 	taskId,
 	initialContent,
@@ -72,9 +75,28 @@ const ToolbarPlugin = ({
 	const [prevEditorState, setPrevEditorState] = useState(
 		editor.getEditorState()
 	);
+
 	useEffect(() => {
 		const content = editor.parseEditorState(initialContent);
-		editor.setEditorState(content);
+		if (content.isEmpty()) {
+			editor.setEditorState(editor.getEditorState());
+		} else {
+			editor.setEditorState(content);
+			setPrevEditorState(content);
+		}
+
+		// return () => {
+		// 	console.log(
+		// 		JSON.stringify(editor.getEditorState().toJSON()) !==
+		// 			JSON.stringify(prevEditorState.toJSON())
+		// 	);
+		// 	if (
+		// 		JSON.stringify(editor.getEditorState().toJSON()) ===
+		// 		JSON.stringify(prevEditorState.toJSON())
+		// 	) {
+		// 		alert("Save before leaving...");
+		// 	}
+		// };
 	}, []);
 
 	const { handleUpdate, taskUpdateLoading } = useTaskUpdate();
@@ -87,6 +109,7 @@ const ToolbarPlugin = ({
 				taskEditorData: JSON.stringify(editor.getEditorState()),
 			});
 			if (response) {
+				console.log("ueta");
 				setPrevEditorState(editor.getEditorState());
 			}
 		}

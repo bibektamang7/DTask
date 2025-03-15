@@ -43,10 +43,9 @@ export const taskApi = createApi({
 			invalidatesTags: ["Task"],
 		}),
 		deleteTask: builder.mutation({
-			query: (deletedTaskInfo) => ({
-				url: "/tasks",
+			query: ({ workspaceId, taskId }) => ({
+				url: `/tasks/${workspaceId}?taskId=${taskId}`,
 				method: "DELETE",
-				body: deletedTaskInfo,
 				credentials: "include",
 			}),
 			invalidatesTags: ["Task"],
@@ -105,6 +104,22 @@ export const taskApi = createApi({
 			}),
 			invalidatesTags: ["Task"],
 		}),
+		addAssignee: builder.mutation({
+			query: ({ workspaceId, taskId, memberId }) => ({
+				url: `/tasks/${workspaceId}/${taskId}/members/${memberId}`,
+				method: "POST",
+				credentials: "include",
+			}),
+			invalidatesTags: ["Task"],
+		}),
+		removeAssignee: builder.mutation({
+			query: ({ workspaceId, taskId, memberId }) => ({
+				url: `/tasks/${workspaceId}/${taskId}/members/${memberId}`,
+				method: "DELETE",
+				credentials: "include",
+			}),
+			invalidatesTags: ["Task"],
+		}),
 	}),
 });
 
@@ -119,4 +134,6 @@ export const {
 	useGetTasksQuery,
 	useUpdateTaskEditorMutation,
 	useUpdateTaskMutation,
+	useAddAssigneeMutation,
+	useRemoveAssigneeMutation,
 } = taskApi;

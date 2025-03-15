@@ -59,22 +59,23 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 	const form = useForm({
 		defaultValues: {
 			title: "" as string,
-			status: "" as string,
+			status: "Todo" as string,
 			startDate: new Date(),
 			dueDate: new Date(),
 			description: "",
 			assignees: [] as string[],
-			priority: "",
+			priority: "Low",
 			tags: [] as string[],
 			taskFiles: [] as File[],
 		},
 	});
 
 	const onSubmit = async (data: any) => {
-		console.log(data);
-
 		// Data is type of UseFormReturn
-		await createTask(data);
+		const response = await createTask(data);
+		if (response.success) {
+			onClose();
+		}
 	};
 
 	// const handleClickOutside = useCallback(
@@ -124,6 +125,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 										<Input
 											placeholder="Title"
 											{...field}
+											required
 										/>
 									</FormControl>
 								</FormItem>
@@ -241,9 +243,10 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 												<Button
 													variant="outline"
 													size="icon"
-													onClick={() =>
-														document.getElementById("file-input")?.click()
-													}
+													onClick={(e) => {
+														e.preventDefault();
+														document.getElementById("file-input")?.click();
+													}}
 												>
 													<Paperclip className="h-4 w-4" />
 												</Button>

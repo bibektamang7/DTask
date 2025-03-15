@@ -10,11 +10,13 @@ import {
 	EllipsisVertical,
 	Loader,
 	Plus,
+	PlusCircle,
 	Star,
 	Tag,
+	Trash,
 	Users,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Activity from "./Activity";
 import MyWork from "./MyWork";
 import TaskAssigned from "./TaskAssigned";
@@ -27,25 +29,74 @@ import {
 	CarouselPrevious,
 } from "@/components/ui/carousel";
 import CustomEditor from "@/components/workspace/tasks/Editor";
-import { useLoaderData } from "react-router";
-import { Attachment } from "@/types/task";
+import { redirect, useLoaderData } from "react-router";
+import { Attachment, Task as TaskSchema } from "@/types/task";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import AddAttachment from "@/components/workspace/tasks/AddAttachment";
 import ShowOpenedAttachment from "@/components/workspace/tasks/ShowOpenedAttachment";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useDeleteTask } from "@/hooks/customs/Tasks/useDeleteTask";
+import AlertBox from "@/components/AlertBox";
+import { useTaskUpdate } from "@/hooks/customs/useTaskUpdate";
+import AddAssignee from "@/components/workspace/tasks/AddAssignee";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { WorkspaceMember } from "@/types/workspace";
 
 const Task: React.FC = () => {
 	const loaderData = useLoaderData();
+	const [status, setStatus] = useState(loaderData.status);
+	const [priority, setPriority] = useState(loaderData.priority);
+const [assignees, setAssignees] = useState<string[]>(
+		loaderData.assignees
+	);
+
 	const workspaceMembers = useSelector(
 		(state: RootState) => state.Workspaces.workspace.members
 	);
+	const [isAddAssignee, setIsAddAssignee] = useState<boolean>(false);
 	const [openedAttachment, setOpenedAttachment] = useState<Attachment | null>(
 		null
 	);
+	const [deletingTask, setDeletingTask] = useState<TaskSchema | null>(null);
 	const [isAddAttachmentOpen, setIsAddAttachmentOpen] =
 		useState<boolean>(false);
+
+	const { handleTaskDelete } = useDeleteTask();
+	const { handleUpdate } = useTaskUpdate();
+
+	const handleDeleteTask = async () => {
+		const response = await handleTaskDelete(deletingTask?._id!);
+		if (response.success) {
+			setDeletingTask(null);
+			window.location.href = "/w/tasks";
+		}
+	};
+
+	const handleTaskUpdate = async (data: any) => {
+		const response = await handleUpdate(loaderData._id, data);
+	};
+
 	return (
 		<>
+			{isAddAssignee && (
+				<AddAssignee
+					taskId={loaderData._id}
+					assignedMembers={loaderData.assignees}
+					onClose={() => setIsAddAssignee(false)}
+					setAssignees={setAssignees}
+				/>
+			)}
 			{openedAttachment && (
 				<ShowOpenedAttachment
 					attachment={openedAttachment}
@@ -58,27 +109,45 @@ const Task: React.FC = () => {
 					taskId={loaderData._id}
 				/>
 			)}
+			{deletingTask && (
+				<AlertBox
+					onClose={() => setDeletingTask(null)}
+					onDelete={() => handleDeleteTask()}
+				/>
+			)}
 			<div className="w-full h-full flex justify-end">
 				<div className="w-full p-4 rounded-md overflow-y-auto scrollbar-hidden overflow-x-hidden">
-					<div className="flex items-center justify-between border-b-2 pb-4 border-gray-700">
-						<div className="flex items-center justify-center gap-2">
+					<div className="flex items-center justify-between border-b-2 py-2 pb-4 border-gray-700">
+						<div className="flex items-center justify-end gap-2 flex-1">
 							<Star
 								size={16}
 								type="icon"
 								className="hover:scale-110 hover:cursor-pointer "
 							/>
-							<EllipsisVertical
-								type="icon"
-								size={15}
-								className="hover:scale-110 hover:cursor-pointer"
-							/>
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<EllipsisVertical
+										type="icon"
+										size={15}
+										className="hover:scale-110 hover:cursor-pointer"
+									/>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align="end">
+									<DropdownMenuItem onClick={() => setIsAddAssignee(true)}>
+										<PlusCircle />
+										Add Assignee
+									</DropdownMenuItem>
+									<DropdownMenuItem onClick={() => setDeletingTask(loaderData)}>
+										<Trash />
+										Delete
+									</DropdownMenuItem>
+								</DropdownMenuContent>
+							</DropdownMenu>
 						</div>
 					</div>
-					<div className="flex gap-8 mt-2 min-h-screen overflow-y-auto">
+					<div className="flex gap-8 mt-2 min-h-screen overflow-y-auto flex-wrap lg:flex-nowrap">
 						<div className="mt-5 w-full">
-							<h3 className="font-semibold text-xl">
-								{loaderData.title}Wireframe
-							</h3>
+							<h3 className="font-semibold text-xl">{loaderData.title}</h3>
 							<div className="text-sm mt-6">
 								<div className="mt-4 flex items-center justify-between">
 									<div className="flex gap-2 items-center justify-center">
@@ -106,16 +175,41 @@ const Task: React.FC = () => {
 											Status
 										</span>
 									</div>
-									<Badge
-										variant="secondary"
-										className={
-											statusColors[
-												loaderData.status as keyof typeof statusColors
-											]
-										}
-									>
-										{loaderData.status}
-									</Badge>
+									<DropdownMenu>
+										<DropdownMenuTrigger className="p-0 bg-inherit">
+											<Badge
+												variant="secondary"
+												className={
+													statusColors[
+														loaderData.status as keyof typeof statusColors
+													]
+												}
+											>
+												{status}
+											</Badge>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent>
+											{["Todo", "In-Progress", "Completed"].map(
+												(statusElement: string) =>
+													status !== statusElement && (
+														<DropdownMenuItem
+															key={statusElement}
+															onClick={() => {
+																handleTaskUpdate({ status: statusElement });
+																setStatus(statusElement);
+															}}
+															className={
+																statusColors[
+																	statusElement as keyof typeof statusColors
+																]
+															}
+														>
+															{statusElement}
+														</DropdownMenuItem>
+													)
+											)}
+										</DropdownMenuContent>
+									</DropdownMenu>
 								</div>
 								<div className="mt-4 flex items-center justify-between">
 									<div className="flex gap-2 items-center justify-center">
@@ -128,16 +222,41 @@ const Task: React.FC = () => {
 											Priority
 										</span>
 									</div>
-									<Badge
-										variant="secondary"
-										className={
-											priorityColors[
-												loaderData.priority as keyof typeof priorityColors
-											]
-										}
-									>
-										{loaderData.priority}
-									</Badge>
+									<DropdownMenu>
+										<DropdownMenuTrigger className="p-0 bg-inherit">
+											<Badge
+												variant="secondary"
+												className={
+													priorityColors[
+														priority as keyof typeof priorityColors
+													]
+												}
+											>
+												{priority}
+											</Badge>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent>
+											{["Low", "High", "Medium", "Urgent"].map(
+												(priorityElement: string) =>
+													priority !== priorityElement && (
+														<DropdownMenuItem
+															key={priorityElement}
+															onClick={() => {
+																handleTaskUpdate({ priority: priorityElement });
+																setPriority(priorityElement);
+															}}
+															className={
+																priorityColors[
+																	priorityElement as keyof typeof priorityColors
+																]
+															}
+														>
+															{priorityElement}
+														</DropdownMenuItem>
+													)
+											)}
+										</DropdownMenuContent>
+									</DropdownMenu>
 								</div>
 								<div className="mt-4 flex items-center justify-between">
 									<div className="flex gap-2 items-center justify-center">
@@ -183,17 +302,26 @@ const Task: React.FC = () => {
 											Assignees
 										</span>
 									</div>
-									<div>
-										{loaderData.assignees.map((assignee: String) =>
+									<div className="flex items-center">
+										{assignees.map((assignee: String) =>
 											workspaceMembers.map(
 												(member) =>
 													assignee === member._id && (
-														<Avatar>
-															<AvatarImage src={member.user.avatar} />
-															<AvatarFallback>
-																{member.user.username.charAt(0)}
-															</AvatarFallback>
-														</Avatar>
+														<TooltipProvider>
+															<Tooltip>
+																<TooltipTrigger className="p-0 bg-inherit outline-none border-none">
+																	<Avatar>
+																		<AvatarImage src={member.user.avatar} />
+																		<AvatarFallback>
+																			{member.user.username.charAt(0)}
+																		</AvatarFallback>
+																	</Avatar>
+																</TooltipTrigger>
+																<TooltipContent>
+																	<p>{member.user.email}</p>
+																</TooltipContent>
+															</Tooltip>
+														</TooltipProvider>
 													)
 											)
 										)}
