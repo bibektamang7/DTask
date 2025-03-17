@@ -4,16 +4,19 @@ import React, { useEffect, useState } from "react";
 import { useLoaderData } from "react-router";
 import { ChatSchema, MessageSchema } from "@/types/chat";
 import NewChatForm from "@/components/workspace/chats/NewChatForm";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useGetChatMessageQuery } from "@/redux/services/chatApi";
 import { useSocket } from "@/context/SocketContex";
 import { ChatEvent } from "@/constants";
 import ChatRoomList from "@/components/workspace/chats/ChatRoomList";
-import { RootState } from "@/redux/store";
-import { WorkspaceMember } from "@/types/workspace";
+import { AppDispatch, RootState } from "@/redux/store";
+import { Workspace, WorkspaceMember } from "@/types/workspace";
 import SelectedChat from "@/components/workspace/chats/SelectedChat";
+import { workspaceApi } from "@/redux/services/workspaceApi";
 
 const WorkspaceChat = () => {
+	const dispatch = useDispatch<AppDispatch>();
+
 	const workspaceId = localStorage.getItem("workspace");
 	const chatsFromLoader = useLoaderData();
 	const currentUserId = localStorage.getItem("currentUser");
@@ -65,6 +68,71 @@ const WorkspaceChat = () => {
 		);
 	};
 
+	const onNewChat = (chat: ChatSchema) => {
+		setChats((prev) => [...prev, chat]);
+	};
+	const onMessageDelete = (chatId: string, messageId: string) => {
+		if (chatId === selectedChat?._id) {
+			selectedChat.messages.filter((message) => message._id !== messageId);
+			if (selectedChat.lastMessage._id === messageId) {
+				selectedChat.lastMessage.content = "Messsage Deleted";
+			}
+		}
+	};
+	const onChatMemberAdded = (chatId: string, member: WorkspaceMember) => {
+		dispatch(
+			workspaceApi.util.updateQueryData(
+				"getWorkspace",
+				undefined,
+				(draft: Workspace) => {
+					draft.members.push(member);
+				}
+			)
+		);
+		if (selectedChat?._id === chatId) {
+			selectedChat.members.push(member._id);
+		}
+		setChats((prev) => {
+			const index = prev.findIndex((chat) => chat._id === chatId);
+			if (index !== -1) {
+				const updatedChats = [...prev];
+				updatedChats[index] = {
+					...prev[index],
+					members: [...prev[index].members, member._id],
+				};
+				return updatedChats;
+			}
+			return prev;
+		});
+	};
+	const onChatMemberRemoved = (chatId: string, memberId: string) => {
+		dispatch(
+			workspaceApi.util.updateQueryData(
+				"getWorkspace",
+				undefined,
+				(draft: Workspace) => {
+					draft.members = draft.members.filter(
+						(member) => member._id === memberId
+					);
+				}
+			)
+		);
+		setChats((prev) => {
+			const index = prev.findIndex((chat) => chat._id === chatId);
+			if (index !== -1) {
+				const updatedChats = [...prev];
+				updatedChats[index] = {
+					...prev[index],
+					members: [
+						...prev[index].members.filter((member) => member === memberId),
+					],
+				};
+				return updatedChats;
+			}
+			return prev;
+		});
+	};
+
 	useEffect(() => {
 		const localCurrentChat = JSON.parse(localStorage.getItem("currentChat")!);
 		if (localCurrentChat) {
@@ -82,17 +150,22 @@ const WorkspaceChat = () => {
 			const message = JSON.parse(event.data);
 			switch (message.type) {
 				case ChatEvent.NEW_CHAT:
+					onNewChat(message.data.chat);
 					break;
 				case ChatEvent.DELETE_CHAT:
+					onChatDelete(message.data.chatId);
 					break;
 				case ChatEvent.ADD_MESSAGE:
 					onMessageReceived(message.data.message);
 					break;
 				case ChatEvent.DELETE_MESSAGE:
+					onMessageDelete(message.data.chatId, message.data.messageId);
 					break;
 				case ChatEvent.ADD_MEMBER:
+					onChatMemberAdded(message.data.chatId, message.data.member);
 					break;
 				case ChatEvent.REMOVE_MEMBER:
+					onChatMemberRemoved(message.data.chatId, message.data.memberId);
 					break;
 			}
 		};
