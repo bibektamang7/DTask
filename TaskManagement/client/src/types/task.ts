@@ -1,7 +1,7 @@
 import { User } from "./user";
 import { Workspace, WorkspaceMember } from "./workspace";
 
-type Status = "Completed" | "Todo" | "In-Progress";
+export type Status = "Completed" | "Todo" | "In-Progress";
 
 export interface Task {
 	_id: string;

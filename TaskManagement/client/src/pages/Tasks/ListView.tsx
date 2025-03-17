@@ -172,14 +172,14 @@ export function ListView() {
 					{filteredTasks.map((task: Task) => (
 						<Card key={task._id}>
 							<CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-								<div className="space-y-1 flex flex-col items-center gap-2">
+								<div className="space-y-1 flex flex-col items-start justify-start gap-4">
 									<h3
 										onClick={() => setTaskId(task._id)}
 										className="hover:cursor-pointer font-semibold text-lg leading-none tracking-tight"
 									>
 										{task.title}
 									</h3>
-									<div className="flex flex-wrap gap-2">
+									<div className="flex flex-wrap items-center gap-2">
 										{task.tags.map((tag) => (
 											<Badge
 												key={tag}
@@ -209,7 +209,7 @@ export function ListView() {
 								</DropdownMenu>
 							</CardHeader>
 							<CardContent>
-								<p className="text-sm text-muted-foreground line-clamp-2">
+								<p className="text-sm text-muted-foreground line-clamp-2 mt-2">
 									{task.description}
 								</p>
 							</CardContent>

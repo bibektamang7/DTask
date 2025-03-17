@@ -37,10 +37,7 @@ const Notification = () => {
 									<p className="text-[1rem] tracking-tight [&>span]:font-semibold font-light">
 										<span>{notification.sender.username} </span>
 										{notification.message}{" "}
-										<span>{notification.reference.name}</span>
-										{notification.purpose === "STATUS" && (
-											<span>f rom Todo to In-Progress</span>
-										)}
+										<span>{notification.reference.title}.</span>
 									</p>
 									<span className="text-[0.7rem]">
 										{new Date(notification.createdAt).toDateString()}

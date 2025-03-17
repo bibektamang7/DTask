@@ -13,9 +13,9 @@ import { MessageSquare, MoreVertical, Paperclip } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { useWorkspace } from "@/hooks/customs/useWorkspace";
 import { useTask } from "@/hooks/customs/useTask";
-import { Task } from "@/types/task";
-import { RootState } from "@/redux/store";
-import { useSelector } from "react-redux";
+import { Attachment, Comment, Status, Task } from "@/types/task";
+import { AppDispatch, RootState } from "@/redux/store";
+import { useDispatch, useSelector } from "react-redux";
 import { WorkspaceMember } from "@/types/workspace";
 import { Badge } from "../ui/badge";
 import {
@@ -24,22 +24,28 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { priorityColors, statusColors } from "@/constants";
+import { priorityColors, statusColors, TaskEvent } from "@/constants";
 import { format } from "date-fns";
 import Todo from "./Todo";
 import QuoteOfTheDay from "./QuoteOfTheDay";
 import { useSocket } from "@/context/SocketContex";
+import Loader from "../Loader";
+import { taskApi } from "@/redux/services/taskApi";
 
 type TaskOptionProp = "Todo" | "In Progress" | "Completed";
 
-export default function DashboardPage() {
-	const { taskData } = useTask();
+const DashboardPage = () => {
+	const socket = useSocket();
+	const dispatch = useDispatch<AppDispatch>();
+
+	const { taskData, isLoading: taskLoading } = useTask();
 	const { workspaceData, isLoading } = useWorkspace();
 	const workspaceMembers = useSelector(
 		(state: RootState) => state.Workspaces.workspace.members
 	);
-	if (isLoading) return <>Loading...</>;
+	if (isLoading || taskLoading) return <Loader />;
 
+	const [tasks, setTasks] = useState<Task[]>(taskData);
 	const [date, setDate] = useState<Date | undefined>(new Date());
 	const formattedDate = new Date().toLocaleDateString("en-US", {
 		weekday: "long",
@@ -52,7 +58,6 @@ export default function DashboardPage() {
 	const [todoTasks, setTodoTasks] = useState<any[]>([]);
 	const [inProgressTasks, setInProgressTasks] = useState<any[]>([]);
 	const [recentTasks, setRecentTasks] = useState<any[]>([]);
-	const socket = useSocket();
 
 	const selectedTasks =
 		taskOption === "Completed"
@@ -61,8 +66,187 @@ export default function DashboardPage() {
 			? todoTasks
 			: inProgressTasks;
 
+	const onStatusChange = (taskId: string, status: Status) => {
+		dispatch(
+			taskApi.util.updateQueryData("getTasks", undefined, (_draft: Task[]) => {
+				const taskIndex = _draft.findIndex((task) => task._id === taskId);
+				if (taskIndex !== -1) {
+					_draft[taskIndex] = { ..._draft[taskIndex], status };
+				}
+			})
+		);
+		// setTasks((prev) =>
+		// 	prev.map((task) => {
+		// 		return task._id === taskId ? { ...task, status } : task;
+		// 	})
+		// );
+	};
+	const onPriorityChange = (taskId: string, priority: string) => {
+		dispatch(
+			taskApi.util.updateQueryData("getTasks", undefined, (_draft: Task[]) => {
+				const taskIndex = _draft.findIndex((task) => task._id === taskId);
+				if (taskIndex !== -1) {
+					_draft[taskIndex] = { ..._draft[taskIndex], priority };
+				}
+			})
+		);
+		// setTasks((prev) =>
+		// 	prev.map((task) => {
+		// 		return task._id === taskId ? { ...task, priority } : task;
+		// 	})
+		// );
+	};
+	const onDescriptionChange = (taskId: string, description: string) => {
+		dispatch(
+			taskApi.util.updateQueryData("getTasks", undefined, (_draft: Task[]) => {
+				const taskIndex = _draft.findIndex((task) => task._id === taskId);
+				if (taskIndex !== -1) {
+					_draft[taskIndex] = { ..._draft[taskIndex], description };
+				}
+			})
+		);
+
+		// setTasks((prev) =>
+		// 	prev.map((task) => {
+		// 		return task._id === taskId ? { ...task, description } : task;
+		// 	})
+		// );
+	};
+	const onTitlechange = (taskId: string, title: string) => {
+		dispatch(
+			taskApi.util.updateQueryData("getTasks", undefined, (_draft: Task[]) => {
+				const taskIndex = _draft.findIndex((task) => task._id === taskId);
+				if (taskIndex !== -1) {
+					_draft[taskIndex] = { ..._draft[taskIndex], title };
+				}
+			})
+		);
+
+		// setTasks((prev) =>
+		// 	prev.map((task) => {
+		// 		return task._id === taskId ? { ...task, title } : task;
+		// 	})
+		// );
+	};
+	const onNewCommentAdded = (taskId: string, comment: Comment) => {
+		dispatch(
+			taskApi.util.updateQueryData("getTasks", undefined, (_draft: Task[]) => {
+				const taskIndex = _draft.findIndex((task) => task._id === taskId);
+				if (taskIndex !== -1) {
+					_draft[taskIndex] = {
+						..._draft[taskIndex],
+						comments: [..._draft[taskIndex].comments, comment],
+					};
+				}
+			})
+		);
+
+		// setTasks((prev) =>
+		// 	prev.map((task) => {
+		// 		return task._id === taskId
+		// 			? { ...task, comments: [...task.comments, comment] }
+		// 			: task;
+		// 	})
+		// );
+	};
+	const onCommentDelete = (taskId: string, commentId: string) => {
+		dispatch(
+			taskApi.util.updateQueryData("getTasks", undefined, (_draft: Task[]) => {
+				const taskIndex = _draft.findIndex((task) => task._id === taskId);
+				if (taskIndex !== -1) {
+					_draft[taskIndex] = {
+						..._draft[taskIndex],
+						comments: _draft[taskIndex].comments.filter(
+							(comment) => comment._id !== commentId
+						),
+					};
+				}
+			})
+		);
+		// setTasks((prev) =>
+		// 	prev.map((task) => {
+		// 		return task._id === taskId
+		// 			? {
+		// 					...task,
+		// 					comments: task.comments.filter(
+		// 						(comment) => comment._id !== commentId
+		// 					),
+		// 			  }
+		// 			: task;
+		// 	})
+		// );
+	};
+
+	const onNewAttachment = (taskId: string, attachment: Attachment) => {
+		dispatch(
+			taskApi.util.updateQueryData("getTasks", undefined, (_draft: Task[]) => {
+				const taskIndex = _draft.findIndex((task) => task._id === taskId);
+				if (taskIndex !== -1) {
+					_draft[taskIndex] = {
+						..._draft[taskIndex],
+						attachments: [..._draft[taskIndex].attachments, attachment],
+					};
+				}
+			})
+		);
+
+		// setTasks((prev) =>
+		// 	prev.map((task) => {
+		// 		return task._id === taskId
+		// 			? {
+		// 					...task,
+		// 					attachments: [...task.attachments, attachment],
+		// 			  }
+		// 			: task;
+		// 	})
+		// );
+	};
+	const onAttachmentDelete = (taskId: string, attachmentId: string) => {
+		dispatch(
+			taskApi.util.updateQueryData("getTasks", undefined, (_draft: Task[]) => {
+				const taskIndex = _draft.findIndex((task) => task._id === taskId);
+				if (taskIndex !== -1) {
+					_draft[taskIndex] = {
+						..._draft[taskIndex],
+						attachments: _draft[taskIndex].attachments.filter(
+							(attachment) => attachment._id !== attachmentId
+						),
+					};
+				}
+			})
+		);
+
+		// setTasks((prev) =>
+		// 	prev.map((task) => {
+		// 		return task._id === taskId
+		// 			? {
+		// 					...task,
+		// 					attachments: task.attachments.filter(
+		// 						(attachment) => attachment._id !== attachmentId
+		// 					),
+		// 			  }
+		// 			: task;
+		// 	})
+		// );
+	};
+
+	const onNewTask = (task: Task) => {
+		dispatch(
+			taskApi.util.updateQueryData("getTasks", undefined, (draft: Task[]) => {
+				draft.push(task);
+			})
+		);
+		// setTasks((prev) => [...prev, task]);
+	};
+
+	const onWorkspaceCreated = () => {};
+	const onWorkspaceNameUpdated = () => {};
+	const onRemoveMemberFromWorkspace = () => {};
+	const onWorkspaceDeleted = () => {};
+	const onWorkspaceInvitation = () => {};
+
 	useEffect(() => {
-		if (taskData) {
+		if (tasks) {
 			const filteredCompletedTasks = taskData.filter(
 				(task: Task) => task.status === "Completed"
 			);
@@ -86,7 +270,7 @@ export default function DashboardPage() {
 
 			setRecentTasks(recentTasksList);
 		}
-	}, []);
+	}, [tasks]);
 
 	useEffect(() => {
 		if (!socket) return;
@@ -94,14 +278,52 @@ export default function DashboardPage() {
 			const message = JSON.parse(event.data.toString());
 			switch (message.type) {
 				case "workspaceCreated":
+					onWorkspaceCreated();
 					break;
+
 				case "workspaceDeleted":
+					onWorkspaceDeleted();
 					break;
 				case "workspaceNameUpdate":
+					onWorkspaceNameUpdated();
 					break;
 				case "removeMemberFromWorkspace":
+					onRemoveMemberFromWorkspace();
 					break;
 				case "workspaceInvitation":
+					onWorkspaceInvitation();
+					break;
+				case TaskEvent.COMMENT_DELETED:
+					onCommentDelete(message.data.taskId, message.data.commentId);
+					break;
+
+				case TaskEvent.DELETE_ATTACHMENT:
+					onAttachmentDelete(message.data.taskId, message.data.attachmentId);
+
+					break;
+				case TaskEvent.NEW_ATTACHMENT:
+					onNewAttachment(message.data.taskId, message.data.attachment);
+					break;
+				case TaskEvent.NEW_TASK_ADDED:
+					onNewTask(message.data.task);
+					break;
+				case TaskEvent.TASK_DATE_CHANGED:
+					// TODO:THIS IS NOT IMPLEMENTED FOR NOW
+					break;
+				case TaskEvent.TASK_DESCRIPTION_CHANGED:
+					onDescriptionChange(message.data.taskId, message.data.description);
+					break;
+				case TaskEvent.TASK_PRIORITY_CHANGED:
+					onPriorityChange(message.data.taskId, message.data.priority);
+					break;
+				case TaskEvent.TASK_STATUS_CHANGED:
+					onStatusChange(message.data.taskId, message.data.status);
+					break;
+				case TaskEvent.TASK_TITLE_CHANGED:
+					onTitlechange(message.data.taskId, message.data.title);
+					break;
+				case TaskEvent.NEW_COMMENT:
+					onNewCommentAdded(message.data.taskId, message.data.comment);
 					break;
 			}
 		};
@@ -386,4 +608,5 @@ export default function DashboardPage() {
 			</aside>
 		</main>
 	);
-}
+};
+export default DashboardPage;
