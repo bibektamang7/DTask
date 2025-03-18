@@ -64,7 +64,7 @@ const Comment: React.FC<CommentProps> = ({ comments, taskId }) => {
 	};
 	useEffect(() => {
 		setTaskComments(comments);
-	}, []);
+	}, [comments]);
 
 	return (
 		<>

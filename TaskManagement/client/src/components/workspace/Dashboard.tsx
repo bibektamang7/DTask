@@ -35,6 +35,7 @@ import { taskApi } from "@/redux/services/taskApi";
 type TaskOptionProp = "Todo" | "In Progress" | "Completed";
 
 const DashboardPage = () => {
+	const token = localStorage.getItem("token");
 	const socket = useSocket();
 	const dispatch = useDispatch<AppDispatch>();
 
@@ -66,177 +67,100 @@ const DashboardPage = () => {
 			? todoTasks
 			: inProgressTasks;
 
-	const onStatusChange = (taskId: string, status: Status) => {
-		dispatch(
-			taskApi.util.updateQueryData("getTasks", undefined, (_draft: Task[]) => {
-				const taskIndex = _draft.findIndex((task) => task._id === taskId);
-				if (taskIndex !== -1) {
-					_draft[taskIndex] = { ..._draft[taskIndex], status };
-				}
+	const onPriorityChange = (
+		event: CustomEvent<{ taskId: string; priority: string }>
+	) => {
+		setTasks((prev) =>
+			prev.map((task) => {
+				return task._id === event.detail.taskId
+					? { ...task, priority: event.detail.priority }
+					: task;
 			})
 		);
-		// setTasks((prev) =>
-		// 	prev.map((task) => {
-		// 		return task._id === taskId ? { ...task, status } : task;
-		// 	})
-		// );
 	};
-	const onPriorityChange = (taskId: string, priority: string) => {
-		dispatch(
-			taskApi.util.updateQueryData("getTasks", undefined, (_draft: Task[]) => {
-				const taskIndex = _draft.findIndex((task) => task._id === taskId);
-				if (taskIndex !== -1) {
-					_draft[taskIndex] = { ..._draft[taskIndex], priority };
-				}
+	const onDescriptionChange = (
+		event: CustomEvent<{ taskId: string; description: string }>
+	) => {
+		setTasks((prev) =>
+			prev.map((task) => {
+				return task._id === event.detail.taskId
+					? { ...task, description: event.detail.description }
+					: task;
 			})
 		);
-		// setTasks((prev) =>
-		// 	prev.map((task) => {
-		// 		return task._id === taskId ? { ...task, priority } : task;
-		// 	})
-		// );
 	};
-	const onDescriptionChange = (taskId: string, description: string) => {
-		dispatch(
-			taskApi.util.updateQueryData("getTasks", undefined, (_draft: Task[]) => {
-				const taskIndex = _draft.findIndex((task) => task._id === taskId);
-				if (taskIndex !== -1) {
-					_draft[taskIndex] = { ..._draft[taskIndex], description };
-				}
+	const onTitlechange = (
+		event: CustomEvent<{ taskId: string; title: string }>
+	) => {
+		setTasks((prev) =>
+			prev.map((task) => {
+				return task._id === event.detail.taskId
+					? { ...task, title: event.detail.title }
+					: task;
 			})
 		);
-
-		// setTasks((prev) =>
-		// 	prev.map((task) => {
-		// 		return task._id === taskId ? { ...task, description } : task;
-		// 	})
-		// );
 	};
-	const onTitlechange = (taskId: string, title: string) => {
-		dispatch(
-			taskApi.util.updateQueryData("getTasks", undefined, (_draft: Task[]) => {
-				const taskIndex = _draft.findIndex((task) => task._id === taskId);
-				if (taskIndex !== -1) {
-					_draft[taskIndex] = { ..._draft[taskIndex], title };
-				}
+	const onNewCommentAdded = (
+		event: CustomEvent<{ taskId: string; comment: Comment }>
+	) => {
+		setTasks((prev) =>
+			prev.map((task) => {
+				return task._id === event.detail.taskId
+					? { ...task, comments: [...task.comments, event.detail.comment] }
+					: task;
 			})
 		);
-
-		// setTasks((prev) =>
-		// 	prev.map((task) => {
-		// 		return task._id === taskId ? { ...task, title } : task;
-		// 	})
-		// );
 	};
-	const onNewCommentAdded = (taskId: string, comment: Comment) => {
-		dispatch(
-			taskApi.util.updateQueryData("getTasks", undefined, (_draft: Task[]) => {
-				const taskIndex = _draft.findIndex((task) => task._id === taskId);
-				if (taskIndex !== -1) {
-					_draft[taskIndex] = {
-						..._draft[taskIndex],
-						comments: [..._draft[taskIndex].comments, comment],
-					};
-				}
+	const onCommentDelete = (
+		event: CustomEvent<{ taskId: string; commentId: string }>
+	) => {
+		setTasks((prev) =>
+			prev.map((task) => {
+				return task._id === event.detail.taskId
+					? {
+							...task,
+							comments: task.comments.filter(
+								(comment) => comment._id !== event.detail.commentId
+							),
+					  }
+					: task;
 			})
 		);
-
-		// setTasks((prev) =>
-		// 	prev.map((task) => {
-		// 		return task._id === taskId
-		// 			? { ...task, comments: [...task.comments, comment] }
-		// 			: task;
-		// 	})
-		// );
-	};
-	const onCommentDelete = (taskId: string, commentId: string) => {
-		dispatch(
-			taskApi.util.updateQueryData("getTasks", undefined, (_draft: Task[]) => {
-				const taskIndex = _draft.findIndex((task) => task._id === taskId);
-				if (taskIndex !== -1) {
-					_draft[taskIndex] = {
-						..._draft[taskIndex],
-						comments: _draft[taskIndex].comments.filter(
-							(comment) => comment._id !== commentId
-						),
-					};
-				}
-			})
-		);
-		// setTasks((prev) =>
-		// 	prev.map((task) => {
-		// 		return task._id === taskId
-		// 			? {
-		// 					...task,
-		// 					comments: task.comments.filter(
-		// 						(comment) => comment._id !== commentId
-		// 					),
-		// 			  }
-		// 			: task;
-		// 	})
-		// );
 	};
 
-	const onNewAttachment = (taskId: string, attachment: Attachment) => {
-		dispatch(
-			taskApi.util.updateQueryData("getTasks", undefined, (_draft: Task[]) => {
-				const taskIndex = _draft.findIndex((task) => task._id === taskId);
-				if (taskIndex !== -1) {
-					_draft[taskIndex] = {
-						..._draft[taskIndex],
-						attachments: [..._draft[taskIndex].attachments, attachment],
-					};
-				}
+	const onNewAttachment = (
+		event: CustomEvent<{ taskId: string; attachment: Attachment[] }>
+	) => {
+		setTasks((prev) =>
+			prev.map((task) => {
+				return task._id === event.detail.taskId
+					? {
+							...task,
+							attachments: [...task.attachments, ...event.detail.attachment],
+					  }
+					: task;
 			})
 		);
-
-		// setTasks((prev) =>
-		// 	prev.map((task) => {
-		// 		return task._id === taskId
-		// 			? {
-		// 					...task,
-		// 					attachments: [...task.attachments, attachment],
-		// 			  }
-		// 			: task;
-		// 	})
-		// );
 	};
-	const onAttachmentDelete = (taskId: string, attachmentId: string) => {
-		dispatch(
-			taskApi.util.updateQueryData("getTasks", undefined, (_draft: Task[]) => {
-				const taskIndex = _draft.findIndex((task) => task._id === taskId);
-				if (taskIndex !== -1) {
-					_draft[taskIndex] = {
-						..._draft[taskIndex],
-						attachments: _draft[taskIndex].attachments.filter(
-							(attachment) => attachment._id !== attachmentId
-						),
-					};
-				}
+	const onAttachmentDelete = (
+		event: CustomEvent<{ taskId: string; attachmentId: string }>
+	) => {
+		setTasks((prev) =>
+			prev.map((task) => {
+				return task._id === event.detail.taskId
+					? {
+							...task,
+							attachments: task.attachments.filter(
+								(attachment) => attachment._id !== event.detail.attachmentId
+							),
+					  }
+					: task;
 			})
 		);
-
-		// setTasks((prev) =>
-		// 	prev.map((task) => {
-		// 		return task._id === taskId
-		// 			? {
-		// 					...task,
-		// 					attachments: task.attachments.filter(
-		// 						(attachment) => attachment._id !== attachmentId
-		// 					),
-		// 			  }
-		// 			: task;
-		// 	})
-		// );
 	};
 
-	const onNewTask = (task: Task) => {
-		dispatch(
-			taskApi.util.updateQueryData("getTasks", undefined, (draft: Task[]) => {
-				draft.push(task);
-			})
-		);
-		// setTasks((prev) => [...prev, task]);
+	const onNewTask = (event: CustomEvent<{ task: Task }>) => {
+		setTasks((prev) => [...prev, event.detail.task]);
 	};
 
 	const onWorkspaceCreated = () => {};
@@ -272,62 +196,131 @@ const DashboardPage = () => {
 		}
 	}, [tasks]);
 
+	const onStatusChange = (
+		event: CustomEvent<{ taskId: string; status: Status }>
+	) => {
+		setTasks((prev) =>
+			prev.map((task) => {
+				return task._id === event.detail.taskId
+					? { ...task, status: event.detail.status }
+					: task;
+			})
+		);
+	};
+
 	useEffect(() => {
-		if (!socket) return;
-		socket.onmessage = (event) => {
-			const message = JSON.parse(event.data.toString());
-			switch (message.type) {
-				case "workspaceCreated":
-					onWorkspaceCreated();
-					break;
+		window.addEventListener("statusChange", onStatusChange as EventListener);
 
-				case "workspaceDeleted":
-					onWorkspaceDeleted();
-					break;
-				case "workspaceNameUpdate":
-					onWorkspaceNameUpdated();
-					break;
-				case "removeMemberFromWorkspace":
-					onRemoveMemberFromWorkspace();
-					break;
-				case "workspaceInvitation":
-					onWorkspaceInvitation();
-					break;
-				case TaskEvent.COMMENT_DELETED:
-					onCommentDelete(message.data.taskId, message.data.commentId);
-					break;
+		window.addEventListener(
+			"descriptionChange",
+			onDescriptionChange as EventListener
+		);
+		window.addEventListener(
+			"priorityChange",
+			onPriorityChange as EventListener
+		);
+		window.addEventListener("titleChange", onTitlechange as EventListener);
+		window.addEventListener("newTask", onNewTask as EventListener);
 
-				case TaskEvent.DELETE_ATTACHMENT:
-					onAttachmentDelete(message.data.taskId, message.data.attachmentId);
+		window.addEventListener(
+			"attachmentDelete",
+			onAttachmentDelete as EventListener
+		);
+		window.addEventListener("newAttachment", onNewAttachment as EventListener);
+		window.addEventListener("commentDelete", onCommentDelete as EventListener);
+		window.addEventListener("newComment", onNewCommentAdded as EventListener);
 
-					break;
-				case TaskEvent.NEW_ATTACHMENT:
-					onNewAttachment(message.data.taskId, message.data.attachment);
-					break;
-				case TaskEvent.NEW_TASK_ADDED:
-					onNewTask(message.data.task);
-					break;
-				case TaskEvent.TASK_DATE_CHANGED:
-					// TODO:THIS IS NOT IMPLEMENTED FOR NOW
-					break;
-				case TaskEvent.TASK_DESCRIPTION_CHANGED:
-					onDescriptionChange(message.data.taskId, message.data.description);
-					break;
-				case TaskEvent.TASK_PRIORITY_CHANGED:
-					onPriorityChange(message.data.taskId, message.data.priority);
-					break;
-				case TaskEvent.TASK_STATUS_CHANGED:
-					onStatusChange(message.data.taskId, message.data.status);
-					break;
-				case TaskEvent.TASK_TITLE_CHANGED:
-					onTitlechange(message.data.taskId, message.data.title);
-					break;
-				case TaskEvent.NEW_COMMENT:
-					onNewCommentAdded(message.data.taskId, message.data.comment);
-					break;
-			}
+		return () => {
+			window.removeEventListener(
+				"statusChange",
+				onStatusChange as EventListener
+			);
+			window.removeEventListener(
+				"descriptionChange",
+				onDescriptionChange as EventListener
+			);
+			window.removeEventListener(
+				"priorityChange",
+				onPriorityChange as EventListener
+			);
+			window.removeEventListener("titleChange", onTitlechange as EventListener);
+			window.removeEventListener("newTask", onNewTask as EventListener);
+
+			window.removeEventListener(
+				"attachmentDelete",
+				onAttachmentDelete as EventListener
+			);
+			window.removeEventListener(
+				"newAttachment",
+				onNewAttachment as EventListener
+			);
+			window.removeEventListener(
+				"commentDelete",
+				onCommentDelete as EventListener
+			);
+			window.removeEventListener(
+				"newComment",
+				onNewCommentAdded as EventListener
+			);
 		};
-	}, [socket]);
+	}, []);
+
+	// useEffect(() => {
+	// 	if (!socket) return;
+	// 	socket.onmessage = (event) => {
+	// 		const message = JSON.parse(event.data.toString());
+	// 		switch (message.type) {
+	// 			case "workspaceCreated":
+	// 				onWorkspaceCreated();
+	// 				break;
+
+	// 			case "workspaceDeleted":
+	// 				onWorkspaceDeleted();
+	// 				break;
+	// 			case "workspaceNameUpdate":
+	// 				onWorkspaceNameUpdated();
+	// 				break;
+	// 			case "removeMemberFromWorkspace":
+	// 				onRemoveMemberFromWorkspace();
+	// 				break;
+	// 			case "workspaceInvitation":
+	// 				onWorkspaceInvitation();
+	// 				break;
+	// 			case TaskEvent.COMMENT_DELETED:
+	// 				onCommentDelete(message.data.taskId, message.data.commentId);
+	// 				break;
+
+	// 			case TaskEvent.DELETE_ATTACHMENT:
+	// 				onAttachmentDelete(message.data.taskId, message.data.attachmentId);
+
+	// 				break;
+	// 			case TaskEvent.NEW_ATTACHMENT:
+	// 				onNewAttachment(message.data.taskId, message.data.attachment);
+	// 				break;
+	// 			case TaskEvent.NEW_TASK_ADDED:
+	// 				onNewTask(message.data.task);
+	// 				break;
+	// 			case TaskEvent.TASK_DATE_CHANGED:
+	// 				// TODO:THIS IS NOT IMPLEMENTED FOR NOW
+	// 				break;
+	// 			case TaskEvent.TASK_DESCRIPTION_CHANGED:
+	// 				onDescriptionChange(message.data.taskId, message.data.description);
+	// 				break;
+	// 			case TaskEvent.TASK_PRIORITY_CHANGED:
+	// 				onPriorityChange(message.data.taskId, message.data.priority);
+	// 				break;
+	// 			case TaskEvent.TASK_STATUS_CHANGED:
+	// 				onStatusChange(message.data.taskId, message.data.status);
+	// 				break;
+	// 			case TaskEvent.TASK_TITLE_CHANGED:
+	// 				onTitlechange(message.data.taskId, message.data.title);
+	// 				break;
+	// 			case TaskEvent.NEW_COMMENT:
+	// 				onNewCommentAdded(message.data.taskId, message.data.comment);
+	// 				break;
+	// 		}
+	// 	};
+	// }, [socket]);
 
 	return (
 		<main className="relative lg:flex lg:flex-1 w-full">
