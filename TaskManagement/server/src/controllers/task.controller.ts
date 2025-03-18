@@ -379,7 +379,8 @@ const updateTask = asyncHandler(async (req, res) => {
 			notification.purpose,
 			JSON.stringify({
 				userId: req.member._id,
-				notification: notification,
+				taskId: updatedTask._id,
+				...parsedData.data,
 				members: members || [],
 			})
 		);
@@ -539,6 +540,13 @@ const addAttachmentInTask = asyncHandler(async (req, res) => {
 	session.startTransaction();
 	try {
 		let attachments;
+		let socketAttachmets: {
+			_id: mongoose.Types.ObjectId;
+			filename: string;
+			fileType: string | null | undefined;
+			fileUrl: string;
+			taskId: mongoose.Types.ObjectId;
+		}[] = [];
 
 		if (files && files.length > 0) {
 			attachments = await Promise.all(
@@ -547,20 +555,28 @@ const addAttachmentInTask = asyncHandler(async (req, res) => {
 						file.path,
 						`/tasks/${task._id}`
 					);
-					return (
-						await AttachmentModel.create(
-							[
-								{
-									filename: fileUploadResponse?.filename,
-									fileType: fileUploadResponse?.format,
-									publicId: fileUploadResponse?.publicId,
-									fileUrl: fileUploadResponse?.url,
-									taskId: task._id,
-								},
-							],
-							{ session }
-						)
-					)[0]._id;
+
+					const attachment = await AttachmentModel.create(
+						[
+							{
+								filename: fileUploadResponse?.filename,
+								fileType: fileUploadResponse?.format,
+								publicId: fileUploadResponse?.publicId,
+								fileUrl: fileUploadResponse?.url,
+								taskId: task._id,
+							},
+						],
+						{ session }
+					);
+
+					socketAttachmets.push({
+						_id: attachment[0]._id,
+						filename: attachment[0]?.filename,
+						fileType: attachment[0]?.fileType,
+						fileUrl: attachment[0]?.fileUrl,
+						taskId: task._id,
+					});
+					return attachment[0]._id;
 				})
 			);
 		}
@@ -594,11 +610,15 @@ const addAttachmentInTask = asyncHandler(async (req, res) => {
 		});
 
 		if (notification) {
-			await TaskModel.findByIdAndUpdate(task._id, {
-				$push: {
-					taskActivities: notification._id,
+			await TaskModel.findByIdAndUpdate(
+				task._id,
+				{
+					$push: {
+						taskActivities: notification._id,
+					},
 				},
-			});
+				{ session }
+			);
 		}
 		const members = extractUser(req.workspace.members, task.assignees);
 
@@ -608,7 +628,7 @@ const addAttachmentInTask = asyncHandler(async (req, res) => {
 				workspaceId: req.workspace._id,
 				userId: req.member._id,
 				taskId: updatedTask._id,
-				attachment: attachments,
+				attachment: socketAttachmets,
 				notification,
 				members,
 			})
@@ -734,6 +754,11 @@ const createComment = asyncHandler(async (req, res) => {
 	session.startTransaction();
 	try {
 		let attachments: any = [];
+		let socketAttachments: {
+			filename: string | undefined;
+			fileUrl: string | undefined;
+			fileType: string | undefined;
+		}[] = [];
 		if (files && files.length > 0) {
 			attachments = await Promise.all(
 				files.map(async (file) => {
@@ -741,7 +766,11 @@ const createComment = asyncHandler(async (req, res) => {
 						file.path,
 						`/tasks/${task._id}/comments`
 					);
-
+					socketAttachments.push({
+						filename: uploadResponse?.filename,
+						fileUrl: uploadResponse?.url,
+						fileType: uploadResponse?.format,
+					});
 					return (
 						await AttachmentModel.create(
 							[
@@ -750,7 +779,7 @@ const createComment = asyncHandler(async (req, res) => {
 									publicId: uploadResponse?.publicId,
 									fileUrl: uploadResponse?.url,
 									fileType: uploadResponse?.format,
-									chatId: task._id,
+									taskId: task._id,
 								},
 							],
 							{ session: session }
@@ -820,7 +849,7 @@ const createComment = asyncHandler(async (req, res) => {
 				workspaceId: req.workspace._id,
 				userId: req.member._id,
 				taskId: updatedTask._id,
-				comment: comment,
+				comment: comment[0],
 				notification,
 				members,
 			})
