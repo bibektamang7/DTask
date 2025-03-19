@@ -17,10 +17,7 @@ const Activity: React.FC<ActivityProps> = ({
 	pastsActivities,
 }) => {
 	const [todaysActivity, setTodaysActivity] = useState<Notification[]>([]);
-	const assignees = useSelector(
-		(state: RootState) => state.Workspaces.workspace.members
-	);
-
+	const assignees = JSON.parse(localStorage.getItem("workspaceMembers")!);
 	useEffect(() => {
 		setTodaysActivity(todaysActivities);
 	}, []);

@@ -56,17 +56,10 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { WorkspaceMember } from "@/types/workspace";
-import { useSocket } from "@/context/SocketContex";
-import { taskApi } from "@/redux/services/taskApi";
 
 const Task: React.FC = () => {
-	// const socket = useSocket();
-
-	// const dispatch = useDispatch<AppDispatch>();
-
 	const loaderData = useLoaderData();
-	const [_, setTrigger] = useState(0);
+
 	const [status, setStatus] = useState(loaderData.status);
 	const [priority, setPriority] = useState(loaderData.priority);
 	const [assignees, setAssignees] = useState<string[]>(loaderData.assignees);
@@ -103,130 +96,11 @@ const Task: React.FC = () => {
 		const response = await handleUpdate(loaderData._id, data);
 	};
 
-	// const onStatusChange = (taskId: string, status: Status) => {
-	// 	if (taskId === loaderData._id) {
-	// 		setStatus(status);
-	// 		// dispatch(
-	// 		// 	taskApi.util.updateQueryData(
-	// 		// 		"getTask",
-	// 		// 		{ workspaceId: loaderData.workspace, taskId: loaderData._id },
-	// 		// 		(draft) => {
-	// 		// 			draft.data = { ...draft.data, status };
-	// 		// 		}
-	// 		// 	)
-	// 		// );
-	// 	}
-	// };
-	// const onPriorityChange = (taskId: string, priority: string) => {
-	// 	if (taskId === loaderData._id) {
-	// 		setPriority(priority);
-	// 	}
-	// 	// dispatch(
-	// 	// 	taskApi.util.updateQueryData(
-	// 	// 		"getTask",
-	// 	// 		{
-	// 	// 			taskId: loaderData._id,
-	// 	// 			workspaceId: loaderData.workspace,
-	// 	// 		},
-	// 	// 		(draft) => {
-	// 	// 			draft.data = { ...draft.data, priority };
-	// 	// 		}
-	// 	// 	)
-	// 	// );
-	// };
-	// const onDescriptionChange = (taskId: string, description: string) => {
-	// 	dispatch(
-	// 		taskApi.util.updateQueryData(
-	// 			"getTask",
-	// 			{
-	// 				taskId: loaderData._id,
-	// 				workspaceId: loaderData.workspace,
-	// 			},
-	// 			(draft) => {
-	// 				draft.data = { ...draft.data, description };
-	// 			}
-	// 		)
-	// 	);
-	// };
-	// const onTitlechange = (taskId: string, title: string) => {
-	// 	dispatch(
-	// 		taskApi.util.updateQueryData(
-	// 			"getTask",
-	// 			{ taskId: loaderData._id, workspaceId: loaderData.workspace },
-	// 			(draft) => {
-	// 				draft.data = { ...draft.data, title };
-	// 			}
-	// 		)
-	// 	);
-	// };
-	// const onNewCommentAdded = (taskId: string, comment: CommentSchema) => {
-	// 	dispatch(
-	// 		taskApi.util.updateQueryData(
-	// 			"getTask",
-	// 			{ taskId: loaderData._id, workspaceId: loaderData.workspace },
-	// 			(draft) => {
-	// 				draft.data = {
-	// 					...draft.data,
-	// 					comments: [...draft.data.comments, comment],
-	// 				};
-	// 			}
-	// 		)
-	// 	);
-	// };
-	// const onCommentDelete = (taskId: string, commentId: string) => {
-	// 	dispatch(
-	// 		taskApi.util.updateQueryData(
-	// 			"getTask",
-	// 			{ taskId: loaderData._id, workspaceId: loaderData.workspace },
-	// 			(draft) => {
-	// 				draft.data = {
-	// 					...draft.data,
-	// 					comments: draft.data.comments.filter(
-	// 						(comment: CommentSchema) => comment._id !== commentId
-	// 					),
-	// 				};
-	// 			}
-	// 		)
-	// 	);
-	// };
-	// const onNewAttachment = (taskId: string, attachment: Attachment) => {
-	// 	dispatch(
-	// 		taskApi.util.updateQueryData(
-	// 			"getTask",
-	// 			{ taskId: loaderData._id, workspaceId: loaderData.workspace },
-	// 			(draft) => {
-	// 				draft.data = {
-	// 					...draft.data,
-	// 					attachments: [...draft.data.attachments, attachment],
-	// 				};
-	// 			}
-	// 		)
-	// 	);
-	// 	setTrigger(1);
-	// };
-	// const onAttachmentDelete = (taskId: string, attachmentId: string) => {
-	// 	dispatch(
-	// 		taskApi.util.updateQueryData(
-	// 			"getTask",
-	// 			{ taskId: loaderData._id, workspaceId: loaderData.workspace },
-	// 			(draft) => {
-	// 				draft.data = {
-	// 					...draft.data,
-	// 					attachments: draft.data.attachments.filter(
-	// 						(attachment: Attachment) => attachment._id !== attachmentId
-	// 					),
-	// 				};
-	// 			}
-	// 		)
-	// 	);
-	// };
-
 	const handleStatusChange = (
 		event: CustomEvent<{ taskId: string; status: string }>
 	) => {
 		if (event.detail.taskId === loaderData._id) {
 			setStatus(event.detail.status);
-			setTrigger(1);
 		}
 	};
 
@@ -235,20 +109,16 @@ const Task: React.FC = () => {
 	) => {
 		if (event.detail.taskId === loaderData._id) {
 			setPriority(event.detail.priority);
-			setTrigger(1);
 		}
 	};
 	const handleDescriptionChange = (
 		event: CustomEvent<{ taskId: string; description: string }>
-	) => {
-		setTrigger(1);
-	};
+	) => {};
 
 	const handleTitleChange = (
 		event: CustomEvent<{ taskId: string; title: string }>
 	) => {
 		if (event.detail.taskId === loaderData._id) {
-			setTrigger(1);
 		}
 	};
 	const handleNewComment = (
@@ -352,45 +222,6 @@ const Task: React.FC = () => {
 			);
 		};
 	}, []);
-
-	// useEffect(() => {
-	// 	if (!socket) return;
-	// 	socket.onmessage = (event) => {
-	// 		const message = JSON.parse(event.data.toString());
-
-	// 		switch (message.type) {
-	// 			case TaskEvent.COMMENT_DELETED:
-	// 				onCommentDelete(message.data.taskId, message.data.commentId);
-	// 				break;
-
-	// 			case TaskEvent.DELETE_ATTACHMENT:
-	// 				onAttachmentDelete(message.data.taskId, message.data.attachmentId);
-
-	// 				break;
-	// 			case TaskEvent.NEW_ATTACHMENT:
-	// 				onNewAttachment(message.data.taskId, message.data.attachment);
-	// 				break;
-	// 			case TaskEvent.TASK_DATE_CHANGED:
-	// 				// TODO:THIS IS NOT IMPLEMENTED FOR NOW
-	// 				break;
-	// 			case TaskEvent.TASK_DESCRIPTION_CHANGED:
-	// 				onDescriptionChange(message.data.taskId, message.data.description);
-	// 				break;
-	// 			case TaskEvent.TASK_PRIORITY_CHANGED:
-	// 				onPriorityChange(message.data.taskId, message.data.priority);
-	// 				break;
-	// 			case TaskEvent.TASK_STATUS_CHANGED:
-	// 				onStatusChange(message.data.taskId, message.data.status);
-	// 				break;
-	// 			case TaskEvent.TASK_TITLE_CHANGED:
-	// 				onTitlechange(message.data.taskId, message.data.title);
-	// 				break;
-	// 			case TaskEvent.NEW_COMMENT:
-	// 				onNewCommentAdded(message.data.taskId, message.data.comment);
-	// 				break;
-	// 		}
-	// 	};
-	// }, [socket]);
 
 	return (
 		<>

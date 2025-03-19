@@ -386,6 +386,10 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 					break;
 			}
 		};
+
+		return () => {
+			socket.close();
+		};
 	}, [socket]);
 	return (
 		<SocketContext.Provider value={socket}>{children}</SocketContext.Provider>

@@ -22,6 +22,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 	messages,
 	currentMember,
 }) => {
+	console.log(messages, currentMember, "hsdghdsjkgds");
 	const workspaceMembers = useSelector(
 		(state: RootState) => state.Workspaces.workspace.members
 	);

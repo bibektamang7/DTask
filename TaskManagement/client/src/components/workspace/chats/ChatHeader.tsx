@@ -38,11 +38,14 @@ interface ChatHeaderProps {
 	onDeleteChat: (chatId: string) => void;
 }
 
+type Call = "Vidio" | "Audio" | "None";
+
 const ChatHeader: React.FC<ChatHeaderProps> = ({
 	onBack,
 	currentChat,
 	onDeleteChat,
 }) => {
+	const [callOpen, setCallOpen] = useState<Call>("None");
 	const [isAddChatMember, setIsAddChatMember] = useState<boolean>(false);
 	const [addingMember, setAddingMember] = useState<string>("");
 	const { handleDeleteChat } = useDeleteChat();

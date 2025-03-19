@@ -117,12 +117,13 @@ const NewChatForm: React.FC<NewChatFormProps> = ({ onClose }) => {
 														return (
 															<div
 																key={assignee._id}
-																onClick={() =>
+																onClick={() => {
 																	form.setValue("members", [
 																		...form.getValues("members"),
 																		assignee._id,
-																	])
-																}
+																	]);
+																	setSearchMember("");
+																}}
 																className="flex items-center justify-start gap-4 mt-4 hover:cursor-pointer"
 															>
 																<Avatar key={assignee._id}>

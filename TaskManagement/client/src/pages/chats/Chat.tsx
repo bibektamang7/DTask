@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Search, CirclePlus } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useLoaderData } from "react-router";
 import { ChatSchema, MessageSchema } from "@/types/chat";
 import NewChatForm from "@/components/workspace/chats/NewChatForm";
@@ -20,14 +20,18 @@ const WorkspaceChat = () => {
 	const workspaceId = localStorage.getItem("workspace");
 	const chatsFromLoader = useLoaderData();
 	const currentUserId = localStorage.getItem("currentUser");
-	const currentMember = useSelector(
-		(state: RootState) => state.Workspaces.workspace.members
-	).find((member: WorkspaceMember) => member.user._id === currentUserId);
+	const storedCurrentWorkspaceMembers = JSON.parse(
+		localStorage.getItem("workspaceMembers")!
+	);
+	const currentMember = storedCurrentWorkspaceMembers.find(
+		(member: WorkspaceMember) => member.user._id === currentUserId
+	);
 
 	const [isNewChat, setIsNewChat] = useState<boolean>(false);
 	const [chats, setChats] = useState<ChatSchema[]>(chatsFromLoader || []);
 	const [showMobileChatList, setShowMobileChatList] = useState(true);
 
+	const [messageInput, setMessageInput] = useState<string>("");
 	const socket = useSocket();
 
 	const [selectedChat, setSelectedChat] = useState<ChatSchema | null>(null);
@@ -45,16 +49,14 @@ const WorkspaceChat = () => {
 		}
 	);
 
-	const onChatDelete = (chatId: string) => {
+	const onChatDelete = useCallback((chatId: string) => {
 		if (chatId === selectedChat?._id) {
 			setSelectedChat(null);
 		}
 		setChats((prev) => prev.filter((chat) => chat._id !== chatId));
-	};
+	}, []);
 
-	const [messageInput, setMessageInput] = useState<string>("");
-
-	const onMessageReceived = (message: MessageSchema) => {
+	const onMessageReceived = useCallback((message: MessageSchema) => {
 		if (message.chat === selectedChat?._id) {
 			setMessages((prev) => [...prev, message]);
 		}
@@ -66,72 +68,78 @@ const WorkspaceChat = () => {
 				)
 				.sort((a, b) => (a._id === message.chat ? -1 : 1))
 		);
-	};
+	}, []);
 
-	const onNewChat = (chat: ChatSchema) => {
-		setChats((prev) => [...prev, chat]);
-	};
-	const onMessageDelete = (chatId: string, messageId: string) => {
+	const onNewChat = useCallback((chat: ChatSchema) => {
+		setChats((prev) => [chat, ...prev]);
+	}, []);
+	const onMessageDelete = useCallback((chatId: string, messageId: string) => {
 		if (chatId === selectedChat?._id) {
 			selectedChat.messages.filter((message) => message._id !== messageId);
 			if (selectedChat.lastMessage._id === messageId) {
 				selectedChat.lastMessage.content = "Messsage Deleted";
 			}
 		}
-	};
-	const onChatMemberAdded = (chatId: string, member: WorkspaceMember) => {
-		dispatch(
-			workspaceApi.util.updateQueryData(
-				"getWorkspace",
-				undefined,
-				(draft: Workspace) => {
-					draft.members.push(member);
-				}
-			)
-		);
-		if (selectedChat?._id === chatId) {
-			selectedChat.members.push(member._id);
-		}
-		setChats((prev) => {
-			const index = prev.findIndex((chat) => chat._id === chatId);
-			if (index !== -1) {
-				const updatedChats = [...prev];
-				updatedChats[index] = {
-					...prev[index],
-					members: [...prev[index].members, member._id],
-				};
-				return updatedChats;
+	}, []);
+	const onChatMemberAdded = useCallback(
+		(chatId: string, member: WorkspaceMember) => {
+			dispatch(
+				workspaceApi.util.updateQueryData(
+					"getWorkspace",
+					undefined,
+					(draft: Workspace) => {
+						draft.members.push(member);
+					}
+				)
+			);
+			if (selectedChat?._id === chatId) {
+				selectedChat.members.push(member._id);
 			}
-			return prev;
-		});
-	};
-	const onChatMemberRemoved = (chatId: string, memberId: string) => {
-		dispatch(
-			workspaceApi.util.updateQueryData(
-				"getWorkspace",
-				undefined,
-				(draft: Workspace) => {
-					draft.members = draft.members.filter(
-						(member) => member._id === memberId
-					);
+			setChats((prev) => {
+				const index = prev.findIndex((chat) => chat._id === chatId);
+				if (index !== -1) {
+					const updatedChats = [...prev];
+					updatedChats[index] = {
+						...prev[index],
+						members: [...prev[index].members, member._id],
+					};
+					return updatedChats;
 				}
-			)
-		);
-		setChats((prev) => {
-			const index = prev.findIndex((chat) => chat._id === chatId);
-			if (index !== -1) {
-				const updatedChats = [...prev];
-				updatedChats[index] = {
-					...prev[index],
-					members: [
-						...prev[index].members.filter((member) => member === memberId),
-					],
-				};
-				return updatedChats;
-			}
-			return prev;
-		});
-	};
+				return prev;
+			});
+		},
+		[]
+	);
+	const onChatMemberRemoved = useCallback(
+		(chatId: string, memberId: string) => {
+			dispatch(
+				workspaceApi.util.updateQueryData(
+					"getWorkspace",
+					undefined,
+					(draft: Workspace) => {
+						draft.members = draft.members.filter(
+							(member) => member._id === memberId
+						);
+					}
+				)
+			);
+			setChats((prev) => {
+				const index = prev.findIndex((chat) => chat._id === chatId);
+				if (index !== -1) {
+					const updatedChats = [...prev];
+					updatedChats[index] = {
+						...prev[index],
+						members: [
+							...prev[index].members.filter((member) => member === memberId),
+						],
+					};
+					return updatedChats;
+				}
+				return prev;
+			});
+		},
+		[]
+	);
 
 	useEffect(() => {
 		const localCurrentChat = JSON.parse(localStorage.getItem("currentChat")!);

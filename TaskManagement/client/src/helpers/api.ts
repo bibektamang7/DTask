@@ -16,6 +16,12 @@ export const workspaceLoader = async () => {
 				workspaceApi.endpoints.getWorkspace.initiate({ token, workspaceId })
 			)
 			.unwrap();
+		console.log(workspaceResult);
+
+		localStorage.setItem(
+			"workspaceMembers",
+			JSON.stringify(workspaceResult.data.members)
+		);
 		const taskResult = await store
 			.dispatch(
 				taskApi.endpoints.getTasks.initiate({
@@ -26,9 +32,8 @@ export const workspaceLoader = async () => {
 			.unwrap();
 
 		const workspacesResult = await store.dispatch(
-			workspaceApi.endpoints.getWorkspaces.initiate({workspaceId})
+			workspaceApi.endpoints.getWorkspaces.initiate({ workspaceId })
 		);
-		
 
 		if (workspaceResult.error || taskResult.error) return redirect("/login");
 		return workspaceResult.data;
@@ -44,14 +49,15 @@ export const workspaceLoader = async () => {
 };
 export const taskLoader = async () => {
 	const token = localStorage.getItem("token");
+	const workspaceId = localStorage.getItem("workspace");
 	if (!token) return redirect("/login");
-	const workspace = store.getState().Workspaces.workspace;
+
 	try {
 		const result = await store
 			.dispatch(
 				taskApi.endpoints.getTasks.initiate({
 					token,
-					workspaceId: workspace._id,
+					workspaceId,
 				})
 			)
 			.unwrap();
@@ -66,8 +72,7 @@ export const taskLoader = async () => {
 };
 
 export const taskDataLoader = async ({ params }: { params: any }) => {
-	// const workspaceId = localStorage.getItem("workspace");
-	const workspaceId = store.getState().Workspaces.workspace._id;
+	const workspaceId = localStorage.getItem("workspace");
 	if (!workspaceId) {
 		redirect("/login");
 	}
@@ -87,7 +92,7 @@ export const taskDataLoader = async ({ params }: { params: any }) => {
 };
 
 export const chatsLoader = async () => {
-	const workspaceId = store.getState().Workspaces.workspace._id;
+	const workspaceId = localStorage.getItem("workspace");
 	try {
 		const chatResponse = await store
 			.dispatch(chatApi.endpoints.getChats.initiate({ workspaceId }))

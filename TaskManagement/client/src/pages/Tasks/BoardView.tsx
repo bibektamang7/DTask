@@ -143,7 +143,10 @@ const BoardView = () => {
 									.filter((task) => task.status === status)
 									.map((task) => (
 										<TaskCard
-											onTaskClick={() => setTaskId(task._id)}
+											onTaskClick={() => {
+												localStorage.setItem("task", task._id);
+												setTaskId(task._id);
+											}}
 											draggedTask={draggedTask}
 											onDragStart={onDragStart}
 											key={task._id}

@@ -174,7 +174,10 @@ export function ListView() {
 							<CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
 								<div className="space-y-1 flex flex-col items-start justify-start gap-4">
 									<h3
-										onClick={() => setTaskId(task._id)}
+										onClick={() => {
+											localStorage.setItem("task", task._id);
+											setTaskId(task._id);
+										}}
 										className="hover:cursor-pointer font-semibold text-lg leading-none tracking-tight"
 									>
 										{task.title}
