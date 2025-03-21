@@ -2,7 +2,13 @@ import { TaskEvent } from "@/constants";
 import { taskApi } from "@/redux/services/taskApi";
 import { AppDispatch } from "@/redux/store";
 import { Attachment, Comment, Status, Task } from "@/types/task";
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useState,
+} from "react";
 import { useDispatch } from "react-redux";
 
 const SOCKET_URL = "ws://localhost:8080";
@@ -17,329 +23,368 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 	const token = localStorage.getItem("token");
 	const workspaceId = localStorage.getItem("workspace");
 
-	const onStatusChange = (taskId: string, status: Status) => {
-		dispatch(
-			taskApi.util.updateQueryData(
-				"getTasks",
-				{
-					workspaceId,
-					token,
-				},
-				(draft) => {
-					const taskIndex = draft.data.findIndex(
-						(task: Task) => task._id === taskId
-					);
-					if (taskIndex !== -1) {
-						draft.data[taskIndex] = { ...draft.data[taskIndex], status };
+	const onStatusChange = useCallback(
+		(taskId: string, status: Status) => {
+			dispatch(
+				taskApi.util.updateQueryData(
+					"getTasks",
+					{
+						workspaceId,
+						token,
+					},
+					(draft) => {
+						const taskIndex = draft.data.findIndex(
+							(task: Task) => task._id === taskId
+						);
+						if (taskIndex !== -1) {
+							draft.data[taskIndex] = { ...draft.data[taskIndex], status };
+						}
 					}
-				}
-			)
-		);
-		dispatch(
-			taskApi.util.updateQueryData(
-				"getTask",
-				{ workspaceId, taskId },
-				(draft) => {
-					draft.data = { ...draft.data, status };
-				}
-			)
-		);
-		window.dispatchEvent(
-			new CustomEvent("statusChange", { detail: { taskId, status } })
-		);
-	};
-	const onPriorityChange = (taskId: string, priority: string) => {
-		dispatch(
-			taskApi.util.updateQueryData(
-				"getTasks",
-
-				{
-					workspaceId,
-					token,
-				},
-				(_draft) => {
-					const taskIndex = _draft.data.findIndex(
-						(task: Task) => task._id === taskId
-					);
-					if (taskIndex !== -1) {
-						_draft.data[taskIndex] = { ..._draft.data[taskIndex], priority };
+				)
+			);
+			dispatch(
+				taskApi.util.updateQueryData(
+					"getTask",
+					{ workspaceId, taskId },
+					(draft) => {
+						draft.data = { ...draft.data, status };
 					}
-				}
-			)
-		);
+				)
+			);
+			window.dispatchEvent(
+				new CustomEvent("statusChange", { detail: { taskId, status } })
+			);
+		},
+		[workspaceId, token, dispatch]
+	);
 
-		dispatch(
-			taskApi.util.updateQueryData(
-				"getTask",
-				{
-					taskId,
-					workspaceId,
-				},
-				(draft) => {
-					draft.data = { ...draft.data, priority };
-				}
-			)
-		);
-		window.dispatchEvent(
-			new CustomEvent("priorityChange", { detail: { taskId, priority } })
-		);
-	};
-	const onDescriptionChange = (taskId: string, description: string) => {
-		dispatch(
-			taskApi.util.updateQueryData(
-				"getTasks",
+	const onPriorityChange = useCallback(
+		(taskId: string, priority: string) => {
+			dispatch(
+				taskApi.util.updateQueryData(
+					"getTasks",
 
-				{
-					workspaceId,
-					token,
-				},
-				(_draft) => {
-					const taskIndex = _draft.data.findIndex(
-						(task: Task) => task._id === taskId
-					);
-					if (taskIndex !== -1) {
-						_draft.data[taskIndex] = { ..._draft.data[taskIndex], description };
+					{
+						workspaceId,
+						token,
+					},
+					(_draft) => {
+						const taskIndex = _draft.data.findIndex(
+							(task: Task) => task._id === taskId
+						);
+						if (taskIndex !== -1) {
+							_draft.data[taskIndex] = { ..._draft.data[taskIndex], priority };
+						}
 					}
-				}
-			)
-		);
+				)
+			);
 
-		dispatch(
-			taskApi.util.updateQueryData(
-				"getTask",
-				{
-					taskId,
-					workspaceId,
-				},
-				(draft) => {
-					draft.data = { ...draft.data, description };
-				}
-			)
-		);
-		window.dispatchEvent(
-			new CustomEvent("descriptionChange", { detail: { taskId, description } })
-		);
-	};
-	const onTitlechange = (taskId: string, title: string) => {
-		dispatch(
-			taskApi.util.updateQueryData(
-				"getTasks",
-
-				{
-					workspaceId,
-					token,
-				},
-				(_draft) => {
-					const taskIndex = _draft.data.findIndex(
-						(task: Task) => task._id === taskId
-					);
-					if (taskIndex !== -1) {
-						_draft.data[taskIndex] = { ..._draft.data[taskIndex], title };
+			dispatch(
+				taskApi.util.updateQueryData(
+					"getTask",
+					{
+						taskId,
+						workspaceId,
+					},
+					(draft) => {
+						draft.data = { ...draft.data, priority };
 					}
-				}
-			)
-		);
+				)
+			);
+			window.dispatchEvent(
+				new CustomEvent("priorityChange", { detail: { taskId, priority } })
+			);
+		},
+		[workspaceId, token, dispatch]
+	);
 
-		dispatch(
-			taskApi.util.updateQueryData(
-				"getTask",
-				{ taskId, workspaceId },
-				(draft) => {
-					draft.data = { ...draft.data, title };
-				}
-			)
-		);
+	const onDescriptionChange = useCallback(
+		(taskId: string, description: string) => {
+			dispatch(
+				taskApi.util.updateQueryData(
+					"getTasks",
 
-		window.dispatchEvent(
-			new CustomEvent("titleChange", { detail: { taskId, title } })
-		);
-	};
-	const onNewCommentAdded = (taskId: string, comment: Comment) => {
-		dispatch(
-			taskApi.util.updateQueryData(
-				"getTasks",
+					{
+						workspaceId,
+						token,
+					},
+					(_draft) => {
+						const taskIndex = _draft.data.findIndex(
+							(task: Task) => task._id === taskId
+						);
+						if (taskIndex !== -1) {
+							_draft.data[taskIndex] = {
+								..._draft.data[taskIndex],
+								description,
+							};
+						}
+					}
+				)
+			);
 
-				{
-					workspaceId,
-					token,
-				},
-				(_draft) => {
-					const taskIndex = _draft.data.findIndex(
-						(task: Task) => task._id === taskId
-					);
-					if (taskIndex !== -1) {
-						_draft[taskIndex] = {
-							..._draft.data[taskIndex],
-							comments: [..._draft.data[taskIndex].comments, comment],
+			dispatch(
+				taskApi.util.updateQueryData(
+					"getTask",
+					{
+						taskId,
+						workspaceId,
+					},
+					(draft) => {
+						draft.data = { ...draft.data, description };
+					}
+				)
+			);
+			window.dispatchEvent(
+				new CustomEvent("descriptionChange", {
+					detail: { taskId, description },
+				})
+			);
+		},
+		[workspaceId, token, dispatch]
+	);
+
+	const onTitlechange = useCallback(
+		(taskId: string, title: string) => {
+			dispatch(
+				taskApi.util.updateQueryData(
+					"getTasks",
+
+					{
+						workspaceId,
+						token,
+					},
+					(_draft) => {
+						const taskIndex = _draft.data.findIndex(
+							(task: Task) => task._id === taskId
+						);
+						if (taskIndex !== -1) {
+							_draft.data[taskIndex] = { ..._draft.data[taskIndex], title };
+						}
+					}
+				)
+			);
+
+			dispatch(
+				taskApi.util.updateQueryData(
+					"getTask",
+					{ taskId, workspaceId },
+					(draft) => {
+						draft.data = { ...draft.data, title };
+					}
+				)
+			);
+
+			window.dispatchEvent(
+				new CustomEvent("titleChange", { detail: { taskId, title } })
+			);
+		},
+		[workspaceId, token, dispatch]
+	);
+
+	const onNewCommentAdded = useCallback(
+		(taskId: string, comment: Comment) => {
+			dispatch(
+				taskApi.util.updateQueryData(
+					"getTasks",
+
+					{
+						workspaceId,
+						token,
+					},
+					(_draft) => {
+						const taskIndex = _draft.data.findIndex(
+							(task: Task) => task._id === taskId
+						);
+						if (taskIndex !== -1) {
+							_draft[taskIndex] = {
+								..._draft.data[taskIndex],
+								comments: [..._draft.data[taskIndex].comments, comment],
+							};
+						}
+					}
+				)
+			);
+
+			dispatch(
+				taskApi.util.updateQueryData(
+					"getTask",
+					{ taskId, workspaceId },
+					(draft) => {
+						draft.data = {
+							...draft.data,
+							comments: [...draft.data.comments, comment],
 						};
 					}
-				}
-			)
-		);
+				)
+			);
+			window.dispatchEvent(
+				new CustomEvent("newComment", { detail: { taskId, comment } })
+			);
+		},
+		[token, dispatch, workspaceId]
+	);
 
-		dispatch(
-			taskApi.util.updateQueryData(
-				"getTask",
-				{ taskId, workspaceId },
-				(draft) => {
-					draft.data = {
-						...draft.data,
-						comments: [...draft.data.comments, comment],
-					};
-				}
-			)
-		);
-		window.dispatchEvent(
-			new CustomEvent("newComment", { detail: { taskId, comment } })
-		);
-	};
-	const onCommentDelete = (taskId: string, commentId: string) => {
-		dispatch(
-			taskApi.util.updateQueryData(
-				"getTasks",
+	const onCommentDelete = useCallback(
+		(taskId: string, commentId: string) => {
+			dispatch(
+				taskApi.util.updateQueryData(
+					"getTasks",
 
-				{
-					workspaceId,
-					token,
-				},
-				(_draft) => {
-					const taskIndex = _draft.data.findIndex(
-						(task: Task) => task._id === taskId
-					);
-					if (taskIndex !== -1) {
-						_draft.data[taskIndex] = {
-							..._draft.data[taskIndex],
-							comments: _draft.data[taskIndex].comments.filter(
+					{
+						workspaceId,
+						token,
+					},
+					(_draft) => {
+						const taskIndex = _draft.data.findIndex(
+							(task: Task) => task._id === taskId
+						);
+						if (taskIndex !== -1) {
+							_draft.data[taskIndex] = {
+								..._draft.data[taskIndex],
+								comments: _draft.data[taskIndex].comments.filter(
+									(comment: Comment) => comment._id !== commentId
+								),
+							};
+						}
+					}
+				)
+			);
+			dispatch(
+				taskApi.util.updateQueryData(
+					"getTask",
+					{ taskId, workspaceId },
+					(draft) => {
+						draft.data = {
+							...draft.data,
+							comments: draft.data.comments.filter(
 								(comment: Comment) => comment._id !== commentId
 							),
 						};
 					}
-				}
-			)
-		);
-		dispatch(
-			taskApi.util.updateQueryData(
-				"getTask",
-				{ taskId, workspaceId },
-				(draft) => {
-					draft.data = {
-						...draft.data,
-						comments: draft.data.comments.filter(
-							(comment: Comment) => comment._id !== commentId
-						),
-					};
-				}
-			)
-		);
-		window.dispatchEvent(
-			new CustomEvent("commentDelete", { detail: { taskId, commentId } })
-		);
-	};
+				)
+			);
+			window.dispatchEvent(
+				new CustomEvent("commentDelete", { detail: { taskId, commentId } })
+			);
+		},
+		[dispatch, token, workspaceId]
+	);
 
-	const onNewAttachment = (taskId: string, attachment: Attachment[]) => {
-		dispatch(
-			taskApi.util.updateQueryData(
-				"getTasks",
+	const onNewAttachment = useCallback(
+		(taskId: string, attachment: Attachment[]) => {
+			dispatch(
+				taskApi.util.updateQueryData(
+					"getTasks",
 
-				{
-					workspaceId,
-					token,
-				},
-				(_draft) => {
-					const taskIndex = _draft.data.findIndex(
-						(task: Task) => task._id === taskId
-					);
-					if (taskIndex !== -1) {
-						_draft.data[taskIndex] = {
-							..._draft.data[taskIndex],
-							attachments: [
-								..._draft.data[taskIndex].attachments,
-								...attachment,
-							],
+					{
+						workspaceId,
+						token,
+					},
+					(_draft) => {
+						const taskIndex = _draft.data.findIndex(
+							(task: Task) => task._id === taskId
+						);
+						if (taskIndex !== -1) {
+							_draft.data[taskIndex] = {
+								..._draft.data[taskIndex],
+								attachments: [
+									..._draft.data[taskIndex].attachments,
+									...attachment,
+								],
+							};
+						}
+					}
+				)
+			);
+			console.log(attachment);
+			dispatch(
+				taskApi.util.updateQueryData(
+					"getTask",
+					{ taskId, workspaceId },
+					(draft) => {
+						draft.data = {
+							...draft.data,
+							attachments: [...draft.data.attachments, ...attachment],
 						};
 					}
-				}
-			)
-		);
-		console.log(attachment);
-		dispatch(
-			taskApi.util.updateQueryData(
-				"getTask",
-				{ taskId, workspaceId },
-				(draft) => {
-					draft.data = {
-						...draft.data,
-						attachments: [...draft.data.attachments, ...attachment],
-					};
-				}
-			)
-		);
-		window.dispatchEvent(
-			new CustomEvent("newAttachment", { detail: { taskId, attachment } })
-		);
-	};
-	const onAttachmentDelete = (taskId: string, attachmentId: string) => {
-		dispatch(
-			taskApi.util.updateQueryData(
-				"getTasks",
+				)
+			);
+			window.dispatchEvent(
+				new CustomEvent("newAttachment", { detail: { taskId, attachment } })
+			);
+		},
+		[token, workspaceId, dispatch]
+	);
 
-				{
-					workspaceId,
-					token,
-				},
-				(_draft) => {
-					const taskIndex = _draft.data.findIndex(
-						(task: Task) => task._id === taskId
-					);
-					if (taskIndex !== -1) {
-						_draft.data[taskIndex] = {
-							..._draft.data[taskIndex],
-							attachments: _draft.data[taskIndex].attachments.filter(
+	const onAttachmentDelete = useCallback(
+		(taskId: string, attachmentId: string) => {
+			dispatch(
+				taskApi.util.updateQueryData(
+					"getTasks",
+
+					{
+						workspaceId,
+						token,
+					},
+					(_draft) => {
+						const taskIndex = _draft.data.findIndex(
+							(task: Task) => task._id === taskId
+						);
+						if (taskIndex !== -1) {
+							_draft.data[taskIndex] = {
+								..._draft.data[taskIndex],
+								attachments: _draft.data[taskIndex].attachments.filter(
+									(attachment: Attachment) => attachment._id !== attachmentId
+								),
+							};
+						}
+					}
+				)
+			);
+			dispatch(
+				taskApi.util.updateQueryData(
+					"getTask",
+					{ taskId, workspaceId },
+					(draft) => {
+						draft.data = {
+							...draft.data,
+							attachments: draft.data.attachments.filter(
 								(attachment: Attachment) => attachment._id !== attachmentId
 							),
 						};
 					}
-				}
-			)
-		);
-		dispatch(
-			taskApi.util.updateQueryData(
-				"getTask",
-				{ taskId, workspaceId },
-				(draft) => {
-					draft.data = {
-						...draft.data,
-						attachments: draft.data.attachments.filter(
-							(attachment: Attachment) => attachment._id !== attachmentId
-						),
-					};
-				}
-			)
-		);
-		window.dispatchEvent(
-			new CustomEvent("attachmentDelete", { detail: { taskId, attachmentId } })
-		);
-	};
+				)
+			);
+			window.dispatchEvent(
+				new CustomEvent("attachmentDelete", {
+					detail: { taskId, attachmentId },
+				})
+			);
+		},
+		[token, workspaceId, dispatch]
+	);
 
-	const onNewTask = (task: Task) => {
-		dispatch(
-			taskApi.util.updateQueryData(
-				"getTasks",
+	const onNewTask = useCallback(
+		(task: Task) => {
+			dispatch(
+				taskApi.util.updateQueryData(
+					"getTasks",
 
-				{
-					workspaceId,
-					token,
-				},
-				(draft) => {
-					draft.data.push(task);
-				}
-			)
-		);
-		window.dispatchEvent(new CustomEvent("newTask", { detail: { task } }));
-	};
+					{
+						workspaceId,
+						token,
+					},
+					(draft) => {
+						draft.data.push(task);
+					}
+				)
+			);
+			window.dispatchEvent(new CustomEvent("newTask", { detail: { task } }));
+		},
+		[workspaceId, token, dispatch]
+	);
 
 	useEffect(() => {
-		const token = localStorage.getItem("token");
 		const newSocket = new WebSocket(SOCKET_URL, token!);
 		setSocket(newSocket);
 		return () => {
@@ -351,6 +396,7 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 		if (!socket) return;
 		socket.onmessage = (event) => {
 			const message = JSON.parse(event.data.toString());
+			console.log(message, "this is socket provider");
 			switch (message.type) {
 				case TaskEvent.COMMENT_DELETED:
 					onCommentDelete(message.data.taskId, message.data.commentId);
@@ -388,9 +434,12 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 		};
 
 		return () => {
-			socket.close();
+			if (socket) {
+				socket.onmessage = null;
+			}
 		};
 	}, [socket]);
+
 	return (
 		<SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
 	);

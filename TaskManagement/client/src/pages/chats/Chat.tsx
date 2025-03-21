@@ -154,6 +154,7 @@ const WorkspaceChat = () => {
 	useEffect(() => {
 		if (!socket) return;
 
+		console.log("here is comes in chat");
 		socket.onmessage = (event) => {
 			const message = JSON.parse(event.data);
 			switch (message.type) {
@@ -175,6 +176,11 @@ const WorkspaceChat = () => {
 				case ChatEvent.REMOVE_MEMBER:
 					onChatMemberRemoved(message.data.chatId, message.data.memberId);
 					break;
+			}
+		};
+		return () => {
+			if (socket) {
+				socket.onmessage = null;
 			}
 		};
 	}, [socket]);

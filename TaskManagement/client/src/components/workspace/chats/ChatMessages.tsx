@@ -22,7 +22,6 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 	messages,
 	currentMember,
 }) => {
-	console.log(messages, currentMember, "hsdghdsjkgds");
 	const workspaceMembers = useSelector(
 		(state: RootState) => state.Workspaces.workspace.members
 	);
@@ -32,6 +31,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 	useEffect(() => {
 		messageEndRef.current?.scrollIntoView({ behavior: "instant" });
 	}, [messages]);
+
 	return (
 		<ScrollArea className="flex-1 p-4">
 			<div className="space-y-4">
