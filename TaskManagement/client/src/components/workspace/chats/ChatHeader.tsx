@@ -44,7 +44,6 @@ interface IncomingCallProps {
 	callType: string;
 	callFrom: string;
 	chatId: string;
-	offer: RTCSessionDescriptionInit;
 }
 
 type CallOpen = "Video" | "Audio" | "None";
@@ -52,8 +51,8 @@ type CallOpen = "Video" | "Audio" | "None";
 const ChatHeader: React.FC<ChatHeaderProps> = React.memo(
 	({ onBack, currentChat, onDeleteChat }) => {
 		const currentUser = localStorage.getItem("currentUser");
-		const { callOpen, setCallOpen, setRemoteAnswer, createAnswer } =
-			usePeerConnection();
+		const [callOpen, setCallOpen] = useState<CallOpen>("None");
+
 		const [incomingCall, setIncomingCall] = useState<IncomingCallProps | null>(
 			null
 		);
@@ -99,27 +98,39 @@ const ChatHeader: React.FC<ChatHeaderProps> = React.memo(
 			setIncomingCall(null);
 		}, [currentUser, incomingCall, socket]);
 
-		const handleIncomingCallAccepted = useCallback(
-			async (offer: RTCSessionDescriptionInit) => {
-				console.log("this is wher ei incomeing call handle");
-				if (incomingCall) {
-					console.log(incomingCall.offer);
-					const ans = createAnswer(offer);
-					socket?.send(
-						JSON.stringify({
-							type: "call-accepted",
-							data: {
-								chatId: incomingCall.chatId,
-								by: currentUser,
-								answer: ans,
-							},
-						})
-					);
-					setCallOpen(incomingCall.callType as CallOpen);
-					setIncomingCall(null);
-				}
+		const handleIncomingCallAccepted = useCallback(async () => {
+			if (incomingCall) {
+				socket?.send(
+					JSON.stringify({
+						type: "call-accepted",
+						data: {
+							chatId: incomingCall.chatId,
+							by: currentUser,
+							callFrom: incomingCall.callFrom,
+						},
+					})
+				);
+				setCallOpen(incomingCall.callType as CallOpen);
+				setIncomingCall(null);
+			}
+		}, [socket, incomingCall, currentUser]);
+
+		const handleCall = useCallback(
+			(callType: CallOpen) => {
+				socket?.send(
+					JSON.stringify({
+						type: "call-members",
+						data: {
+							callType,
+							from: currentUser,
+							chatMembers: chatUsers,
+							chatId: currentChat._id,
+						},
+					})
+				);
+				setCallOpen(callType);
 			},
-			[socket, incomingCall, currentUser]
+			[socket]
 		);
 
 		useEffect(() => {
@@ -127,14 +138,11 @@ const ChatHeader: React.FC<ChatHeaderProps> = React.memo(
 			socket.onmessage = (event) => {
 				const message = JSON.parse(event.data);
 
-				console.log("jsdfkjshlkejkf");
 				if (message.type === "incoming-call") {
-					console.log(message);
 					setIncomingCall({
 						callFrom: message.data.callFrom,
 						callType: message.data.callType,
 						chatId: message.data.chatId,
-						offer: message.data.offer,
 					});
 				} else if (message.type === "call-accepted") {
 				}
@@ -150,7 +158,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = React.memo(
 					<IncomingCall
 						callDetails={incomingCall}
 						onDecline={() => handleCallRejected()}
-						onAccept={() => handleIncomingCallAccepted(incomingCall.offer)}
+						onAccept={() => handleIncomingCallAccepted()}
 					/>
 				)}
 
@@ -257,7 +265,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = React.memo(
 					</div>
 					<div className="flex items-center gap-2">
 						<Button
-							onClick={() => setCallOpen("Audio")}
+							onClick={() => handleCall("Audio")}
 							variant="ghost"
 							size="icon"
 							className="hidden md:inline-flex"
@@ -265,7 +273,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = React.memo(
 							<Phone className="h-5 w-5" />
 						</Button>
 						<Button
-							onClick={() => setCallOpen("Video")}
+							onClick={() => handleCall("Video")}
 							variant="ghost"
 							size="icon"
 							className="hidden md:inline-flex"

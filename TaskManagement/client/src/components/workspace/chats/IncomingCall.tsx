@@ -8,7 +8,6 @@ interface IncomingCallProps {
 	callDetails: {
 		callType: string;
 		callFrom: string;
-		offer: RTCSessionDescriptionInit;
 		chatId: string;
 	};
 	onAccept: () => void;

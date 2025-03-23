@@ -1,7 +1,7 @@
 import { usePeerConnection } from "@/context/PeerContex";
 import { useSocket } from "@/context/SocketContex";
 import { Mic, MicOff, Phone, Video, VideoOff } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactPlayer from "react-player";
 
 type CallType = "Video" | "Audio";
@@ -22,51 +22,29 @@ const Call: React.FC<CallProps> = ({
 	onHangUp,
 }) => {
 	const {
-		peer,
+		peers,
+		peersRef,
 		createAnswer,
 		createOffer,
 		setRemoteAnswer,
-		setCallOpen,
 		sendStream,
-		remoteStreams,
+		remoteStreamsRef,
 	} = usePeerConnection();
 	const socket = useSocket();
-	const currentUser = localStorage.getItem("currentUser");
 
 	const [isVideo, setIsVideo] = useState(true);
 	const [isAudio, setIsAudio] = useState(true);
 
-	const [currentUserStream, setCurrentUserStream] =
-		useState<MediaStream | null>(null);
+	const [_, forceUpdate] = useState(0);
 
-	const handleNewMemberJoined = useCallback(async () => {
-		const offer = await createOffer();
-		socket?.send(
-			JSON.stringify({
-				type: "call-members",
-				data: {
-					callType,
-					from: callFrom,
-					chatMembers,
-					chatId,
-					offer,
-				},
-			})
-		);
-	}, []);
-
-	const handleCallAccepted = useCallback(
-		async (answer: RTCSessionDescriptionInit) => {
-			await setRemoteAnswer(answer);
-			sendStream(currentUserStream!);
-		},
-		[]
-	);
+	const currentUserRef = useRef<MediaStream | null>(null);
 
 	const handleCallHangUp = useCallback(() => {
-		currentUserStream?.getTracks().forEach((track) => {
+		currentUserRef.current?.getTracks().forEach((track) => {
 			track.stop();
-			currentUserStream.removeTrack(track);
+			if (currentUserRef.current) {
+				currentUserRef.current.removeTrack(track);
+			}
 		});
 		onHangUp();
 	}, []);
@@ -76,42 +54,70 @@ const Call: React.FC<CallProps> = ({
 			audio: true,
 			video: callType === "Video",
 		});
-		setCurrentUserStream(stream);
+		currentUserRef.current = stream;
+		forceUpdate(1);
 	}, []);
 
-	const handleNegotiationNeededEvent = useCallback(() => {
-		const offer = peer?.localDescription;
-		socket?.send(
-			JSON.stringify({
-				type: "call-members",
-				data: {
-					callType,
-					from: callFrom,
-					chatMembers,
-					chatId,
-					offer,
-				},
-			})
-		);
-	}, []);
 
-	useEffect(() => {
-		peer?.addEventListener("negotiationneeded", handleNegotiationNeededEvent);
-		return () => {
-			peer?.removeEventListener(
-				"negotiationneeded",
-				handleNegotiationNeededEvent
+	const handleSendOffer = useCallback(
+		async (callAcceptedUser: string) => {
+			const offer = await createOffer(callAcceptedUser, socket!, callFrom);
+
+			socket?.send(
+				JSON.stringify({
+					type: "receive-offer",
+					data: {
+						to: callAcceptedUser,
+						offer,
+						from: callFrom,
+					},
+				})
 			);
-		};
-	}, []);
+		},
+		[socket]
+	);
+
+	const handleSendAnswer = useCallback(
+		async (offer: RTCSessionDescriptionInit, receiver: string) => {
+			const ans = await createAnswer(offer, receiver, socket!, callFrom);
+
+			socket?.send(
+				JSON.stringify({
+					type: "receive-answer",
+					data: {
+						answer: ans,
+						from: callFrom,
+						to: receiver,
+					},
+				})
+			);
+		},
+		[socket]
+	);
+
+	const handleSetAnswer = useCallback(
+		(answer: RTCSessionDescriptionInit, sender: string) => {
+			setRemoteAnswer(answer, sender);
+			console.log("this stream in hande Set ansee", currentUserRef.current);
+			sendStream(currentUserRef.current!, sender);
+		},
+		[currentUserRef]
+	);
+
+	const handleSetCandidate = useCallback(
+		(candidate: RTCIceCandidate, remoteUser: string) => {
+			const pc = peersRef.current[remoteUser];
+			pc.addIceCandidate(new RTCIceCandidate(candidate));
+		},
+		[peersRef.current]
+	);
 
 	useEffect(() => {
-		handleNewMemberJoined();
 		getCurrentUserMedia();
 		return () => {
-			currentUserStream?.getTracks().forEach((track) => {
+			currentUserRef.current?.getTracks().forEach((track) => {
 				track.stop();
-				currentUserStream.removeTrack(track);
+				currentUserRef.current?.removeTrack(track);
 			});
 		};
 	}, []);
@@ -120,30 +126,39 @@ const Call: React.FC<CallProps> = ({
 		if (!socket) return;
 		socket.onmessage = (event) => {
 			const message = JSON.parse(event.data);
-			if (message.type === "call-accepted") {
-				const answer = message.data.answer;
-				console.log("getting answer form ");
-				handleCallAccepted(answer);
+			if (message.type === "send-offer") {
+				handleSendOffer(message.data.callAcceptedBy);
+			} else if (message.type === "send-answer") {
+				handleSendAnswer(message.data.offer, message.data.to);
+			} else if (message.type === "set-answer") {
+				handleSetAnswer(message.data.answer, message.data.from);
+			} else if (message.type === "set-candidate") {
+				handleSetCandidate(message.data.candidate, message.data.from);
 			}
 		};
 	}, [socket]);
+
 	return (
 		<div className="fixed top-0 left-0 w-full h-full backdrop-blur-md z-10 overflow-y-auto py-16">
 			<div className="relative w-full h-full max-w-2xl mx-auto space-y-6 bg-background text-foreground rounded-lg">
-				<div>
+				<div className="w-24 h-24 rounded-md">
 					<ReactPlayer
-						url={currentUserStream!}
+						height={`100%`}
+						width={`100%`}
+						url={currentUserRef.current!}
 						playing
 					/>
 				</div>
-				<div className="w-full h-full">
-					{remoteStreams.map((stream) => (
+				{remoteStreamsRef.current.map((stream) => (
+					<div className="w-24 h-24 rounded-md">
 						<ReactPlayer
-							key={stream.id}
+							height={`100%`}
+							width={`100%`}
 							url={stream}
+							playing
 						/>
-					))}
-				</div>
+					</div>
+				))}
 				<div className="absolute bottom-10 left-0 w-full flex items-center justify-center gap-16">
 					{isVideo ? (
 						<div
