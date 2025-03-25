@@ -68,6 +68,7 @@ const Signup = () => {
 											<FormLabel htmlFor="email">Email</FormLabel>
 											<FormControl>
 												<Input
+												id="email"
 													placeholder="Enter your email"
 													className="my-2 outline-none border-none bg-gray-800 py-6"
 													{...field}
@@ -90,6 +91,7 @@ const Signup = () => {
 											<FormLabel htmlFor="password">password</FormLabel>
 											<FormControl>
 												<Input
+												id="password"
 													placeholder="Enter your password"
 													className="my-2 outline-none border-none bg-gray-800 py-6"
 													type="password"

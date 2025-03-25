@@ -31,9 +31,9 @@ export const workspaceLoader = async () => {
 			)
 			.unwrap();
 
-		const workspacesResult = await store.dispatch(
-			workspaceApi.endpoints.getWorkspaces.initiate({ workspaceId })
-		);
+		// const workspacesResult = await store.dispatch(
+		// 	workspaceApi.endpoints.getWorkspaces.initiate({ workspaceId })
+		// );
 
 		if (workspaceResult.error || taskResult.error) return redirect("/login");
 		return workspaceResult.data;

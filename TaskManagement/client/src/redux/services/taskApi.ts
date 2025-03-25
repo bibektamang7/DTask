@@ -136,4 +136,5 @@ export const {
 	useUpdateTaskMutation,
 	useAddAssigneeMutation,
 	useRemoveAssigneeMutation,
+	useLazyGetTasksQuery
 } = taskApi;

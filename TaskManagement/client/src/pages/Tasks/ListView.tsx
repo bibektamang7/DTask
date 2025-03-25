@@ -40,7 +40,7 @@ import Loader from "@/components/Loader";
 import AlertBox from "@/components/AlertBox";
 import { useDeleteTask } from "@/hooks/customs/Tasks/useDeleteTask";
 
-export function ListView() {
+const ListView = () => {
 	const [setTaskId]: [setTaskId: React.Dispatch<React.SetStateAction<string>>] =
 		useOutletContext();
 	const { taskData, isLoading } = useTask();
@@ -273,4 +273,6 @@ export function ListView() {
 			</div>
 		</>
 	);
-}
+};
+
+export default ListView;

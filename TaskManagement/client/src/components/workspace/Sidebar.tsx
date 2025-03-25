@@ -130,7 +130,6 @@ const MySidebar: React.FC<MySidebarProps> = ({
 								>
 									<ele.icon className={cn("mr-3 h-4 w-4")} />
 									{ele.title}
-									<SidebarMenuBadge>5</SidebarMenuBadge>
 								</Link>
 							))}
 						</SidebarMenu>
@@ -148,7 +147,6 @@ const MySidebar: React.FC<MySidebarProps> = ({
 								>
 									<ele.icon className={cn("mr-3 h-4 w-4")} />
 									{ele.title}
-									<SidebarMenuBadge>5</SidebarMenuBadge>
 								</Link>
 							))}
 						</SidebarMenu>

@@ -1,18 +1,17 @@
 import {
 	createContext,
-	SetStateAction,
 	useCallback,
 	useContext,
 	useEffect,
-	useMemo,
 	useRef,
 	useState,
 } from "react";
 
 interface PeerContextProps {
-	peers: Record<string, RTCPeerConnection>;
 	peersRef: React.MutableRefObject<Record<string, RTCPeerConnection>>;
-	remoteStreamsRef: React.MutableRefObject<MediaStream[]>;
+	setRemoteStreams: React.Dispatch<
+		React.SetStateAction<Array<{ stream: MediaStream; userId: string }>>
+	>;
 	createAnswer: (
 		offer: RTCSessionDescriptionInit,
 		remoteUser: string,
@@ -29,16 +28,15 @@ interface PeerContextProps {
 		memberId: string
 	) => Promise<void>;
 	sendStream: (stream: MediaStream, memberId: string) => void;
+	remoteStreams: Array<{ stream: MediaStream; userId: string }>;
 }
 
 const PeerContext = createContext<PeerContextProps>({
-	peers: {},
 	peersRef: {
 		current: {},
 	},
-	remoteStreamsRef: {
-		current: [],
-	},
+	setRemoteStreams: () => [],
+	remoteStreams: [],
 	createAnswer: async () => {
 		throw new Error("Function not implemented.");
 	},
@@ -60,10 +58,9 @@ const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
 	const peersRef = useRef<Record<string, RTCPeerConnection>>({});
 
-	const [peers, setPeers] = useState<Record<string, RTCPeerConnection>>({});
-
-	// const peer = useMemo(() => new RTCPeerConnection(), []);
-	const remoteStreamsRef = useRef<MediaStream[]>([]);
+	const [remoteStreams, setRemoteStreams] = useState<
+		Array<{ stream: MediaStream; userId: string }>
+	>([]);
 
 	const createOffer = useCallback(
 		async (remoteUser: string, socket: WebSocket, currentUser: string) => {
@@ -73,10 +70,6 @@ const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
 						urls: "stun:stun.l.google.com:19302",
 					},
 				],
-				iceTransportPolicy: "all",
-				bundlePolicy: "balanced",
-				rtcpMuxPolicy: "require",
-				iceCandidatePoolSize: 0,
 			});
 			pc.onicecandidate = (event) => {
 				if (event.candidate) {
@@ -93,11 +86,26 @@ const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
 				}
 			};
 
-			pc.addEventListener("negotiationneeded", () => {
-				const offer = pc.localDescription;
+			pc.ontrack = (event) => {
+				const stream = event.streams[0];
+				if (stream) {
+					setRemoteStreams((prevStreams) => {
+						const existingStream = prevStreams.find(
+							(s) => s.userId === remoteUser
+						);
+						if (existingStream) {
+							return prevStreams;
+						}
+						return [...prevStreams, { stream, userId: remoteUser }];
+					});
+				}
+			};
+			pc.onnegotiationneeded = async () => {
+				const offer = await pc.createOffer();
+				await pc.setLocalDescription(offer);
 				socket.send(
 					JSON.stringify({
-						type: "receive-offer",
+						type: "nego-needed",
 						data: {
 							offer,
 							to: remoteUser,
@@ -105,7 +113,21 @@ const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
 						},
 					})
 				);
-			});
+			};
+
+			// pc.addEventListener("negotiationneeded", () => {
+			// 	const offer = pc.localDescription;
+			// 	socket.send(
+			// 		JSON.stringify({
+			// 			type: "nego-needed",
+			// 			data: {
+			// 				offer,
+			// 				to: remoteUser,
+			// 				from: currentUser,
+			// 			},
+			// 		})
+			// 	);
+			// });
 
 			const _offer = await pc.createOffer();
 			await pc.setLocalDescription(_offer);
@@ -127,6 +149,17 @@ const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
 			socket: WebSocket,
 			currentUser: string
 		) => {
+			// {
+			// 	iceServers: [
+			// 		{
+			// 			urls: "stun:stun.l.google.com:19302",
+			// 		},
+			// 	],
+			// 	iceTransportPolicy: "all",
+			// 	bundlePolicy: "balanced",
+			// 	rtcpMuxPolicy: "require",
+			// 	iceCandidatePoolSize: 0,
+			// }
 			const pc = new RTCPeerConnection({
 				iceServers: [
 					{
@@ -136,7 +169,6 @@ const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
 				iceTransportPolicy: "all",
 				bundlePolicy: "balanced",
 				rtcpMuxPolicy: "require",
-				iceCandidatePoolSize: 0,
 			});
 
 			pc.onicecandidate = (event) => {
@@ -153,11 +185,28 @@ const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
 					);
 				}
 			};
-			pc.addEventListener("negotiationneeded", () => {
-				const offer = pc.localDescription;
+
+			pc.ontrack = (event) => {
+				const stream = event.streams[0];
+				if (stream) {
+					setRemoteStreams((prevStreams) => {
+						const existingStream = prevStreams.find(
+							(s) => s.userId === remoteUser
+						);
+						if (existingStream) {
+							return prevStreams;
+						}
+						return [...prevStreams, { stream, userId: remoteUser }];
+					});
+				}
+			};
+			pc.onnegotiationneeded = async () => {
+				console.log("negotiation need in answer");
+				const offer = await pc.createOffer();
+				await pc.setLocalDescription(offer);
 				socket.send(
 					JSON.stringify({
-						type: "receive-offer",
+						type: "nego-needed",
 						data: {
 							offer,
 							to: remoteUser,
@@ -165,7 +214,19 @@ const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
 						},
 					})
 				);
-			});
+			};
+
+			// 	socket.send(
+			// 		JSON.stringify({
+			// 			type: "nego-needed",
+			// 			data: {
+			// 				offer,
+			// 				to: remoteUser,
+			// 				from: currentUser,
+			// 			},
+			// 		})
+			// 	);
+			// });
 
 			await pc.setRemoteDescription(new RTCSessionDescription(offer));
 			const _answer = await pc.createAnswer();
@@ -191,7 +252,7 @@ const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
 				await pc.setRemoteDescription(answer);
 			}
 		},
-		[peersRef.current]
+		[peersRef.current, createAnswer, createOffer]
 	);
 
 	const sendStream = useCallback(
@@ -200,53 +261,25 @@ const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
 
 			const _tracks = stream.getTracks();
 			for (const track of _tracks) {
-				const existSender = pc.getSenders();
-				const trackAlreadyAdded = existSender.some(
-					(sender) => sender.track === track
-				);
-				if (!trackAlreadyAdded) {
-					pc.addTrack(track, stream);
-				}
+				pc.addTrack(track, stream);
 			}
-			// const tracks = stream.getTracks();
-			// for (const track of tracks) {
-			// 	peer.addTrack(track, stream);
-			// }
 		},
 		[peersRef.current]
 	);
 
-	const handleTrackEvent = useCallback(
-		(event: RTCTrackEvent) => {
-			const streams = event.streams;
-
-			remoteStreamsRef.current = [...remoteStreamsRef.current, streams[0]];
-		},
-		[remoteStreamsRef.current]
-	);
-
 	useEffect(() => {
-		Object.values(peersRef.current).forEach((peer) => {
-			console.log(remoteStreamsRef.current);
-			peer.addEventListener("track", handleTrackEvent);
-		});
-		return () => {
-			Object.values(peersRef.current).forEach((peer) => {
-				peer.removeEventListener("track", handleTrackEvent);
-			});
-		};
-	}, [peersRef.current]);
-
+		console.log(remoteStreams, "this is remote sterams");
+	}, [remoteStreams]);
 	return (
 		<PeerContext.Provider
 			value={{
-				peers,
 				peersRef,
 				createOffer,
 				createAnswer,
 				setRemoteAnswer,
 				sendStream,
-				remoteStreamsRef,
+				remoteStreams,
+				setRemoteStreams,
 			}}
 		>
 			{children}

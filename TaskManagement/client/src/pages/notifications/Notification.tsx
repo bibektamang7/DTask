@@ -22,7 +22,10 @@ const Notification = () => {
 			<div className="mt-8 px-4">
 				{notifications.length > 0 ? (
 					notifications.map((notification: any) => (
-						<div className="flex items-center justify-between">
+						<div
+							key={notification._id}
+							className="flex items-center justify-between"
+						>
 							<div className="flex gap-4 mt-2">
 								<Avatar className="w-16 h-8">
 									<AvatarImage

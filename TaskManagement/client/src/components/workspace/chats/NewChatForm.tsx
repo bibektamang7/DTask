@@ -81,9 +81,10 @@ const NewChatForm: React.FC<NewChatFormProps> = ({ onClose }) => {
 							name="name"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Chat Name</FormLabel>
+									<FormLabel htmlFor="chatName">Chat Name</FormLabel>
 									<FormControl>
 										<Input
+											id="chatName"
 											placeholder="Enter chat name"
 											{...field}
 										/>
@@ -97,10 +98,11 @@ const NewChatForm: React.FC<NewChatFormProps> = ({ onClose }) => {
 								name="members"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Members</FormLabel>
+										<FormLabel htmlFor="members">Members</FormLabel>
 										<div className="flex gap-4 items-center">
 											<FormControl>
 												<Input
+													id="members"
 													onChange={(e) => setSearchMember(e.target.value)}
 													placeholder="Type email or user name"
 													className="flex-1"

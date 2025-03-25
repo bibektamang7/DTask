@@ -120,9 +120,10 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 							name="title"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Task Title</FormLabel>
+									<FormLabel htmlFor="taskTitle">Task Title</FormLabel>
 									<FormControl>
 										<Input
+											id="taskTitle"
 											placeholder="Title"
 											{...field}
 											required
@@ -138,11 +139,12 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 								name="startDate"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Start Date</FormLabel>
+										<FormLabel htmlFor="startDate">Start Date</FormLabel>
 										<Popover>
 											<PopoverTrigger asChild>
 												<FormControl>
 													<Button
+														id="startDate"
 														variant="outline"
 														className={cn(
 															"w-full pl-3 text-left font-normal",
@@ -180,11 +182,12 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 								name="dueDate"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Due Date</FormLabel>
+										<FormLabel htmlFor="dueDate">Due Date</FormLabel>
 										<Popover>
 											<PopoverTrigger asChild>
 												<FormControl>
 													<Button
+														id="dueDate"
 														variant="outline"
 														className={cn(
 															"w-full pl-3 text-left font-normal",
@@ -225,10 +228,13 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 							name="description"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Description & Attachment</FormLabel>
+									<FormLabel htmlFor="description">
+										Description & Attachment
+									</FormLabel>
 									<FormControl>
 										<div className="space-y-2">
 											<Textarea
+												id="description"
 												placeholder="Add description..."
 												className="min-h-[100px]"
 												{...field}
@@ -315,10 +321,11 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 								name="assignees"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Assignee</FormLabel>
+										<FormLabel htmlFor="assignee">Assignee</FormLabel>
 										<div className="flex gap-4 items-center">
 											<FormControl>
 												<Input
+													id="assignee"
 													onChange={(e) => setSearchMember(e.target.value)}
 													placeholder="Type email or user name"
 													className="flex-1"
@@ -394,14 +401,17 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 								name="priority"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Priority</FormLabel>
+										<FormLabel htmlFor="priority">Priority</FormLabel>
 										<Select
 											onValueChange={field.onChange}
 											defaultValue={field.value}
 										>
 											<FormControl>
 												<SelectTrigger>
-													<SelectValue placeholder="Select priority" />
+													<SelectValue
+														id="priority"
+														placeholder="Select priority"
+													/>
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
@@ -423,14 +433,17 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 								name="status"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Status</FormLabel>
+										<FormLabel htmlFor="status">Status</FormLabel>
 										<Select
 											onValueChange={field.onChange}
 											defaultValue={field.value}
 										>
 											<FormControl>
 												<SelectTrigger>
-													<SelectValue placeholder="Select status" />
+													<SelectValue
+														id="status"
+														placeholder="Select status"
+													/>
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
@@ -453,12 +466,13 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 							name="tags"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Tags</FormLabel>
+									<FormLabel htmlFor="tags">Tags</FormLabel>
 									<FormControl>
 										<div className="flex flex-wrap gap-2">
 											{field.value.length > 0 &&
 												field.value.map((tag: string, index: number) => (
 													<div
+													id="tags"
 														key={index}
 														className="relative flex items-center gap-2 px-2 py-1 rounded-md bg-muted"
 													>

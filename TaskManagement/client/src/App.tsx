@@ -1,25 +1,44 @@
-import React, { Suspense } from "react";
+import React, { Suspense, lazy } from "react";
 import {
 	createBrowserRouter,
 	createRoutesFromElements,
 	Route,
 	RouterProvider,
 } from "react-router";
-import Not_Fount from "./components/Not_Fount";
 
-import Error from "./components/Error";
-import RootLayout from "./components/RootLayout";
-import Home from "./pages/Home";
-import ErrorComponent from "./components/ErrorComponent";
-import Loader from "./components/Loader";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import DashboardPage from "./components/workspace/Dashboard";
-import BoardView from "./pages/Tasks/BoardView";
-import WorkspaceChat from "./pages/chats/Chat";
-import WorkspaceLayout from "./components/workspace/WorkspaceLayout";
-import TaskLayout from "./components/workspace/tasks/TaskLayout";
-import AuthLayout from "./components/AuthLayout";
+const Not_Fount = lazy(() => import("@/components/Not_Fount"));
+
+const Error = lazy(() => import("@/components/Error"));
+// import Error from "./components/Error";
+const RootLayout = lazy(() => import("@/components/RootLayout"));
+// import RootLayout from "./components/RootLayout";
+const Home = lazy(() => import("@/pages/Home"));
+// import Home from "./pages/Home";
+const ErrorComponent = lazy(() => import("@/components/ErrorComponent"));
+// import ErrorComponent from "./components/ErrorComponent";
+const Loader = lazy(() => import("@/components/Loader"));
+// import Loader from "./components/Loader";
+const Login = lazy(() => import("@/pages/Login"));
+// import Login from "./pages/Login";
+const Signup = lazy(() => import("@/pages/Signup"));
+// import Signup from "./pages/Signup";
+const DashboardPage = lazy(() => import("@/components/workspace/Dashboard"));
+// import DashboardPage from "./components/workspace/Dashboard";
+const BoardView = lazy(() => import("@/pages/Tasks/BoardView"));
+// import BoardView from "./pages/Tasks/BoardView";
+const WorkspaceChat = lazy(() => import("@/pages/chats/Chat"));
+
+// import WorkspaceChat from "./pages/chats/Chat";
+// import WorkspaceLayout from "./components/workspace/WorkspaceLayout";
+const WorkspaceLayout = lazy(
+	() => import("@/components/workspace/WorkspaceLayout")
+);
+const TaskLayout = lazy(
+	() => import("@/components/workspace/tasks/TaskLayout")
+);
+// import TaskLayout from "./components/workspace/tasks/TaskLayout";
+const AuthLayout = lazy(() => import("@/components/AuthLayout"));
+// import AuthLayout from "./components/AuthLayout";
 
 import {
 	chatsLoader,
@@ -28,11 +47,17 @@ import {
 	taskLoader,
 	workspaceLoader,
 } from "./helpers/api";
-import { ListView } from "./pages/Tasks/ListView";
-import Task from "./pages/Tasks/Task";
-import CreateWorkspace from "./pages/CreateWorkspace";
-import SetUsername from "./pages/SetUsername";
-import Notification from "./pages/notifications/Notification";
+
+const ListView = lazy(() => import("@/pages/Tasks/ListView"));
+// import { ListView } from "./pages/Tasks/ListView";
+const Task = lazy(() => import("@/pages/Tasks/Task"));
+// import Task from "./pages/Tasks/Task";
+const CreateWorkspace = lazy(() => import("@/pages/CreateWorkspace"));
+// import CreateWorkspace from "./pages/CreateWorkspace";
+const SetUsername = lazy(() => import("@/pages/SetUsername"));
+// import SetUsername from "./pages/SetUsername";
+const Notification = lazy(() => import("@/pages/notifications/Notification"));
+// import Notification from "./pages/notifications/Notification";
 
 const router = createBrowserRouter(
 	createRoutesFromElements(

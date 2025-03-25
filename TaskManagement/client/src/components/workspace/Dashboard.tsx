@@ -28,25 +28,19 @@ import { priorityColors, statusColors, TaskEvent } from "@/constants";
 import { format } from "date-fns";
 import Todo from "./Todo";
 import QuoteOfTheDay from "./QuoteOfTheDay";
-import { useSocket } from "@/context/SocketContex";
 import Loader from "../Loader";
-import { taskApi } from "@/redux/services/taskApi";
 
 type TaskOptionProp = "Todo" | "In Progress" | "Completed";
 
 const DashboardPage = () => {
-	const token = localStorage.getItem("token");
-	const socket = useSocket();
-	const dispatch = useDispatch<AppDispatch>();
-
 	const { taskData, isLoading: taskLoading } = useTask();
 	const { workspaceData, isLoading } = useWorkspace();
+	console.log(isLoading);
 	const workspaceMembers = useSelector(
 		(state: RootState) => state.Workspaces.workspace.members
 	);
-	if (isLoading || taskLoading) return <Loader />;
 
-	const [tasks, setTasks] = useState<Task[]>(taskData);
+	const [tasks, setTasks] = useState<Task[]>([]);
 	const [date, setDate] = useState<Date | undefined>(new Date());
 	const formattedDate = new Date().toLocaleDateString("en-US", {
 		weekday: "long",
@@ -169,33 +163,6 @@ const DashboardPage = () => {
 	const onWorkspaceDeleted = () => {};
 	const onWorkspaceInvitation = () => {};
 
-	useEffect(() => {
-		if (tasks) {
-			const filteredCompletedTasks = taskData.filter(
-				(task: Task) => task.status === "Completed"
-			);
-			const filteredTodoTasks = taskData.filter(
-				(task: Task) => task.status === "Todo"
-			);
-			const filteredInProgressTasks = taskData.filter(
-				(task: Task) => task.status === "In-Progress"
-			);
-			setCompletedTasks(filteredCompletedTasks || []);
-			setTodoTasks(filteredTodoTasks || []);
-			setInProgressTasks(filteredInProgressTasks || []);
-
-			const sevenDaysAgo = new Date();
-			sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-			const recentTasksList = taskData.filter((task: Task) => {
-				const createdAt = new Date(task.createdAt);
-				return createdAt >= sevenDaysAgo;
-			});
-
-			setRecentTasks(recentTasksList);
-		}
-	}, [tasks]);
-
 	const onStatusChange = (
 		event: CustomEvent<{ taskId: string; status: Status }>
 	) => {
@@ -265,63 +232,34 @@ const DashboardPage = () => {
 		};
 	}, []);
 
-	// useEffect(() => {
-	// 	if (!socket) return;
-	// 	socket.onmessage = (event) => {
-	// 		const message = JSON.parse(event.data.toString());
-	// 		switch (message.type) {
-	// 			case "workspaceCreated":
-	// 				onWorkspaceCreated();
-	// 				break;
+	useEffect(() => {
+		if (tasks) {
+			const filteredCompletedTasks = taskData.filter(
+				(task: Task) => task.status === "Completed"
+			);
+			const filteredTodoTasks = taskData.filter(
+				(task: Task) => task.status === "Todo"
+			);
+			const filteredInProgressTasks = taskData.filter(
+				(task: Task) => task.status === "In-Progress"
+			);
+			setCompletedTasks(filteredCompletedTasks || []);
+			setTodoTasks(filteredTodoTasks || []);
+			setInProgressTasks(filteredInProgressTasks || []);
 
-	// 			case "workspaceDeleted":
-	// 				onWorkspaceDeleted();
-	// 				break;
-	// 			case "workspaceNameUpdate":
-	// 				onWorkspaceNameUpdated();
-	// 				break;
-	// 			case "removeMemberFromWorkspace":
-	// 				onRemoveMemberFromWorkspace();
-	// 				break;
-	// 			case "workspaceInvitation":
-	// 				onWorkspaceInvitation();
-	// 				break;
-	// 			case TaskEvent.COMMENT_DELETED:
-	// 				onCommentDelete(message.data.taskId, message.data.commentId);
-	// 				break;
+			const sevenDaysAgo = new Date();
+			sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-	// 			case TaskEvent.DELETE_ATTACHMENT:
-	// 				onAttachmentDelete(message.data.taskId, message.data.attachmentId);
+			const recentTasksList = taskData.filter((task: Task) => {
+				const createdAt = new Date(task.createdAt);
+				return createdAt >= sevenDaysAgo;
+			});
 
-	// 				break;
-	// 			case TaskEvent.NEW_ATTACHMENT:
-	// 				onNewAttachment(message.data.taskId, message.data.attachment);
-	// 				break;
-	// 			case TaskEvent.NEW_TASK_ADDED:
-	// 				onNewTask(message.data.task);
-	// 				break;
-	// 			case TaskEvent.TASK_DATE_CHANGED:
-	// 				// TODO:THIS IS NOT IMPLEMENTED FOR NOW
-	// 				break;
-	// 			case TaskEvent.TASK_DESCRIPTION_CHANGED:
-	// 				onDescriptionChange(message.data.taskId, message.data.description);
-	// 				break;
-	// 			case TaskEvent.TASK_PRIORITY_CHANGED:
-	// 				onPriorityChange(message.data.taskId, message.data.priority);
-	// 				break;
-	// 			case TaskEvent.TASK_STATUS_CHANGED:
-	// 				onStatusChange(message.data.taskId, message.data.status);
-	// 				break;
-	// 			case TaskEvent.TASK_TITLE_CHANGED:
-	// 				onTitlechange(message.data.taskId, message.data.title);
-	// 				break;
-	// 			case TaskEvent.NEW_COMMENT:
-	// 				onNewCommentAdded(message.data.taskId, message.data.comment);
-	// 				break;
-	// 		}
-	// 	};
-	// }, [socket]);
+			setRecentTasks(recentTasksList);
+		}
+	}, [tasks]);
 
+	if (isLoading || taskLoading) return <h1>loading...</h1>;
 	return (
 		<main className="relative lg:flex lg:flex-1 w-full">
 			<div className="w-full pl-2">

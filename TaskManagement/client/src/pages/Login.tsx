@@ -57,6 +57,7 @@ const Login = () => {
 							<div className="flex flex-col flex-1 my-4">
 								<label htmlFor="email">Email</label>
 								<Input
+								id="email"
 									placeholder="Enter your email"
 									defaultValue={email}
 									onChange={(e) => setEmail(e.target.value)}
@@ -66,6 +67,7 @@ const Login = () => {
 							<div className="flex flex-col my-4">
 								<label htmlFor="password">Password</label>
 								<Input
+								id="password"
 									placeholder="Enter your password"
 									type="password"
 									onChange={(e) => setPassword(e.target.value)}
