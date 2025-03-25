@@ -1,0 +1,1 @@
+{"root":["./src/constants.ts","./src/index.ts","./src/user.ts","./src/workspace.ts","./src/workspacemanager.ts","./src/helpers/index.ts","./src/helpers/redisconnection.ts","./src/services/chats/chat.ts","./src/services/chats/chatmanager.ts","./src/services/tasks/task.ts","./src/services/tasks/taskmanager.ts"],"version":"5.7.3"}
