@@ -2,7 +2,7 @@ import { usePeerConnection } from "@/context/PeerContex";
 import { useSocket } from "@/context/SocketContex";
 import { cn } from "@/lib/utils";
 import { Mic, MicOff, Phone, Video, VideoOff } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactPlayer from "react-player";
 
 type CallType = "Video" | "Audio";
@@ -15,13 +15,7 @@ interface CallProps {
 	onHangUp: () => void;
 }
 
-const Call: React.FC<CallProps> = ({
-	chatId,
-	chatMembers,
-	callType,
-	callFrom,
-	onHangUp,
-}) => {
+const Call: React.FC<CallProps> = ({ callType, callFrom, onHangUp }) => {
 	const {
 		peersRef,
 		createAnswer,
@@ -220,7 +214,7 @@ const Call: React.FC<CallProps> = ({
 			<div className="relative w-full h-full max-w-2xl mx-auto space-y-6 bg-background text-foreground rounded-lg">
 				<div
 					className={cn(
-						"grid relative",
+						"grid relative items-center justify-center gap-4",
 						remoteStreams.length === 1
 							? "grid-rows-1"
 							: "grid-rows-[200px_minmax(900px, 1fr)_100px]"

@@ -1,9 +1,7 @@
-import React from 'react'
+import React from "react";
+import { Loader } from "lucide-react";
+const LoaderComponent = () => {
+	return <Loader className="animate-spin" />;
+};
 
-const Loader = () => {
-  return (
-    <div>Loader</div>
-  )
-}
-
-export default Loader
+export default LoaderComponent;

@@ -28,7 +28,6 @@ import { priorityColors, statusColors, TaskEvent } from "@/constants";
 import { format } from "date-fns";
 import Todo from "./Todo";
 import QuoteOfTheDay from "./QuoteOfTheDay";
-import Loader from "../Loader";
 
 type TaskOptionProp = "Todo" | "In Progress" | "Completed";
 

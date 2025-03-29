@@ -2,7 +2,6 @@
 // import { User } from "./user";
 import { userManager } from "./user";
 
-import { createClient } from "redis";
 import { socketClient } from "./helpers/redisConnection";
 // import { socketSubscriber } from ".";
 import { socketBroadcast } from "./helpers";

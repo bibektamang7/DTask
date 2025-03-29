@@ -18,7 +18,7 @@ import { CommentModel } from "../models/tasks/comment.model";
 import { createClient } from "redis";
 import { TodoModel } from "../models/workspaces/todo.model";
 
-const workspaceClient = createClient({ url: "redis://localhost:6379" });
+const workspaceClient = createClient({ url: process.env.REDIS_URL });
 const publisher = workspaceClient.duplicate();
 
 (async () => {
@@ -272,11 +272,11 @@ const getWorkspaces = asyncHandler(async (req, res) => {
 	});
 	res.status(200).json(new ApiResponse(200, workspaces));
 });
+
 const getWorkspace = asyncHandler(async (req, res) => {
 	const { workspaceId } = req.query;
 	const userId = req.member._id;
 
-	console.log("domt ot sca,e jere")
 	if (!workspaceId && !userId) {
 		throw new ApiError(400, "Workspace ID or User ID is required");
 	}
@@ -284,6 +284,8 @@ const getWorkspace = asyncHandler(async (req, res) => {
 	const matchCondition = workspaceId
 		? { _id: new mongoose.Types.ObjectId(workspaceId.toString()) }
 		: { owner: userId };
+
+	console.log(matchCondition);
 	const workspace = await WorkspaceModel.aggregate([
 		{
 			$match: matchCondition,
@@ -352,6 +354,7 @@ const getWorkspace = asyncHandler(async (req, res) => {
 			},
 		},
 	]);
+	console.log(workspace.length);
 
 	if (workspace.length < 1) {
 		throw new ApiError(404, "Workspace not found");

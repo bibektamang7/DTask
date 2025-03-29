@@ -1,6 +1,6 @@
 import { createClient } from "redis";
 
-const socketClient = createClient({ url: "redis://localhost:6379" });
+const socketClient = createClient({ url: process.env.REDIS_URL });
 
 (async () => {
 	await socketClient.connect();

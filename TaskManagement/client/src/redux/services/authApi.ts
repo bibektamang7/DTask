@@ -21,6 +21,7 @@ export const authApi = createApi({
 		registerWithGoogle: builder.mutation({
 			query: () => ({
 				url: "/users/google",
+				redirect: "follow",
 				method: "GET",
 			}),
 		}),

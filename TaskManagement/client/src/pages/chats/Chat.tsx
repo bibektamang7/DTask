@@ -73,6 +73,7 @@ const WorkspaceChat = () => {
 	const onNewChat = useCallback((chat: ChatSchema) => {
 		setChats((prev) => [chat, ...prev]);
 	}, []);
+
 	const onMessageDelete = useCallback((chatId: string, messageId: string) => {
 		if (chatId === selectedChat?._id) {
 			selectedChat.messages.filter((message) => message._id !== messageId);
@@ -154,7 +155,6 @@ const WorkspaceChat = () => {
 	useEffect(() => {
 		if (!socket) return;
 
-		console.log("here is comes in chat");
 		socket.onmessage = (event) => {
 			const message = JSON.parse(event.data);
 			switch (message.type) {
@@ -189,7 +189,6 @@ const WorkspaceChat = () => {
 		<>
 			{isNewChat && <NewChatForm onClose={() => setIsNewChat(false)} />}
 			<div className="w-full flex bg-background">
-				{/* Mobile view */}
 				<div className="md:hidden flex flex-col w-full">
 					{showMobileChatList ? (
 						<>
@@ -230,7 +229,6 @@ const WorkspaceChat = () => {
 					)}
 				</div>
 
-				{/* Desktop view */}
 				<div className="hidden md:flex w-full">
 					<div className="w-80 max-h-screen scrollbar-hidden overflow-scroll border-r border-border">
 						<div className="p-4 border-b border-borderi flex items-center justify-between">

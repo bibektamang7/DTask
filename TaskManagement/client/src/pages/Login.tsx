@@ -26,7 +26,10 @@ const Login = () => {
 	};
 	const handleSignInWithGoogle = async () => {
 		try {
-			const resposne = await loginWithGoogle({}).unwrap();
+			window.location.href =
+				"https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=125780096909-ja70oupd020o9td6prm5hceg61j1a3ra.apps.googleusercontent.com&redirect_uri=http://localhost:8000/api/v1/users/auth/google/callback&scope=profile email";
+
+			// const resposne = await loginWithGoogle({}).unwrap();
 		} catch (error) {
 			console.log("something went wrong");
 		}
@@ -43,7 +46,9 @@ const Login = () => {
 		<section className="w-full min-h-screen h-full p-8">
 			<div className="hidden lg:w-[50%]">hello</div>
 			<div className="lg:w-[50%] w-full h-full flex flex-col items-center justify-between">
-				<h1 className="text-2xl text-center mb-16">Denzo</h1>
+				<h1 className="text-2xl text-center mb-16">
+					<Link to={`/`}>Denzo</Link>
+				</h1>
 				<div className="lg:mx-20 flex flex-col items-center justify-between">
 					<h2 className="text-4xl my-4 text-center">Welcome Back</h2>
 					<div className="flex flex-col">
@@ -57,7 +62,7 @@ const Login = () => {
 							<div className="flex flex-col flex-1 my-4">
 								<label htmlFor="email">Email</label>
 								<Input
-								id="email"
+									id="email"
 									placeholder="Enter your email"
 									defaultValue={email}
 									onChange={(e) => setEmail(e.target.value)}
@@ -67,7 +72,7 @@ const Login = () => {
 							<div className="flex flex-col my-4">
 								<label htmlFor="password">Password</label>
 								<Input
-								id="password"
+									id="password"
 									placeholder="Enter your password"
 									type="password"
 									onChange={(e) => setPassword(e.target.value)}

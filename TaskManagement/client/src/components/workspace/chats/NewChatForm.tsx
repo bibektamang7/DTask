@@ -33,6 +33,10 @@ const NewChatForm: React.FC<NewChatFormProps> = ({ onClose }) => {
 	});
 
 	const onSubmit = async (data: any) => {
+		if (form.watch("members").length === 0) {
+			alert("At least one member required");
+			return;
+		}
 		const response = await handleCreateChat(data);
 		if (response.success) {
 			onClose();

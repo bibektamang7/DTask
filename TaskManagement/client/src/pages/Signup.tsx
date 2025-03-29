@@ -58,7 +58,10 @@ const Signup = () => {
 							Embrace productivity and efficiency by optimizing your tasks
 						</p>
 						<FormProvider {...form}>
-							<form onSubmit={form.handleSubmit(handleRegister)} className="flex flex-col gap-4">
+							<form
+								onSubmit={form.handleSubmit(handleRegister)}
+								className="flex flex-col gap-4"
+							>
 								<FormField
 									control={form.control}
 									name="email"
@@ -68,7 +71,7 @@ const Signup = () => {
 											<FormLabel htmlFor="email">Email</FormLabel>
 											<FormControl>
 												<Input
-												id="email"
+													id="email"
 													placeholder="Enter your email"
 													className="my-2 outline-none border-none bg-gray-800 py-6"
 													{...field}
@@ -91,7 +94,7 @@ const Signup = () => {
 											<FormLabel htmlFor="password">password</FormLabel>
 											<FormControl>
 												<Input
-												id="password"
+													id="password"
 													placeholder="Enter your password"
 													className="my-2 outline-none border-none bg-gray-800 py-6"
 													type="password"
@@ -118,7 +121,7 @@ const Signup = () => {
 							</form>
 						</FormProvider>
 						<div>
-							<Button className="w-full py-5 bg-gray-900 border-2 border-slate-500 my-4">
+							<Button className="w-full py-5 bg-gray-900 text-white border-2 border-slate-500 my-4 hover:bg-slate-700">
 								<img
 									width={20}
 									height={20}

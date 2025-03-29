@@ -21,13 +21,10 @@ const isMemberInWorkspace = async (memberId: string) => {
 	return !!member;
 };
 
-const chatClient = createClient({ url: "redis://localhost:6379" });
+const chatClient = createClient({ url: process.env.REDIS_URL });
 chatClient.connect().then(() => console.log("Chat client connected"));
 
 const createChat = asyncHandler(async (req, res) => {
-	if (req.workspaceMember.role === "Member") {
-		throw new ApiError(401, "Unauthorized to edit");
-	}
 	const parsedData = createChatSchema.safeParse(req.body);
 
 	if (!parsedData.success) {

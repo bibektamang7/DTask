@@ -16,7 +16,7 @@ import { uploadOnCloudinary } from "../helpers/fileUpload.cloudinary";
 import { createClient } from "redis";
 import { NotificationModel } from "../models/notification.model";
 
-const taskClient = createClient({ url: "redis://localhost:6379" });
+const taskClient = createClient({ url: process.env.REDIS_URL });
 taskClient.connect().then(() => console.log("Task client connected"));
 
 const isMemberInWorkspace = async (memberId: string) => {
@@ -286,6 +286,9 @@ const getTask = asyncHandler(async (req, res) => {
 });
 
 const updateTask = asyncHandler(async (req, res) => {
+	if (req.workspaceMember.role === "Member") {
+		throw new ApiError(401, "Unauthorized to edit");
+	}
 	const { taskId } = req.params;
 	if (!taskId) {
 		throw new ApiError(400, "Task is required");

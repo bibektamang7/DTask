@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "../ui/button";
+import { Link } from "react-router";
 
 const ReadyElevate = () => {
 	return (
@@ -14,10 +15,19 @@ const ReadyElevate = () => {
 					Join Denzo today and boost your team's productivity with powerful task
 					management tools. Simplify your projects and stay organized.
 				</p>
-				<Button className="mt-4">Get Started</Button>
+				<Link
+					to={`/login`}
+					className="w-full h-full"
+				>
+					<Button className="mt-4 w-full">Get Started</Button>
+				</Link>
 			</div>
 			<div className="hidden">
-				<img className="" src="/1.png" alt="" />
+				<img
+					className=""
+					src="/1.png"
+					alt=""
+				/>
 			</div>
 		</section>
 	);

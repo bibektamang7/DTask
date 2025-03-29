@@ -6,7 +6,7 @@ import Footer from "./landing_page/Footer";
 const RootLayout = () => {
 	return (
 		<div className="min-w-full min-h-screen">
-			<div className="lg:mx-52 overflow-hidden">
+			<div className="lg:mx-40 overflow-hidden">
 				<Header />
 				<Outlet />
 			</div>

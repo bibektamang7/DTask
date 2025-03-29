@@ -14,7 +14,7 @@ import mongoose from "mongoose";
 
 import { createClient } from "redis";
 
-const userClient = createClient({ url: "redis://localhost:6379" });
+const userClient = createClient({ url: process.env.REDIS_URL });
 userClient.connect().then(() => console.log("User client is connected"));
 
 const encryptPassword = async (password: string) => {
@@ -145,7 +145,6 @@ const userLoginWithEmailAndPassword = asyncHandler(async (req, res) => {
 	if (!isPasswordCorrect) {
 		throw new ApiError(400, "Incorrect password");
 	}
-	
 
 	const { refreshToken, accessToken } = generateAccessAndRefreshToken(
 		user._id.toString()
@@ -177,7 +176,8 @@ const userLoginWithEmailAndPassword = asyncHandler(async (req, res) => {
 });
 
 const userSignIn = asyncHandler(async (req, res) => {
-	const { user } = req.user as { user: User };
+	console.log("this is user signin", req.user);
+	const user = req.user as User;
 	const { accessToken, refreshToken } = generateAccessAndRefreshToken(
 		user._id.toString()
 	);
