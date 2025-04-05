@@ -46,14 +46,12 @@ const Signup = () => {
 	};
 
 	return (
-		<section className="w-full min-h-screen h-full p-8">
-			<div className="hidden lg:w-[50%]">hello</div>
-			<div className="lg:w-[50%] w-full h-full flex flex-col items-center justify-between">
-				{/* <h1 className="text-2xl text-center mb-16">Denzo</h1> */}
-				<div className="lg:mx-20 flex flex-col items-center justify-between">
+		<section className="w-full max-h-screen h-screen p-8">
+			<div className="lg:w-[50%] w-full h-full flex flex-col items-center justify-center">
+				<div className="lg:mx-20 h-full flex flex-col items-center justify-center">
 					<h2 className="text-4xl my-4 text-center">Create an account</h2>
 					<div className="flex flex-col">
-						<p className="text-sm font-extralight text-center text-gray-400">
+						<p className="text-sm font-extralight mb-6  text-center text-gray-400">
 							Embrace productivity and efficiency by optimizing your tasks
 						</p>
 						<FormProvider {...form}>
@@ -129,8 +127,7 @@ const Signup = () => {
 							</Button>
 						</div>
 					</div>
-				</div>
-				<div className="flex">
+
 					<p className="text-sm text-gray-500">
 						Already have an account?
 						<Link

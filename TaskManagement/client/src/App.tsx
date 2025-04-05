@@ -47,6 +47,11 @@ import {
 	taskLoader,
 	workspaceLoader,
 } from "./helpers/api";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import MobileApp from "./pages/MobileApp";
+import Pricing from "./pages/Pricing";
+import Feature from "./pages/Feature";
 
 const ListView = lazy(() => import("@/pages/Tasks/ListView"));
 // import { ListView } from "./pages/Tasks/ListView";
@@ -65,12 +70,31 @@ const router = createBrowserRouter(
 			<Route
 				path="/"
 				element={<RootLayout />}
-				errorElement={<Error />}
-			>
+				errorElement={<Error />}>
 				<Route
 					index
 					element={<Home />}
 					errorElement={<ErrorComponent />}
+				/>
+				<Route
+					path="/about"
+					element={<About />}
+				/>
+				<Route
+					path="/features"
+					element={<Feature />}
+				/>
+				<Route
+					path="/pricing"
+					element={<Pricing />}
+				/>
+				<Route
+					path="/app"
+					element={<MobileApp />}
+				/>
+				<Route
+					path="/contact"
+					element={<Contact />}
 				/>
 			</Route>
 			<Route
@@ -90,8 +114,7 @@ const router = createBrowserRouter(
 					<AuthLayout>
 						<WorkspaceLayout />
 					</AuthLayout>
-				}
-			>
+				}>
 				<Route
 					index
 					element={<DashboardPage />}
@@ -105,8 +128,7 @@ const router = createBrowserRouter(
 				<Route
 					path="tasks"
 					element={<TaskLayout />}
-					loader={taskLoader}
-				>
+					loader={taskLoader}>
 					<Route
 						index
 						element={<ListView />}

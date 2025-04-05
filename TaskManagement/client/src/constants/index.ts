@@ -19,8 +19,12 @@ const HeaderList = [
 		redirect: "/pricing",
 	},
 	{
-		title: "Blog",
-		redirect: "/blog",
+		title: "App",
+		redirect: "/app",
+	},
+	{
+		title: "contact",
+		redirect: "/contact",
 	},
 ];
 

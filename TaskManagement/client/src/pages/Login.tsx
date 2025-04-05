@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 // import { useRegisterWithGoogleMutation } from "@/redux/services/authApi";
 import { cn } from "@/lib/utils";
@@ -43,11 +43,12 @@ const Login = () => {
 
 	return (
 		<section className="w-full min-h-screen h-full p-8">
-			<div className="hidden lg:w-[50%]">hello</div>
 			<div className="lg:w-[50%] w-full h-full flex flex-col items-center justify-between">
-				<h1 className="text-2xl text-center mb-16">
-					<Link to={`/`}>Denzo</Link>
-				</h1>
+				<Link
+					to={`/`}
+					className="text-gradient">
+					<h1 className="text-4xl text-center mb-16">Donezo</h1>
+				</Link>
 				<div className="lg:mx-20 flex flex-col items-center justify-between">
 					<h2 className="text-4xl my-4 text-center">Welcome Back</h2>
 					<div className="flex flex-col">
@@ -56,8 +57,7 @@ const Login = () => {
 						</p>
 						<form
 							action=""
-							onSubmit={handleLogin}
-						>
+							onSubmit={handleLogin}>
 							<div className="flex flex-col flex-1 my-4">
 								<label htmlFor="email">Email</label>
 								<Input
@@ -81,8 +81,7 @@ const Login = () => {
 							<div className="flex items-center justify-between">
 								<div
 									onClick={() => setIsRemember((prev) => !prev)}
-									className="flex items-center space-x-2"
-								>
+									className="flex items-center space-x-2">
 									<input
 										checked={isRemember}
 										type="checkbox"
@@ -90,15 +89,13 @@ const Login = () => {
 									/>
 									<label
 										htmlFor="terms"
-										className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-									>
+										className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
 										Remember me
 									</label>
 								</div>
 								<Link
 									className="text-sm"
-									to={`/forgot-password`}
-								>
+									to={`/forgot-password`}>
 									Forgot Password?
 								</Link>
 							</div>
@@ -107,16 +104,14 @@ const Login = () => {
 									"w-full mt-12 py-5",
 									isLoading ? "bg-red-600" : ""
 								)}
-								type="submit"
-							>
+								type="submit">
 								Sign In
 							</Button>
 						</form>
 						<div>
 							<Button
 								className="w-full py-5 text-white hover:bg-slate-700 outline-none bg-gray-900 border-2 border-slate-500 my-4"
-								onClick={handleSignInWithGoogle}
-							>
+								onClick={handleSignInWithGoogle}>
 								<img
 									width={20}
 									height={20}
@@ -133,8 +128,7 @@ const Login = () => {
 						Don't have an account?
 						<Link
 							className="text-white font-normal"
-							to={`/signup`}
-						>
+							to={`/signup`}>
 							{" "}
 							Sign Up
 						</Link>

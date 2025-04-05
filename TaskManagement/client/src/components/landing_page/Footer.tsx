@@ -79,7 +79,7 @@ const FooterLink = () => {
 const Footer = () => {
 	return (
 		<section className="overflow-hidden">
-			<div className="flex flex-col lg:flex-row items-center justify-start gap-8 lg:gap-40 border-t-2 border-gray-500 py-8 lg:px-16">
+			<div className="flex flex-col md:flex-row items-center justify-start gap-8 md:gap-40 border-t-2 border-gray-500 py-8 md:px-16">
 				<div className="flex flex-col gap-4">
 					<strong className="text-4xl">Denzo</strong>
 					<p className="text-sm font-extralight text-gray-400">

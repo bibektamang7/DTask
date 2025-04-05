@@ -1,14 +1,15 @@
-import { Link} from "react-router";
+import { Link } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import Benifit from "@/components/landing_page/Benifit";
 import ReadyElevate from "@/components/landing_page/ReadyElevate";
 import Features from "@/components/landing_page/Features";
+import JoinUs from "@/components/landing_page/JoinUs";
 
 const Home = () => {
 	return (
 		<section className="py-12 px-4">
-			<h2 className="text-4xl font-semibold md:leading-[4.3rem] md:text-6xl text-center">
+			<h2 className="text-gradient text-4xl font-semibold md:leading-[4.3rem] md:text-6xl text-center">
 				Effortless Task
 				<br />
 				Management for your Team
@@ -32,6 +33,7 @@ const Home = () => {
 			</div>
 			<Features />
 			<Benifit />
+			<JoinUs />
 			<ReadyElevate />
 		</section>
 	);

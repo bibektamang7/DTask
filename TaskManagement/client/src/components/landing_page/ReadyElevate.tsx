@@ -5,7 +5,7 @@ const ReadyElevate = () => {
 	return (
 		<section className="w-full py-12 border-2 border-slate-800 rounded-lg lg:mx-auto">
 			<div className="flex flex-col px-6">
-				<h3 className="text-center font-semibold tracking-tighter leading-6 text-2xl lg:text-4xl">
+				<h3 className="text-gradient text-center font-semibold tracking-tighter leading-6 text-2xl lg:text-4xl">
 					Ready to streamline
 					<br />
 					your workflow?
@@ -16,8 +16,7 @@ const ReadyElevate = () => {
 				</p>
 				<Link
 					to={`/login`}
-					className="w-full h-full"
-				>
+					className="w-full h-full">
 					<Button className="mt-4 w-full">Get Started</Button>
 				</Link>
 			</div>

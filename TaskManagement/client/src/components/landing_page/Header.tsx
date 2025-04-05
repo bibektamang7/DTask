@@ -7,30 +7,25 @@ import { DropdownMenuContent, DropdownMenuTrigger } from "../ui/dropdown-menu";
 
 const Header = () => {
 	return (
-		<div className="px-4 py-2 flex items-center justify-between">
-			{/* <div className="w-24 h-10">
-				<img
-					style={{ width: "100%", height: "100%" }}
-					src="./donezo.svg"
-					alt="Donezo logo"
-				/>{" "}
-				{/* TODO:Lazy load this image */}
-			{/* </div> */}
-			<h2 className="text-sm font-semibold">
+		<section className="xl:px-4 py-2 flex items-center justify-between">
+			<div className="lg:w-32 w-28  hover:scale-110">
 				<Link
 					to={`/`}
-					className="text-inherit font-semibold"
-				>
-					Denezo
+					className="w-full h-full">
+					<img
+						style={{ width: "100%", height: "100%" }}
+						src="./donezo.svg"
+						alt="Donezo logo"
+						loading="lazy"
+					/>
 				</Link>
-			</h2>
-			<ul className="hidden lg:flex lg:items-center lg:justify-between lg:flex-1 lg:mx-28 lg:gap-4">
+			</div>
+			<ul className="hidden  xl:mx-28   lg:flex lg:items-center lg:justify-between lg:flex-1 lg:px-8  lg:gap-4">
 				{HeaderList.map((element, index) => (
 					<NavLink
 						className={`text-sm`}
 						to={element.redirect}
-						key={`${element.title}${index}`}
-					>
+						key={`${element.title}${index}`}>
 						<li>{element.title}</li>
 					</NavLink>
 				))}
@@ -41,7 +36,7 @@ const Header = () => {
 				</DropdownMenuTrigger>
 				<DropdownMenuContent className="absolute right-0 flex items-start flex-col pl-2 gap-4">
 					{HeaderList.map((element) => (
-						<DropdownMenuItem>
+						<DropdownMenuItem key={element.title}>
 							<Link to={element.redirect}>{element.title}</Link>
 						</DropdownMenuItem>
 					))}
@@ -64,7 +59,7 @@ const Header = () => {
 					<Button className="font-medium text-sm">Sign up</Button>
 				</Link>
 			</div>
-		</div>
+		</section>
 	);
 };
 
