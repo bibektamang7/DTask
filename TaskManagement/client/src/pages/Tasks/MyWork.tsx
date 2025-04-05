@@ -14,7 +14,7 @@ interface MyWorkProps {
 }
 
 const MyWork: React.FC<MyWorkProps> = ({ activities, comments }) => {
-	const [myActivities, setMyActivities] = useState<Notification[]>([]);
+	const [_, setMyActivities] = useState<Notification[]>([]);
 	const [myComments, setMyComments] = useState<Comment[]>([]);
 	const assignees = useSelector(
 		(state: RootState) => state.Workspaces.workspace.members

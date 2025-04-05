@@ -1,4 +1,3 @@
-import React from "react";
 import { Outlet } from "react-router";
 import Header from "./landing_page/Header";
 import Footer from "./landing_page/Footer";

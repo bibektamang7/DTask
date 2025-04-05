@@ -1,5 +1,4 @@
 import { User } from "@/types/user";
-import { Action } from "@radix-ui/react-toast";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface UserInitialStateProps {

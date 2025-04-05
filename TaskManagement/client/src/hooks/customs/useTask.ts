@@ -1,6 +1,5 @@
 import {
 	useGetTasksQuery,
-	useLazyGetTasksQuery,
 } from "@/redux/services/taskApi";
 import { redirect } from "react-router";
 

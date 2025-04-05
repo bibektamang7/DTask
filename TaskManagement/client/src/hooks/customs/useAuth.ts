@@ -1,6 +1,4 @@
-import { setUser } from "@/redux/features/authSlice";
 import { useLoginUserMutation } from "@/redux/services/authApi";
-import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
 import { useToast } from "../use-toast";
 

@@ -1,5 +1,5 @@
 import useCreateTask from "@/hooks/customs/useCreateTask";
-import { CalendarIcon, Link2, Paperclip, SmilePlus, X } from "lucide-react";
+import { CalendarIcon, Link2, Paperclip } from "lucide-react";
 import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
@@ -27,8 +27,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { useForm, UseFormReturn } from "react-hook-form";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 
@@ -105,16 +105,14 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 			<div className="relative w-full max-w-2xl mx-auto p-6 space-y-6 bg-background text-foreground rounded-lg">
 				<p
 					className="absolute right-7 font-extralight hover:cursor-pointer text-sm top-1"
-					onClick={() => onClose()}
-				>
+					onClick={() => onClose()}>
 					X
 				</p>
 				<Form {...form}>
 					<form
 						ref={formRef}
 						onSubmit={form.handleSubmit(onSubmit)}
-						className="space-y-6"
-					>
+						className="space-y-6">
 						<FormField
 							control={form.control}
 							name="title"
@@ -149,8 +147,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 														className={cn(
 															"w-full pl-3 text-left font-normal",
 															!field.value && "text-muted-foreground"
-														)}
-													>
+														)}>
 														{field.value
 															? format(new Date(field.value), "PPP")
 															: "Select start date"}
@@ -161,8 +158,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 											<PopoverContent
 												className="w-auto p-0"
 												align="start"
-												ref={calendarRef}
-											>
+												ref={calendarRef}>
 												<Calendar
 													mode="single"
 													selected={
@@ -192,8 +188,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 														className={cn(
 															"w-full pl-3 text-left font-normal",
 															!field.value && "text-muted-foreground"
-														)}
-													>
+														)}>
 														{field.value ? (
 															format(new Date(field.value), "PPP")
 														) : (
@@ -206,8 +201,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 											<PopoverContent
 												className="w-auto p-0"
 												align="start"
-												ref={calendarRef}
-											>
+												ref={calendarRef}>
 												<Calendar
 													mode="single"
 													selected={
@@ -242,8 +236,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 											<div className="flex gap-2 items-center">
 												<Button
 													variant="outline"
-													size="icon"
-												>
+													size="icon">
 													<Link2 className="h-4 w-4" />
 												</Button>
 												<Button
@@ -252,8 +245,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 													onClick={(e) => {
 														e.preventDefault();
 														document.getElementById("file-input")?.click();
-													}}
-												>
+													}}>
 													<Paperclip className="h-4 w-4" />
 												</Button>
 												<Input
@@ -283,8 +275,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 														.map((file: File, index: number) => (
 															<div
 																key={index}
-																className="relative flex items-center gap-2 w-fit px-5"
-															>
+																className="relative flex items-center gap-2 w-fit px-5">
 																<Paperclip className="h-4 w-4 text-gray-400" />
 																<p>
 																	{file.name}
@@ -300,8 +291,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 																					)
 																			);
 																		}}
-																		className="absolute hover:cursor-pointer hover:text-red-400 -top-3 -right-1 text-red-500"
-																	>
+																		className="absolute hover:cursor-pointer hover:text-red-400 -top-3 -right-1 text-red-500">
 																		x
 																	</span>
 																</p>
@@ -319,7 +309,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 							<FormField
 								control={form.control}
 								name="assignees"
-								render={({ field }) => (
+								render={() => (
 									<FormItem>
 										<FormLabel htmlFor="assignee">Assignee</FormLabel>
 										<div className="flex gap-4 items-center">
@@ -348,8 +338,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 																		assignee._id,
 																	])
 																}
-																className="flex items-center justify-start gap-4 mt-4 hover:cursor-pointer"
-															>
+																className="flex items-center justify-start gap-4 mt-4 hover:cursor-pointer">
 																<Avatar key={assignee._id}>
 																	<AvatarImage
 																		src={assignee.user.avatar}
@@ -374,8 +363,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 														return (
 															<div
 																key={member.user._id}
-																className="flex items-center justify-start gap-4 mt-2"
-															>
+																className="flex items-center justify-start gap-4 mt-2">
 																<Avatar key={member._id}>
 																	<AvatarImage
 																		src={member.user.avatar}
@@ -404,8 +392,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 										<FormLabel htmlFor="priority">Priority</FormLabel>
 										<Select
 											onValueChange={field.onChange}
-											defaultValue={field.value}
-										>
+											defaultValue={field.value}>
 											<FormControl>
 												<SelectTrigger>
 													<SelectValue
@@ -418,8 +405,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 												{priorities.map((priority) => (
 													<SelectItem
 														key={priority.id}
-														value={priority.name}
-													>
+														value={priority.name}>
 														{priority.name}
 													</SelectItem>
 												))}
@@ -436,8 +422,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 										<FormLabel htmlFor="status">Status</FormLabel>
 										<Select
 											onValueChange={field.onChange}
-											defaultValue={field.value}
-										>
+											defaultValue={field.value}>
 											<FormControl>
 												<SelectTrigger>
 													<SelectValue
@@ -450,8 +435,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 												{status.map((status) => (
 													<SelectItem
 														key={status.id}
-														value={status.name}
-													>
+														value={status.name}>
 														{status.name}
 													</SelectItem>
 												))}
@@ -472,10 +456,9 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 											{field.value.length > 0 &&
 												field.value.map((tag: string, index: number) => (
 													<div
-													id="tags"
+														id="tags"
 														key={index}
-														className="relative flex items-center gap-2 px-2 py-1 rounded-md bg-muted"
-													>
+														className="relative flex items-center gap-2 px-2 py-1 rounded-md bg-muted">
 														<span>{tag}</span>
 														<p
 															onClick={() => {
@@ -484,8 +467,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 																	field.value.filter((_, i) => i !== index)
 																);
 															}}
-															className=" text-[0.8rem] font-extralight  text-red-500 ml-4 hover:text-red-600 hover:cursor-pointer"
-														>
+															className=" text-[0.8rem] font-extralight  text-red-500 ml-4 hover:text-red-600 hover:cursor-pointer">
 															X
 														</p>
 													</div>
@@ -517,8 +499,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onClose }) => {
 						<Button
 							disabled={isLoading}
 							type="submit"
-							className="w-full bg-red-500 hover:bg-red-600"
-						>
+							className="w-full bg-red-500 hover:bg-red-600">
 							{isLoading ? <>Loading...</> : "Create"}
 						</Button>
 					</form>

@@ -15,7 +15,7 @@ const workspaceInitialState: WorkspaceInitialStateProps = {
 			email: "",
 			username: "",
 		},
-		tasks: [],
+		// tasks: [],
 	},
 };
 const workspaceSlice = createSlice({

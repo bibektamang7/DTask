@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "react-router";
 
 const footer_links = [
@@ -55,7 +54,9 @@ const FooterLink = () => {
 	return (
 		<div className="flex gap-12">
 			{footer_links.map((element, index) => (
-				<div className="flex flex-col gap-4">
+				<div
+					key={element.heading}
+					className="flex flex-col gap-4">
 					<h4>{element.heading}</h4>
 					<ul
 						className="flex flex-col gap-3"

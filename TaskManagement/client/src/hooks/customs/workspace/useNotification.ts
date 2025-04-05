@@ -6,7 +6,7 @@ const useAcceptInvitation = () => {
 		useAcceptInvitaionMutation();
 	const handleAcceptInvitation = async (notificationId: string) => {
 		try {
-			const response = await acceptInvitation({ notificationId }).unwrap();
+			await acceptInvitation({ notificationId }).unwrap();
 			toast({
 				title: "Accepted Invitation",
 			});
@@ -18,7 +18,7 @@ const useAcceptInvitation = () => {
 			});
 		}
 	};
-	return {handleAcceptInvitation, acceptInvitaionLoading}
+	return { handleAcceptInvitation, acceptInvitaionLoading };
 };
 
 const useDeclineInvitation = () => {};

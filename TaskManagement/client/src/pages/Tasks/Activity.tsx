@@ -1,11 +1,6 @@
-import { AvatarFallback } from "@/components/ui/avatar";
 import ActivityWidget from "@/hooks/customs/Tasks/ActivityWidget";
-import { RootState } from "@/redux/store";
 import { Notification } from "@/types/task";
-import { WorkspaceMember } from "@/types/workspace";
-import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 interface ActivityProps {
 	todaysActivities: Notification[];
 	yesterdaysActivities: Notification[];
@@ -16,7 +11,7 @@ const Activity: React.FC<ActivityProps> = ({
 	yesterdaysActivities,
 	pastsActivities,
 }) => {
-	const [todaysActivity, setTodaysActivity] = useState<Notification[]>([]);
+	const [_, setTodaysActivity] = useState<Notification[]>([]);
 	const assignees = JSON.parse(localStorage.getItem("workspaceMembers")!);
 	useEffect(() => {
 		setTodaysActivity(todaysActivities);

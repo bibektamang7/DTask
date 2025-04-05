@@ -2,7 +2,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { WorkspaceMember } from "@/types/workspace";
 import { AvatarFallback } from "@radix-ui/react-avatar";
 import { PhoneCall, X } from "lucide-react";
-import React, { useMemo } from "react";
+import React from "react";
 
 interface IncomingCallProps {
 	callDetails: {

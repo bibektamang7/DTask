@@ -1,15 +1,15 @@
 import { Input } from "@/components/ui/input";
 import { Search, CirclePlus } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLoaderData } from "react-router";
 import { ChatSchema, MessageSchema } from "@/types/chat";
 import NewChatForm from "@/components/workspace/chats/NewChatForm";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useGetChatMessageQuery } from "@/redux/services/chatApi";
 import { useSocket } from "@/context/SocketContex";
 import { ChatEvent } from "@/constants";
 import ChatRoomList from "@/components/workspace/chats/ChatRoomList";
-import { AppDispatch, RootState } from "@/redux/store";
+import { AppDispatch } from "@/redux/store";
 import { Workspace, WorkspaceMember } from "@/types/workspace";
 import SelectedChat from "@/components/workspace/chats/SelectedChat";
 import { workspaceApi } from "@/redux/services/workspaceApi";
@@ -39,7 +39,7 @@ const WorkspaceChat = () => {
 
 	// This is to store files from chat message input
 	const [files, setFiles] = useState<File[]>([]);
-	const { data: fetchedMessage, isLoading } = useGetChatMessageQuery(
+	const { data: fetchedMessage } = useGetChatMessageQuery(
 		{
 			workspaceId,
 			chatId: selectedChat?._id,
@@ -66,7 +66,7 @@ const WorkspaceChat = () => {
 				.map((chat) =>
 					chat._id === message.chat ? { ...chat, lastMessage: message } : chat
 				)
-				.sort((a, b) => (a._id === message.chat ? -1 : 1))
+				.sort((a) => (a._id === message.chat ? -1 : 1))
 		);
 	}, []);
 

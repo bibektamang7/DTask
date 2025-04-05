@@ -1,4 +1,3 @@
-import { Task } from "./task";
 import { User } from "./user";
 export interface WorkspaceMember {
 	_id: string;

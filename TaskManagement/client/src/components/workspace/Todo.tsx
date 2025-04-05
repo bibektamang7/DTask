@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "../ui/card";
-import { Delete, LoaderCircle, PencilIcon, Quote, Trash } from "lucide-react";
+import { LoaderCircle, PencilIcon, Trash } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Todo } from "@/types/workspace";
@@ -63,16 +63,14 @@ const MyTodo = () => {
 				<Button
 					onClick={() => setIsNewTodo(true)}
 					variant="ghost"
-					className="w-full justify-start text-muted-foreground mb-4"
-				>
+					className="w-full justify-start text-muted-foreground mb-4">
 					+ click to add
 				</Button>
 				<div className="space-y-3">
 					{todos.map((todo) => (
 						<div
 							key={todo._id}
-							className="flex items-start justify-between  gap-2"
-						>
+							className="flex items-start justify-between  gap-2">
 							<div className="flex gap-2 items-center-justify-center">
 								<input
 									type="checkbox"
@@ -84,8 +82,7 @@ const MyTodo = () => {
 								/>
 								<Label
 									htmlFor={todo._id}
-									className="text-sm leading-none"
-								>
+									className="text-sm leading-none">
 									{todo.title}
 								</Label>
 							</div>
@@ -113,8 +110,7 @@ const MyTodo = () => {
 							/>
 							<Button
 								className="text-sm"
-								onClick={handleTodo}
-							>
+								onClick={handleTodo}>
 								{isLoading ? "Loading..." : "Add"}
 							</Button>
 						</div>

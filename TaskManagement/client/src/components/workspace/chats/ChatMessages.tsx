@@ -11,7 +11,7 @@ import { RootState } from "@/redux/store";
 import { MessageSchema } from "@/types/chat";
 import { WorkspaceMember } from "@/types/workspace";
 import { MoreVertical } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 
 interface ChatMessagesProps {
@@ -42,13 +42,11 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 							message.sender === currentMember?._id
 								? "justify-end"
 								: "justify-start"
-						}`}
-					>
+						}`}>
 						<div
 							className={`flex mt-2 gap-2 max-w-[60%] ${
 								message.sender === currentMember?._id ? "flex-row-reverse" : ""
-							}`}
-						>
+							}`}>
 							<Avatar className="h-8 w-8">
 								<AvatarFallback>
 									{workspaceMembers
@@ -79,8 +77,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 												<DropdownMenuItem
 													onClick={() =>
 														handleDeleteChatMessage(message.chat, message._id)
-													}
-												>
+													}>
 													Delete
 												</DropdownMenuItem>
 											</DropdownMenuContent>
@@ -92,8 +89,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 												message.sender === currentMember?._id
 													? "bg-primary text-primary-foreground"
 													: "bg-muted"
-											}`}
-										>
+											}`}>
 											{message.content}
 										</div>
 									) : (

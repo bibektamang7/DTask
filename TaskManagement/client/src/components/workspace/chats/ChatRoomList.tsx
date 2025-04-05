@@ -19,12 +19,11 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
 	};
 	return (
 		<ScrollArea className="h-[calc(100vh-5rem)]">
-			{chats.map((chat, index) => (
+			{chats.map((chat) => (
 				<div
 					key={chat._id}
 					className="flex items-center gap-3 p-4 hover:bg-muted/50 cursor-pointer"
-					onClick={() => handelOnChatSelect(chat)}
-				>
+					onClick={() => handelOnChatSelect(chat)}>
 					<Avatar className="h-10 w-10">
 						<AvatarFallback>
 							{chat.name
@@ -58,4 +57,4 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
 	);
 };
 
-export default ChatRoomList
+export default ChatRoomList;

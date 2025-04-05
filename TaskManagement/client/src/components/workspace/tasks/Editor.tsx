@@ -18,7 +18,6 @@ import {
 	$createParagraphNode,
 	$createTextNode,
 	$isTextNode,
-	EditorState,
 } from "lexical";
 import { $createHeadingNode, $createQuoteNode } from "@lexical/rich-text";
 import { $setBlocksType } from "@lexical/selection";
@@ -237,8 +236,7 @@ const ToolbarPlugin = ({
 						<Button
 							variant="ghost"
 							size="sm"
-							className="gap-1"
-						>
+							className="gap-1">
 							Normal
 							<ChevronDown className="h-4 w-4" />
 						</Button>
@@ -274,15 +272,13 @@ const ToolbarPlugin = ({
 				<Button
 					variant="ghost"
 					size="sm"
-					onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold")}
-				>
+					onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold")}>
 					<Bold className="h-4 w-4" />
 				</Button>
 				<Button
 					variant="ghost"
 					size="sm"
-					onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic")}
-				>
+					onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic")}>
 					<Italic className="h-4 w-4" />
 				</Button>
 				<Button
@@ -290,8 +286,7 @@ const ToolbarPlugin = ({
 					size="sm"
 					onClick={() =>
 						editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline")
-					}
-				>
+					}>
 					<Underline className="h-4 w-4" />
 				</Button>
 				<Button
@@ -299,8 +294,7 @@ const ToolbarPlugin = ({
 					size="sm"
 					onClick={() =>
 						editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough")
-					}
-				>
+					}>
 					<Strikethrough className="h-4 w-4" />
 				</Button>
 
@@ -312,15 +306,13 @@ const ToolbarPlugin = ({
 				<Button
 					variant="ghost"
 					size="sm"
-					onClick={formatCode}
-				>
+					onClick={formatCode}>
 					<Code className="h-4 w-4" />
 				</Button>
 				<Button
 					variant="ghost"
 					size="sm"
-					onClick={toggleLink}
-				>
+					onClick={toggleLink}>
 					<Link className="h-4 w-4" />
 				</Button>
 
@@ -334,8 +326,7 @@ const ToolbarPlugin = ({
 						<Button
 							variant="ghost"
 							size="sm"
-							className="gap-1"
-						>
+							className="gap-1">
 							Align
 							<ChevronDown className="h-4 w-4" />
 						</Button>
@@ -368,15 +359,13 @@ const ToolbarPlugin = ({
 				<Button
 					variant="ghost"
 					size="sm"
-					onClick={formatBulletList}
-				>
+					onClick={formatBulletList}>
 					<List className="h-4 w-4" />
 				</Button>
 				<Button
 					variant="ghost"
 					size="sm"
-					onClick={formatNumberedList}
-				>
+					onClick={formatNumberedList}>
 					<ListOrdered className="h-4 w-4" />
 				</Button>
 
@@ -388,29 +377,25 @@ const ToolbarPlugin = ({
 				<Button
 					variant="ghost"
 					size="sm"
-					onClick={clearFormatting}
-				>
+					onClick={clearFormatting}>
 					<X className="h-4 w-4" />
 				</Button>
 				<Button
 					variant="ghost"
 					size="sm"
-					onClick={() => editor.dispatchCommand(UNDO_COMMAND, undefined)}
-				>
+					onClick={() => editor.dispatchCommand(UNDO_COMMAND, undefined)}>
 					<Undo className="h-4 w-4" />
 				</Button>
 				<Button
 					variant="ghost"
 					size="sm"
-					onClick={() => editor.dispatchCommand(REDO_COMMAND, undefined)}
-				>
+					onClick={() => editor.dispatchCommand(REDO_COMMAND, undefined)}>
 					<Redo className="h-4 w-4" />
 				</Button>
 				<Button
 					variant="ghost"
 					size="sm"
-					onClick={() => handleSaveEditorData()}
-				>
+					onClick={() => handleSaveEditorData()}>
 					{taskUpdateLoading ? <Loader /> : "Save"}
 				</Button>
 			</div>

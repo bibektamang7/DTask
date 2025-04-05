@@ -21,7 +21,7 @@ const CreateWorkspace = () => {
 	const token = localStorage.getItem("token");
 	const [workspaceName, setWorkspaceName] = useState("");
 	const [searchEmail, setSearchEmail] = useState<string>("");
-	const [getUser, { isLoading }] = useLazyGetUsersByEmailQuery();
+	const [getUser] = useLazyGetUsersByEmailQuery();
 	const debouncedEmail = useDebounce(searchEmail);
 	const [searchedUser, setSearchedUser] = useState<User | null>(null);
 	const [members, setMembers] = useState<User[]>([]);
@@ -83,8 +83,7 @@ const CreateWorkspace = () => {
 						<div className="space-y-2">
 							<Label
 								htmlFor="workspace-name"
-								className="text-slate-400"
-							>
+								className="text-slate-400">
 								Workspace Name
 							</Label>
 							<Input
@@ -110,8 +109,7 @@ const CreateWorkspace = () => {
 						{searchedUser && (
 							<div
 								key={searchedUser._id}
-								className="flex items-start space-x-4 p-3 rounded-lg bg-gray-800/50"
-							>
+								className="flex items-start space-x-4 p-3 rounded-lg bg-gray-800/50">
 								<Avatar>
 									<AvatarImage src={searchedUser.avatar} />
 									<AvatarFallback className="bg-gray-700 text-gray-200">
@@ -130,8 +128,7 @@ const CreateWorkspace = () => {
 											variant="ghost"
 											size="icon"
 											onClick={handleAddUser}
-											className="h-8 w-8 text-gray-400"
-										>
+											className="h-8 w-8 text-gray-400">
 											<Plus className="h-4 w-4" />
 										</Button>
 									</div>
@@ -145,8 +142,7 @@ const CreateWorkspace = () => {
 								members.map((member: User) => (
 									<div
 										key={member._id}
-										className="flex items-start space-x-4 p-3 rounded-lg bg-gray-800/50"
-									>
+										className="flex items-start space-x-4 p-3 rounded-lg bg-gray-800/50">
 										<Avatar>
 											<AvatarImage
 												src={`/placeholder.svg?height=40&width=40`}
@@ -180,8 +176,7 @@ const CreateWorkspace = () => {
 						<Button
 							variant="ghost"
 							className="text-gray-400"
-							onClick={() => window.history.back()}
-						>
+							onClick={() => window.history.back()}>
 							Cancel
 						</Button>
 						<Button onClick={handleWorkspaceCreation}>

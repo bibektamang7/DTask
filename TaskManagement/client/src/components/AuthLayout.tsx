@@ -1,7 +1,7 @@
 import PeerProvider from "@/context/PeerContex";
 import { SocketProvider } from "@/context/SocketContex";
 import React from "react";
-import { Navigate, useLocation } from "react-router";
+import { Navigate } from "react-router";
 
 const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	// const location = useLocation();

@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { useRegisterWithGoogleMutation } from "@/redux/services/authApi";
+// import { useRegisterWithGoogleMutation } from "@/redux/services/authApi";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/customs/useAuth";
 
@@ -11,7 +11,7 @@ const Login = () => {
 	const [email, setEmail] = useState<string>("");
 	const [password, setPassword] = useState<string>("");
 	const { login, isLoading } = useAuth();
-	const [loginWithGoogle] = useRegisterWithGoogleMutation();
+	// const [loginWithGoogle] = useRegisterWithGoogleMutation();
 
 	const handleLogin = async (e: any) => {
 		e.preventDefault();
@@ -26,8 +26,7 @@ const Login = () => {
 	};
 	const handleSignInWithGoogle = async () => {
 		try {
-			window.location.href =
-				"https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=125780096909-ja70oupd020o9td6prm5hceg61j1a3ra.apps.googleusercontent.com&redirect_uri=http://localhost:8000/api/v1/users/auth/google/callback&scope=profile email";
+			window.location.href = import.meta.env.VITE_GOOGLE_CONSOLE;
 
 			// const resposne = await loginWithGoogle({}).unwrap();
 		} catch (error) {

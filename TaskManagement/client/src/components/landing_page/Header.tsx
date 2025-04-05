@@ -1,4 +1,3 @@
-import React from "react";
 import { HeaderList } from "@/constants";
 import { Link, NavLink } from "react-router";
 import { Menu } from "lucide-react";

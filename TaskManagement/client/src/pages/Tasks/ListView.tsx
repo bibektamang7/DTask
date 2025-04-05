@@ -52,7 +52,7 @@ const ListView = () => {
 
 	const [deletingTask, setDeletingTask] = useState<Task | null>(null);
 
-	const { handleTaskDelete, deleteTaskLoading } = useDeleteTask();
+	const { handleTaskDelete} = useDeleteTask();
 
 	const filteredTasks = React.useMemo(() => {
 		return tasks

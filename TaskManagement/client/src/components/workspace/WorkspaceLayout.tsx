@@ -1,9 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Outlet, useLoaderData } from "react-router";
 import Sidebar from "./Sidebar";
-import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
-import { Button } from "../ui/button";
-import { Menu, PencilIcon } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
 import { SidebarProvider, SidebarTrigger } from "../ui/sidebar";
 import Setting from "@/pages/Setting";
@@ -17,7 +14,12 @@ const WorkspaceLayout = () => {
 	const [isSettingPageOpen, setIsSettingPageOpen] = useState<boolean>(false);
 	return (
 		<>
-			{isSettingPageOpen && <Setting workspace={loaderData} onSettingPageClose={() => setIsSettingPageOpen(false)}/>}
+			{isSettingPageOpen && (
+				<Setting
+					workspace={loaderData}
+					onSettingPageClose={() => setIsSettingPageOpen(false)}
+				/>
+			)}
 			<div className="max-h-screen bg-background dark">
 				<div className="flex flex-row">
 					<SidebarProvider className="transition-all duration-300  w-fit z-0">

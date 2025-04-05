@@ -1,5 +1,4 @@
 import { Attachment } from "./task";
-import { WorkspaceMember } from "./workspace";
 
 export interface ChatSchema {
 	_id: string;

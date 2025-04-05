@@ -1,10 +1,8 @@
 import {
 	BellIcon,
-	CalendarIcon,
 	CheckSquareIcon,
 	LayoutDashboardIcon,
 	MessageSquareIcon,
-	UserIcon,
 } from "lucide-react";
 
 const HeaderList = [

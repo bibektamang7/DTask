@@ -4,7 +4,6 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useDeleteComment } from "@/hooks/customs/Tasks/useDeleteComment";
@@ -31,8 +30,8 @@ const Comment: React.FC<CommentProps> = ({ comments, taskId }) => {
 		null
 	);
 
-	const { handleMakeComment, commentLoading } = useMakeComment();
-	const { handleDeleteComment, deleteCommentLoading } = useDeleteComment();
+	const { handleMakeComment } = useMakeComment();
+	const { handleDeleteComment } = useDeleteComment();
 	const handleSendCommnet = async () => {
 		const formData = new FormData();
 		if (commentText.length < 1 && commentFiles.length < 1) return;
@@ -84,8 +83,7 @@ const Comment: React.FC<CommentProps> = ({ comments, taskId }) => {
 										return (
 											<div
 												className="mt-4"
-												key={comment._id}
-											>
+												key={comment._id}>
 												<div className="flex text-sm gap-2 mt-2">
 													<Avatar className="w-16 h-8">
 														<AvatarImage
@@ -121,8 +119,7 @@ const Comment: React.FC<CommentProps> = ({ comments, taskId }) => {
 																				e.stopPropagation();
 																				setDeletingComment(comment);
 																			}}
-																			className="text-[0.7rem] text-gray-300 hover:text-inherit"
-																		>
+																			className="text-[0.7rem] text-gray-300 hover:text-inherit">
 																			<Trash />
 																			Delete
 																		</DropdownMenuItem>
@@ -138,8 +135,7 @@ const Comment: React.FC<CommentProps> = ({ comments, taskId }) => {
 																{comment.attachments.map((attachment) => (
 																	<div
 																		className="w-24 h-24"
-																		key={attachment._id}
-																	>
+																		key={attachment._id}>
 																		<img
 																			src={attachment.fileUrl}
 																			alt={attachment._id}
@@ -180,8 +176,7 @@ const Comment: React.FC<CommentProps> = ({ comments, taskId }) => {
 									commentFiles.map((file) => (
 										<div
 											key={file.name}
-											className="relative w-16 h-12 rounded-md"
-										>
+											className="relative w-16 h-12 rounded-md">
 											<span
 												onClick={() =>
 													setCommentFiles((prev) =>
@@ -190,8 +185,7 @@ const Comment: React.FC<CommentProps> = ({ comments, taskId }) => {
 														)
 													)
 												}
-												className="absolute right-0 -top-2 text-xs hover:cursor-pointer hover:scale-110"
-											>
+												className="absolute right-0 -top-2 text-xs hover:cursor-pointer hover:scale-110">
 												x
 											</span>
 											<img

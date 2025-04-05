@@ -2,8 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAcceptInvitation } from "@/hooks/customs/workspace/useNotification";
 import { cn } from "@/lib/utils";
-import { Notification as NotificationSchema } from "@/types/task";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLoaderData } from "react-router";
 
 const Notification = () => {
@@ -24,8 +23,7 @@ const Notification = () => {
 					notifications.map((notification: any) => (
 						<div
 							key={notification._id}
-							className="flex items-center justify-between"
-						>
+							className="flex items-center justify-between">
 							<div className="flex gap-4 mt-2">
 								<Avatar className="w-16 h-8">
 									<AvatarImage
@@ -51,14 +49,12 @@ const Notification = () => {
 								<div className="flex gap-4">
 									<Button
 										onClick={handleDeclineInvitation}
-										className=" bg-red-500 text-white/70"
-									>
+										className=" bg-red-500 text-white/70">
 										Decline
 									</Button>
 									<Button
 										onClick={() => handleAcceptInvitation(notification._id)}
-										className={cn(acceptInvitaionLoading ? "bg-red-400" : "")}
-									>
+										className={cn(acceptInvitaionLoading ? "bg-red-400" : "")}>
 										Accept
 									</Button>
 								</div>

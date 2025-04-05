@@ -1,16 +1,13 @@
 import { useSetUsernameMutation } from "@/redux/services/userApi";
 import { toast } from "../use-toast";
-import { useDispatch } from "react-redux";
-import { setCurrentUsername } from "@/redux/features/authSlice";
 
 const useSetUsername = () => {
 	const token = localStorage.getItem("token");
-	const dispatch = useDispatch();
 	const [setUsername, { isLoading: setUsernameLoading }] =
 		useSetUsernameMutation();
 	const handleSetUsername = async (username: string) => {
 		try {
-			const response = await setUsername({ username, token }).unwrap();
+			await setUsername({ username, token }).unwrap();
 			// dispatch(setCurrentUsername(resposne.data.username));
 			toast({
 				title: "Welcome to Donezo",

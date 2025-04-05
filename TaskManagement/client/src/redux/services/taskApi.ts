@@ -1,7 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const BASE_URL = "http://localhost:8000/api/v1";
-
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 export const taskApi = createApi({
 	reducerPath: "tasks",
 	baseQuery: fetchBaseQuery({
@@ -136,5 +135,5 @@ export const {
 	useUpdateTaskMutation,
 	useAddAssigneeMutation,
 	useRemoveAssigneeMutation,
-	useLazyGetTasksQuery
+	useLazyGetTasksQuery,
 } = taskApi;

@@ -8,7 +8,7 @@ const useAddMember = () => {
 
 	const handleAddMember = async (memberInfo: any) => {
 		try {
-			const resposne = await addMember({ workspaceId, memberInfo }).unwrap();
+			 await addMember({ workspaceId, memberInfo }).unwrap();
 			toast({
 				title: "Send Invitation",
 			});

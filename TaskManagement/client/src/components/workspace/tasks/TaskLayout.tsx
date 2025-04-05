@@ -6,8 +6,8 @@ import {
 	LayoutDashboardIcon,
 	LayoutListIcon,
 } from "lucide-react";
-import React, { useState } from "react";
-import { useDispatch} from "react-redux";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { Link, Outlet, useLoaderData } from "react-router";
 import NewTaskForm from "./NewTaskForm";
 import { setTasks } from "@/redux/features/taskSlice";
@@ -16,7 +16,7 @@ import Task from "./SidebarTask";
 const TaskLayout = () => {
 	const dispatch = useDispatch();
 	const tasks = useLoaderData();
-	
+
 	dispatch(setTasks(tasks));
 
 	const [isNewTaskForm, setIsNewTaskForm] = useState<boolean>(false);
@@ -24,11 +24,13 @@ const TaskLayout = () => {
 
 	return (
 		<>
-			{taskId.length > 0 && <Task taskId={taskId} onClose={() => setTaskId("")}/>}
-			{isNewTaskForm && (
-				<NewTaskForm
-					onClose={() => setIsNewTaskForm(false)} 				/>
+			{taskId.length > 0 && (
+				<Task
+					taskId={taskId}
+					onClose={() => setTaskId("")}
+				/>
 			)}
+			{isNewTaskForm && <NewTaskForm onClose={() => setIsNewTaskForm(false)} />}
 			<div className="w-full flex min-h-screen bg-background">
 				<main className="flex-1 p-8">
 					<div className="max-w-7xl mx-auto">
@@ -43,21 +45,19 @@ const TaskLayout = () => {
 							<div className="flex items-center space-x-4">
 								<div className="flex items-center rounded-lg border border-border p-1">
 									<Link to={``}>
-									<Button
-										variant="ghost"
-										size="sm"
-										className="px-3"
-									>
-										<LayoutListIcon className="h-4 w-4 mr-2" />
-										Lists
-									</Button>
+										<Button
+											variant="ghost"
+											size="sm"
+											className="px-3">
+											<LayoutListIcon className="h-4 w-4 mr-2" />
+											Lists
+										</Button>
 									</Link>
 									<Link to={`boardview`}>
 										<Button
 											variant="ghost"
 											size="sm"
-											className="px-3 bg-accent"
-										>
+											className="px-3 bg-accent">
 											<LayoutDashboardIcon className="h-4 w-4 mr-2" />
 											Board
 										</Button>
@@ -65,24 +65,20 @@ const TaskLayout = () => {
 									<Button
 										variant="ghost"
 										size="sm"
-										className="px-3"
-									>
+										className="px-3">
 										<ClockIcon className="h-4 w-4 mr-2" />
 										Timeline
 									</Button>
 								</div>
 								<Button
 									variant="ghost"
-									size="icon"
-								>
+									size="icon">
 									<FilterIcon className="h-5 w-5" />
 								</Button>
 								<Button onClick={() => setIsNewTaskForm(true)}>New Task</Button>
 							</div>
 						</div>
-						<Outlet 
-							context={[setTaskId]}
-						/>
+						<Outlet context={[setTaskId]} />
 					</div>
 				</main>
 			</div>

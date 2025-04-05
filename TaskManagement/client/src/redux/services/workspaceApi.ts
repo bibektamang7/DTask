@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-const BASE_URL = "http://localhost:8000/api/v1/";
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const workspaceApi = createApi({
 	reducerPath: "workspaces",
@@ -28,7 +28,7 @@ export const workspaceApi = createApi({
 			providesTags: ["Workspace", "Todo"],
 		}),
 		getWorkspaces: builder.query({
-			query: ({workspaceId}) => ({
+			query: ({ workspaceId }) => ({
 				url: `/workspaces/${workspaceId}/get-workspaces`,
 				credentials: "include",
 			}),
@@ -133,5 +133,5 @@ export const {
 	useAcceptInvitaionMutation,
 	useDeclineInvitationMutation,
 	useGetWorkspacesQuery,
-	useLazyGetWorkspacesQuery
+	useLazyGetWorkspacesQuery,
 } = workspaceApi;

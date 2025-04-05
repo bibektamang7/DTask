@@ -70,16 +70,14 @@ const NewChatForm: React.FC<NewChatFormProps> = ({ onClose }) => {
 			<div className="relative w-full max-w-2xl mx-auto p-6 space-y-6 bg-background text-foreground rounded-lg">
 				<p
 					className="absolute right-7 font-extralight hover:cursor-pointer text-sm top-1"
-					onClick={() => onClose()}
-				>
+					onClick={() => onClose()}>
 					X
 				</p>
 				<Form {...form}>
 					<form
 						ref={formRef}
 						onSubmit={form.handleSubmit(onSubmit)}
-						className="space-y-6"
-					>
+						className="space-y-6">
 						<FormField
 							control={form.control}
 							name="name"
@@ -100,7 +98,7 @@ const NewChatForm: React.FC<NewChatFormProps> = ({ onClose }) => {
 							<FormField
 								control={form.control}
 								name="members"
-								render={({ field }) => (
+								render={() => (
 									<FormItem>
 										<FormLabel htmlFor="members">Members</FormLabel>
 										<div className="flex gap-4 items-center">
@@ -130,8 +128,7 @@ const NewChatForm: React.FC<NewChatFormProps> = ({ onClose }) => {
 																	]);
 																	setSearchMember("");
 																}}
-																className="flex items-center justify-start gap-4 mt-4 hover:cursor-pointer"
-															>
+																className="flex items-center justify-start gap-4 mt-4 hover:cursor-pointer">
 																<Avatar key={assignee._id}>
 																	<AvatarImage
 																		src={assignee.user.avatar}
@@ -156,8 +153,7 @@ const NewChatForm: React.FC<NewChatFormProps> = ({ onClose }) => {
 														return (
 															<div
 																key={member.user._id}
-																className="flex items-center justify-start gap-4 mt-2"
-															>
+																className="flex items-center justify-start gap-4 mt-2">
 																<Avatar key={member._id}>
 																	<AvatarImage
 																		src={member.user.avatar}
@@ -182,8 +178,7 @@ const NewChatForm: React.FC<NewChatFormProps> = ({ onClose }) => {
 						<Button
 							disabled={isLoading}
 							type="submit"
-							className="w-full bg-red-500 hover:bg-red-600"
-						>
+							className="w-full bg-red-500 hover:bg-red-600">
 							{isLoading ? <>Loading...</> : "Create"}
 						</Button>
 					</form>

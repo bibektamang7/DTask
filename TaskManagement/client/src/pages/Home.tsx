@@ -1,7 +1,4 @@
-import Footer from "@/components/landing_page/Footer";
-import Header from "@/components/landing_page/Header";
-import React from "react";
-import { Link, Outlet } from "react-router";
+import { Link} from "react-router";
 
 import { Button } from "@/components/ui/button";
 import Benifit from "@/components/landing_page/Benifit";

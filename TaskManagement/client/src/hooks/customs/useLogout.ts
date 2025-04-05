@@ -3,13 +3,13 @@ import { toast } from "../use-toast";
 
 const useLogout = () => {
 	const token = localStorage.getItem("token");
-	
+
 	const [makeLogout, { isLoading }] = useLogoutUserMutation();
 	const handleLogout = async () => {
 		try {
-			const response = await makeLogout({ token }).unwrap();
+			await makeLogout({ token }).unwrap();
 			localStorage.removeItem("token");
-			localStorage.removeItem("workspace")
+			localStorage.removeItem("workspace");
 			window.location.href = "/";
 			toast({
 				title: "Logout Successfull",

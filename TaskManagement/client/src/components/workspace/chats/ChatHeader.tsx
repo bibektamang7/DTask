@@ -30,7 +30,6 @@ import { Workspace, WorkspaceMember } from "@/types/workspace";
 import { ArrowLeft, MoreVertical, Phone, Video } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import Call from "./Call";
-import { usePeerConnection } from "@/context/PeerContex";
 import { useSocket } from "@/context/SocketContex";
 import IncomingCall from "./IncomingCall";
 import React from "react";

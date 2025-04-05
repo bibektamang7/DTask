@@ -28,11 +28,9 @@ const SelectedChat: React.FC<SelectedChatProps> = ({
 	setFiles,
 	messageInput,
 	setMessageInput,
-	onDeleteChat
+	onDeleteChat,
 }) => {
-	const { handleSendMessage, sendMessageLoading } = useSendMessage(
-		selectedChat._id
-	);
+	const { handleSendMessage } = useSendMessage(selectedChat._id);
 	const handleMessageSend = async () => {
 		const formData = new FormData();
 		formData.append("content", messageInput);
@@ -66,8 +64,7 @@ const SelectedChat: React.FC<SelectedChatProps> = ({
 							files.map((file) => (
 								<div
 									key={file.name}
-									className="relative w-16 h-12"
-								>
+									className="relative w-16 h-12">
 									<span
 										onClick={() =>
 											setFiles((prev) =>
@@ -76,8 +73,7 @@ const SelectedChat: React.FC<SelectedChatProps> = ({
 												)
 											)
 										}
-										className="absolute right-0 -top-2 text-xs hover:cursor-pointer hover:scale-110"
-									>
+										className="absolute right-0 -top-2 text-xs hover:cursor-pointer hover:scale-110">
 										x
 									</span>
 									<img

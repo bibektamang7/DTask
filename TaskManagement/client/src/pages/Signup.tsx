@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import React, { useState } from "react";
 import { setUser } from "@/redux/features/authSlice";
 import { Link, useNavigate } from "react-router";
 import { useRegisterUserMutation } from "@/redux/services/authApi";
 import { cn } from "@/lib/utils";
-import { Form, FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import {
 	FormControl,
 	FormField,
@@ -60,8 +59,7 @@ const Signup = () => {
 						<FormProvider {...form}>
 							<form
 								onSubmit={form.handleSubmit(handleRegister)}
-								className="flex flex-col gap-4"
-							>
+								className="flex flex-col gap-4">
 								<FormField
 									control={form.control}
 									name="email"
@@ -114,8 +112,7 @@ const Signup = () => {
 									className={cn(
 										"w-full mt-4 py-5",
 										isLoading ? "bg-red-600" : ""
-									)}
-								>
+									)}>
 									Get Started
 								</Button>
 							</form>
@@ -138,8 +135,7 @@ const Signup = () => {
 						Already have an account?
 						<Link
 							className="text-white font-normal"
-							to={`/login`}
-						>
+							to={`/login`}>
 							{" "}
 							Login
 						</Link>

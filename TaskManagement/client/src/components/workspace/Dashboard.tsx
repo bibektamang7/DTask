@@ -14,8 +14,8 @@ import { Link, useNavigate } from "react-router";
 import { useWorkspace } from "@/hooks/customs/useWorkspace";
 import { useTask } from "@/hooks/customs/useTask";
 import { Attachment, Comment, Status, Task } from "@/types/task";
-import { AppDispatch, RootState } from "@/redux/store";
-import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { useSelector } from "react-redux";
 import { WorkspaceMember } from "@/types/workspace";
 import { Badge } from "../ui/badge";
 import {
@@ -24,7 +24,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { priorityColors, statusColors, TaskEvent } from "@/constants";
+import { priorityColors, statusColors } from "@/constants";
 import { format } from "date-fns";
 import Todo from "./Todo";
 import QuoteOfTheDay from "./QuoteOfTheDay";
@@ -156,11 +156,11 @@ const DashboardPage = () => {
 		setTasks((prev) => [...prev, event.detail.task]);
 	};
 
-	const onWorkspaceCreated = () => {};
-	const onWorkspaceNameUpdated = () => {};
-	const onRemoveMemberFromWorkspace = () => {};
-	const onWorkspaceDeleted = () => {};
-	const onWorkspaceInvitation = () => {};
+	// const onWorkspaceCreated = () => {};
+	// const onWorkspaceNameUpdated = () => {};
+	// const onRemoveMemberFromWorkspace = () => {};
+	// const onWorkspaceDeleted = () => {};
+	// const onWorkspaceInvitation = () => {};
 
 	const onStatusChange = (
 		event: CustomEvent<{ taskId: string; status: Status }>
@@ -283,33 +283,28 @@ const DashboardPage = () => {
 								<TabsList className="gap-4">
 									<TabsTrigger
 										value="Todo"
-										onClick={() => setTaskOption("Todo")}
-									>
+										onClick={() => setTaskOption("Todo")}>
 										Todo
 									</TabsTrigger>
 									<TabsTrigger
 										value="In Progress"
-										onClick={() => setTaskOption("In Progress")}
-									>
+										onClick={() => setTaskOption("In Progress")}>
 										In Progress
 									</TabsTrigger>
 									<TabsTrigger
 										value="Completed"
-										onClick={() => setTaskOption("Completed")}
-									>
+										onClick={() => setTaskOption("Completed")}>
 										Completed
 									</TabsTrigger>
 								</TabsList>
 								<TabsContent
 									value={taskOption}
-									className="space-y-4"
-								>
+									className="space-y-4">
 									{selectedTasks.length > 0 ? (
 										selectedTasks.map((task) => (
 											<Card
 												key={task._id}
-												className="hover:cursor-pointer"
-											>
+												className="hover:cursor-pointer">
 												<CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
 													<div className="space-y-1">
 														<h3 className="font-semibold text-lg leading-none tracking-tight">
@@ -320,8 +315,7 @@ const DashboardPage = () => {
 																<Badge
 																	key={tag}
 																	variant="secondary"
-																	className="text-xs"
-																>
+																	className="text-xs">
 																	{tag}
 																</Badge>
 															))}
@@ -331,8 +325,7 @@ const DashboardPage = () => {
 														<DropdownMenuTrigger asChild>
 															<Button
 																variant="ghost"
-																size="icon"
-															>
+																size="icon">
 																<MoreVertical className="h-4 w-4" />
 															</Button>
 														</DropdownMenuTrigger>
@@ -355,8 +348,7 @@ const DashboardPage = () => {
 																statusColors[
 																	task.status as keyof typeof statusColors
 																]
-															}
-														>
+															}>
 															{task.status}
 														</Badge>
 														<Badge
@@ -365,8 +357,7 @@ const DashboardPage = () => {
 																priorityColors[
 																	task.priority as keyof typeof priorityColors
 																]
-															}
-														>
+															}>
 															{task.priority}
 														</Badge>
 														<div className="text-sm text-muted-foreground">
@@ -391,8 +382,7 @@ const DashboardPage = () => {
 																(assignee: WorkspaceMember) => (
 																	<Avatar
 																		key={assignee._id}
-																		className="border-2 border-background"
-																	>
+																		className="border-2 border-background">
 																		<AvatarImage
 																			src={assignee.user.avatar}
 																			alt={assignee.user.username}
@@ -440,8 +430,7 @@ const DashboardPage = () => {
 							<Button
 								onClick={() => navigate("tasks")}
 								variant="ghost"
-								className="text-blue-500 hover:text-blue-600"
-							>
+								className="text-blue-500 hover:text-blue-600">
 								<Link to={`tasks`}>View All</Link>
 							</Button>
 						</div>
@@ -450,8 +439,7 @@ const DashboardPage = () => {
 								recentTasks.map((task) => (
 									<Card
 										key={task._id}
-										className="hover:cursor-pointer flex flex-col gap-4"
-									>
+										className="hover:cursor-pointer flex flex-col gap-4">
 										<CardHeader className="flex flex-row gap-4 items-start justify-between space-y-0 pb-2">
 											<div className="space-y-1 flex-1">
 												<h3 className="font-semibold line-clamp-1 text-slate-300 text-base leading-none tracking-tight">
@@ -471,8 +459,7 @@ const DashboardPage = () => {
 														statusColors[
 															task.status as keyof typeof statusColors
 														]
-													}
-												>
+													}>
 													{task.status}
 												</Badge>
 												<Badge
@@ -481,8 +468,7 @@ const DashboardPage = () => {
 														priorityColors[
 															task.priority as keyof typeof priorityColors
 														]
-													}
-												>
+													}>
 													{task.priority}
 												</Badge>
 											</div>
@@ -503,8 +489,7 @@ const DashboardPage = () => {
 							<Button
 								onClick={() => navigate("users")}
 								variant="ghost"
-								className="text-blue-500 hover:text-blue-600"
-							>
+								className="text-blue-500 hover:text-blue-600">
 								View All
 							</Button>
 						</div>
@@ -513,8 +498,7 @@ const DashboardPage = () => {
 								workspaceMembers.map((member, index) => (
 									<div
 										key={index}
-										className="flex items-center gap-3"
-									>
+										className="flex items-center gap-3">
 										<Avatar>
 											<AvatarImage
 												src={member.user.avatar}

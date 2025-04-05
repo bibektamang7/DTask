@@ -1,8 +1,6 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ActivityWidget from "@/hooks/customs/Tasks/ActivityWidget";
 import { RootState } from "@/redux/store";
 import { Notification } from "@/types/task";
-import { WorkspaceMember } from "@/types/workspace";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 interface TaskAssignedProps {

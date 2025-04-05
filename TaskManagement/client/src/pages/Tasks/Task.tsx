@@ -1,8 +1,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { priorityColors, statusColors, TaskEvent } from "@/constants";
+import { priorityColors, statusColors } from "@/constants";
 import {
 	Calendar,
 	CircleCheck,
@@ -29,11 +29,10 @@ import {
 	CarouselPrevious,
 } from "@/components/ui/carousel";
 import CustomEditor from "@/components/workspace/tasks/Editor";
-import { redirect, useLoaderData } from "react-router";
+import { useLoaderData } from "react-router";
 import {
 	Attachment,
 	Comment as CommentSchema,
-	Status,
 	Task as TaskSchema,
 } from "@/types/task";
 import { useSelector } from "react-redux";
@@ -93,7 +92,7 @@ const Task: React.FC = () => {
 	};
 
 	const handleTaskUpdate = async (data: any) => {
-		const response = await handleUpdate(loaderData._id, data);
+		await handleUpdate(loaderData._id, data);
 	};
 
 	const handleStatusChange = (
@@ -111,9 +110,9 @@ const Task: React.FC = () => {
 			setPriority(event.detail.priority);
 		}
 	};
-	const handleDescriptionChange = (
-		event: CustomEvent<{ taskId: string; description: string }>
-	) => {};
+	// const handleDescriptionChange = (
+	// 	event: CustomEvent<{ taskId: string; description: string }>
+	// ) => {};
 
 	const handleTitleChange = (
 		event: CustomEvent<{ taskId: string; title: string }>
@@ -162,10 +161,10 @@ const Task: React.FC = () => {
 			"statusChange",
 			handleStatusChange as EventListener
 		);
-		window.addEventListener(
-			"descriptionChange",
-			handleDescriptionChange as EventListener
-		);
+		// window.addEventListener(
+		// 	"descriptionChange",
+		// 	handleDescriptionChange as EventListener
+		// );
 		window.addEventListener(
 			"priorityChange",
 			handlePriorityChange as EventListener
@@ -191,10 +190,10 @@ const Task: React.FC = () => {
 				"statusChange",
 				handleStatusChange as EventListener
 			);
-			window.removeEventListener(
-				"descriptionChange",
-				handleDescriptionChange as EventListener
-			);
+			// window.removeEventListener(
+			// 	"descriptionChange",
+			// 	handleDescriptionChange as EventListener
+			// );
 			window.removeEventListener(
 				"priorityChange",
 				handlePriorityChange as EventListener
@@ -319,8 +318,7 @@ const Task: React.FC = () => {
 													statusColors[
 														loaderData.status as keyof typeof statusColors
 													]
-												}
-											>
+												}>
 												{status}
 											</Badge>
 										</DropdownMenuTrigger>
@@ -338,8 +336,7 @@ const Task: React.FC = () => {
 																statusColors[
 																	statusElement as keyof typeof statusColors
 																]
-															}
-														>
+															}>
 															{statusElement}
 														</DropdownMenuItem>
 													)
@@ -366,8 +363,7 @@ const Task: React.FC = () => {
 													priorityColors[
 														priority as keyof typeof priorityColors
 													]
-												}
-											>
+												}>
 												{priority}
 											</Badge>
 										</DropdownMenuTrigger>
@@ -385,8 +381,7 @@ const Task: React.FC = () => {
 																priorityColors[
 																	priorityElement as keyof typeof priorityColors
 																]
-															}
-														>
+															}>
 															{priorityElement}
 														</DropdownMenuItem>
 													)
@@ -491,29 +486,25 @@ const Task: React.FC = () => {
 											opts={{
 												align: "start",
 											}}
-											className="w-full max-w-sm h-full mt-4"
-										>
+											className="w-full max-w-sm h-full mt-4">
 											<CarouselContent>
-												{attachments.map(
-													(attachment: Attachment, index: number) => (
-														<CarouselItem
-															key={attachment._id}
-															className="md:basis-2/3 lg:basis-1/3 hover:cursor-pointer"
-															onDoubleClick={() =>
-																setOpenedAttachment(attachment)
-															}
-														>
-															<Card>
-																<CardContent className="flex aspect-square items-center justify-center p-6">
-																	<img
-																		src={attachment.fileUrl}
-																		className="w-full h-full object-cover"
-																	/>
-																</CardContent>
-															</Card>
-														</CarouselItem>
-													)
-												)}
+												{attachments.map((attachment: Attachment) => (
+													<CarouselItem
+														key={attachment._id}
+														className="md:basis-2/3 lg:basis-1/3 hover:cursor-pointer"
+														onDoubleClick={() =>
+															setOpenedAttachment(attachment)
+														}>
+														<Card>
+															<CardContent className="flex aspect-square items-center justify-center p-6">
+																<img
+																	src={attachment.fileUrl}
+																	className="w-full h-full object-cover"
+																/>
+															</CardContent>
+														</Card>
+													</CarouselItem>
+												))}
 											</CarouselContent>
 											<CarouselPrevious />
 											<CarouselNext />
@@ -536,27 +527,23 @@ const Task: React.FC = () => {
 											<TabsList className="w-full bg-inherit justify-start">
 												<TabsTrigger
 													className="bg-inherit"
-													value="Activity"
-												>
+													value="Activity">
 													Activity
 												</TabsTrigger>
 												<TabsTrigger
 													className="bg-inherit"
-													value="My Work"
-												>
+													value="My Work">
 													My Work
 												</TabsTrigger>
 												<TabsTrigger
 													className="bg-inherit"
-													value="Assigned"
-												>
+													value="Assigned">
 													Assigned
 												</TabsTrigger>
 
 												<TabsTrigger
 													className="bg-inherit"
-													value="Comments"
-												>
+													value="Comments">
 													Comments
 												</TabsTrigger>
 											</TabsList>

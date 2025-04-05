@@ -7,7 +7,7 @@ const useDeleteChatMessage = () => {
 
 	const handleDeleteChatMessage = async (chatId: string, messageId: string) => {
 		try {
-			const deleteResponse = await deleteMessage({
+			await deleteMessage({
 				chatId,
 				workspaceId,
 				messageId,

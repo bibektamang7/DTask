@@ -1,6 +1,4 @@
-import { Task } from "@/types/task";
 import { toast } from "../use-toast";
-import { useNavigate } from "react-router";
 import { useCreateChatMutation } from "@/redux/services/chatApi";
 
 const useCreateChat = () => {

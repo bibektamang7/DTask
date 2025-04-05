@@ -8,7 +8,7 @@ const useAddChatMember = () => {
 
 	const handleAddChatMember = async (chatId: string, memberId: string) => {
 		try {
-			const addResponse = await addChatMember({
+			await addChatMember({
 				chatId,
 				workspaceId,
 				memberId,
