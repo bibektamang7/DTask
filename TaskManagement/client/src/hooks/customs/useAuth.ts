@@ -16,7 +16,11 @@ export const useAuth = () => {
 			const { data } = response;
 			localStorage.setItem("currentUser", data.user._id);
 			localStorage.setItem("token", data.token);
-			navigate("/w");
+			if (!data.user.username) {
+				navigate("/set-username");
+			} else {
+				navigate("/w");
+			}
 		} catch (err: any) {
 			toast({
 				title: "Login Failed",

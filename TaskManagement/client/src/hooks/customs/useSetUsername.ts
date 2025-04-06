@@ -1,7 +1,9 @@
 import { useSetUsernameMutation } from "@/redux/services/userApi";
 import { toast } from "../use-toast";
+import { useNavigate } from "react-router";
 
 const useSetUsername = () => {
+	const navigate = useNavigate();
 	const token = localStorage.getItem("token");
 	const [setUsername, { isLoading: setUsernameLoading }] =
 		useSetUsernameMutation();
@@ -12,7 +14,7 @@ const useSetUsername = () => {
 			toast({
 				title: "Welcome to Donezo",
 			});
-			window.location.href = "/w";
+			navigate("/");
 		} catch (error: any) {
 			toast({
 				title: error.data.error,

@@ -13,8 +13,6 @@ const useCreateWorkspace = () => {
 			toast({
 				title: "Workspace created",
 			});
-
-			window.location.href = "/set-username";
 		} catch (error: any) {
 			toast({
 				title: error.data.error,

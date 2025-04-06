@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/form";
 import { toast } from "@/hooks/use-toast";
 import { useDispatch } from "react-redux";
+import LoaderComponent from "@/components/Loader";
 
 const Signup = () => {
 	const dispatch = useDispatch();
@@ -109,12 +110,10 @@ const Signup = () => {
 									/>
 									<Button
 										type="submit"
-										className={cn(
-											"w-full mt-4 py-5",
-											isLoading ? "bg-red-600" : ""
-										)}
+										disabled={isLoading}
+										className={cn("w-full mt-4 py-5")}
 									>
-										Get Started
+										{isLoading ? <LoaderComponent /> : "Get Started"}
 									</Button>
 								</form>
 							</FormProvider>

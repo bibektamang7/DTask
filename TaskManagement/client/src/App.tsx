@@ -37,8 +37,8 @@ const TaskLayout = lazy(
 	() => import("@/components/workspace/tasks/TaskLayout")
 );
 // import TaskLayout from "./components/workspace/tasks/TaskLayout";
-const AuthLayout = lazy(() => import("@/components/AuthLayout"));
-// import AuthLayout from "./components/AuthLayout";
+const ContainerLayout = lazy(() => import("@/components/ContainerLayout"));
+// import ContainerLayout from "./components/ContainerLayout";
 
 import {
 	chatsLoader,
@@ -52,6 +52,7 @@ import Contact from "./pages/Contact";
 import MobileApp from "./pages/MobileApp";
 import Pricing from "./pages/Pricing";
 import Feature from "./pages/Feature";
+import AuthLayout from "./components/AuthLayout";
 
 const ListView = lazy(() => import("@/pages/Tasks/ListView"));
 // import { ListView } from "./pages/Tasks/ListView";
@@ -70,7 +71,8 @@ const router = createBrowserRouter(
 			<Route
 				path="/"
 				element={<RootLayout />}
-				errorElement={<Error />}>
+				errorElement={<Error />}
+			>
 				<Route
 					index
 					element={<Home />}
@@ -104,17 +106,22 @@ const router = createBrowserRouter(
 			/>
 			<Route
 				path="login"
-				element={<Login />}
+				element={
+					<AuthLayout>
+						<Login />
+					</AuthLayout>
+				}
 			/>
 
 			<Route
 				path="/w"
 				loader={workspaceLoader}
 				element={
-					<AuthLayout>
+					<ContainerLayout>
 						<WorkspaceLayout />
-					</AuthLayout>
-				}>
+					</ContainerLayout>
+				}
+			>
 				<Route
 					index
 					element={<DashboardPage />}
@@ -128,7 +135,8 @@ const router = createBrowserRouter(
 				<Route
 					path="tasks"
 					element={<TaskLayout />}
-					loader={taskLoader}>
+					loader={taskLoader}
+				>
 					<Route
 						index
 						element={<ListView />}
