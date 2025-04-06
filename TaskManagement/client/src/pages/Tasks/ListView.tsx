@@ -52,7 +52,7 @@ const ListView = () => {
 
 	const [deletingTask, setDeletingTask] = useState<Task | null>(null);
 
-	const { handleTaskDelete} = useDeleteTask();
+	const { handleTaskDelete } = useDeleteTask();
 
 	const filteredTasks = React.useMemo(() => {
 		return tasks
@@ -169,106 +169,112 @@ const ListView = () => {
 				</div>
 
 				<div className="grid gap-4">
-					{filteredTasks.map((task: Task) => (
-						<Card key={task._id}>
-							<CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-								<div className="space-y-1 flex flex-col items-start justify-start gap-4">
-									<h3
-										onClick={() => {
-											localStorage.setItem("task", task._id);
-											setTaskId(task._id);
-										}}
-										className="hover:cursor-pointer font-semibold text-lg leading-none tracking-tight"
-									>
-										{task.title}
-									</h3>
-									<div className="flex flex-wrap items-center gap-2">
-										{task.tags.map((tag) => (
-											<Badge
-												key={tag}
-												variant="secondary"
-												className="text-xs"
-											>
-												{tag}
-											</Badge>
-										))}
-									</div>
-								</div>
-								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
-										<Button
-											variant="ghost"
-											size="icon"
+					{filteredTasks.length > 0 ? (
+						filteredTasks.map((task: Task) => (
+							<Card key={task._id}>
+								<CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+									<div className="space-y-1 flex flex-col items-start justify-start gap-4">
+										<h3
+											onClick={() => {
+												localStorage.setItem("task", task._id);
+												setTaskId(task._id);
+											}}
+											className="hover:cursor-pointer font-semibold text-lg leading-none tracking-tight"
 										>
-											<MoreVertical className="h-4 w-4" />
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent align="end">
-										<DropdownMenuItem onClick={() => setDeletingTask(task)}>
-											<Trash />
-											Delete
-										</DropdownMenuItem>
-									</DropdownMenuContent>
-								</DropdownMenu>
-							</CardHeader>
-							<CardContent>
-								<p className="text-sm text-muted-foreground line-clamp-2 mt-2">
-									{task.description}
-								</p>
-							</CardContent>
-							<CardFooter className="flex flex-wrap gap-4 items-center justify-between">
-								<div className="flex items-center gap-4">
-									<Badge
-										variant="secondary"
-										className={
-											statusColors[task.status as keyof typeof statusColors]
-										}
-									>
-										{task.status}
-									</Badge>
-									<Badge
-										variant="secondary"
-										className={
-											priorityColors[
-												task.priority as keyof typeof priorityColors
-											]
-										}
-									>
-										{task.priority}
-									</Badge>
-									<div className="text-sm text-muted-foreground">
-										Due {format(task.dueDate, "MMM d, yyyy")}
+											{task.title}
+										</h3>
+										<div className="flex flex-wrap items-center gap-2">
+											{task.tags.map((tag) => (
+												<Badge
+													key={tag}
+													variant="secondary"
+													className="text-xs"
+												>
+													{tag}
+												</Badge>
+											))}
+										</div>
 									</div>
-								</div>
-								<div className="flex items-center gap-4">
-									<div className="flex items-center gap-1 text-muted-foreground">
-										<Paperclip className="h-4 w-4" />
-										<span className="text-sm">{task.attachments.length}</span>
-									</div>
-									<div className="flex items-center gap-1 text-muted-foreground">
-										<MessageSquare className="h-4 w-4" />
-										<span className="text-sm">{task.comments.length}</span>
-									</div>
-									<div className="flex -space-x-2">
-										{task.assignees.map((assignee) => (
-											<Avatar
-												key={assignee._id}
-												className="border-2 border-background"
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button
+												variant="ghost"
+												size="icon"
 											>
-												<AvatarImage
-													src={assignee.user.avatar}
-													alt={assignee.user.username}
-												/>
-												<AvatarFallback>
-													{assignee.user.username.charAt(0)}
-												</AvatarFallback>
-											</Avatar>
-										))}
+												<MoreVertical className="h-4 w-4" />
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent align="end">
+											<DropdownMenuItem onClick={() => setDeletingTask(task)}>
+												<Trash />
+												Delete
+											</DropdownMenuItem>
+										</DropdownMenuContent>
+									</DropdownMenu>
+								</CardHeader>
+								<CardContent>
+									<p className="text-sm text-muted-foreground line-clamp-2 mt-2">
+										{task.description}
+									</p>
+								</CardContent>
+								<CardFooter className="flex flex-wrap gap-4 items-center justify-between">
+									<div className="flex items-center gap-4">
+										<Badge
+											variant="secondary"
+											className={
+												statusColors[task.status as keyof typeof statusColors]
+											}
+										>
+											{task.status}
+										</Badge>
+										<Badge
+											variant="secondary"
+											className={
+												priorityColors[
+													task.priority as keyof typeof priorityColors
+												]
+											}
+										>
+											{task.priority}
+										</Badge>
+										<div className="text-sm text-muted-foreground">
+											Due {format(task.dueDate, "MMM d, yyyy")}
+										</div>
 									</div>
-								</div>
-							</CardFooter>
-						</Card>
-					))}
+									<div className="flex items-center gap-4">
+										<div className="flex items-center gap-1 text-muted-foreground">
+											<Paperclip className="h-4 w-4" />
+											<span className="text-sm">{task.attachments.length}</span>
+										</div>
+										<div className="flex items-center gap-1 text-muted-foreground">
+											<MessageSquare className="h-4 w-4" />
+											<span className="text-sm">{task.comments.length}</span>
+										</div>
+										<div className="flex -space-x-2">
+											{task.assignees.map((assignee) => (
+												<Avatar
+													key={assignee._id}
+													className="border-2 border-background"
+												>
+													<AvatarImage
+														src={assignee.user.avatar}
+														alt={assignee.user.username}
+													/>
+													<AvatarFallback>
+														{assignee.user.username.charAt(0)}
+													</AvatarFallback>
+												</Avatar>
+											))}
+										</div>
+									</div>
+								</CardFooter>
+							</Card>
+						))
+					) : (
+						<div className="h-full text-center text-lg tracking-tighter text-gray-200">
+							No tasks yet.
+						</div>
+					)}
 				</div>
 			</div>
 		</>
