@@ -11,7 +11,7 @@ import {
 } from "react";
 import { useDispatch } from "react-redux";
 
-const SOCKET_URL = "ws://localhost:8080";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
 
 const SocketContext = createContext<WebSocket | null>(null);
 

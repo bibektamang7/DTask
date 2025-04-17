@@ -4,7 +4,6 @@ import { User, userManager } from "./user";
 // import { workspaceManager } from "./workspaceManager";
 import dotenv from "dotenv";
 const wss = new WebSocketServer({ port: 8080 });
-import { socketClient } from "./helpers/redisConnection";
 
 import "./workspaceManager";
 import "./services/tasks/taskManager";
