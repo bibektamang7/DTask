@@ -11,9 +11,7 @@ interface AuthPayload extends JwtPayload {
 export const authMiddleware = asyncHandler(
 	async (req: Request, _, next: NextFunction) => {
 		try {
-			const token =
-				req.cookies?.accessToken ||
-				req.header("Authorization")?.split("Bearer")[1].trim();
+			const token = req.headers.authorization?.split(" ")[1].trim();
 			if (!token) {
 				throw new ApiError(401, "Unauthorized access");
 			}

@@ -14,7 +14,7 @@ const useSetUsername = () => {
 			toast({
 				title: "Welcome to Donezo",
 			});
-			navigate("/");
+			navigate("/w");
 		} catch (error: any) {
 			toast({
 				title: error.data.error,

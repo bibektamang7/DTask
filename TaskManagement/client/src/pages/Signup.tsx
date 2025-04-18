@@ -30,13 +30,17 @@ const Signup = () => {
 		try {
 			const response = await register(data).unwrap();
 			dispatch(setUser(response.data.user));
-			console.log(response);
 
+			localStorage.setItem("currentUser", response.data.user._id);
 			localStorage.setItem("token", response.data.token);
+			if (!response.data.user.username) {
+				navigate("/set-username");
+			} else {
+				navigate("/w");
+			}
 			toast({
 				title: response.message,
 			});
-			navigate("/w");
 		} catch (error: any) {
 			toast({
 				title: error.data.error,

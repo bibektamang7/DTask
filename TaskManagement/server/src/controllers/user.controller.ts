@@ -28,16 +28,14 @@ const decryptPassword = async (password: string, savedPassword: string) => {
 };
 
 const generateAccessAndRefreshToken = (id: string) => {
-	// @ts-ignore
 	const accessToken = jwt.sign({ _id: id }, process.env.ACCESS_TOKEN_SECRET!, {
-		expiresIn: process.env.ACCESS_TOKEN_EXPIRY || "1h",
+		expiresIn: "1h",
 	});
 
-	// @ts-ignore
 	const refreshToken = jwt.sign(
 		{ _id: id },
 		process.env.REFRESH_TOKEN_SECRET!,
-		{ expiresIn: process.env.REFRESH_TOKEN_EXPIRY || "7d" }
+		{ expiresIn: "7d" }
 	);
 	return { accessToken, refreshToken };
 };

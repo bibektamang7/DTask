@@ -1,7 +1,9 @@
 import { useCreateWorkspaceMutation } from "@/redux/services/workspaceApi";
 import { toast } from "../use-toast";
 import { User } from "@/types/user";
+import { useNavigate } from "react-router";
 const useCreateWorkspace = () => {
+	const navigate = useNavigate();
 	const [createWorkspace, { isLoading: createWorkspaceLoading }] =
 		useCreateWorkspaceMutation();
 
@@ -13,6 +15,7 @@ const useCreateWorkspace = () => {
 			toast({
 				title: "Workspace created",
 			});
+			navigate("/w");
 		} catch (error: any) {
 			toast({
 				title: error.data.error,

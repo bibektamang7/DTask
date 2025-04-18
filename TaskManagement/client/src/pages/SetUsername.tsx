@@ -15,8 +15,13 @@ import { useSetUsername } from "@/hooks/customs/useSetUsername";
 
 const SetUsername = () => {
 	const [username, setUsername] = useState("");
+	const [error, setError] = useState("");
 	const { handleSetUsername, setUsernameLoading } = useSetUsername();
 	const handleContinue = async () => {
+		if (username.length > 20 || username.length < 6) {
+			setError("Username: Min(6) || Max(20)");
+			return;
+		}
 		await handleSetUsername(username);
 	};
 
@@ -70,11 +75,14 @@ const SetUsername = () => {
 						<Input
 							id="user-name"
 							value={username}
+							min={6}
+							max={20}
 							onChange={(e) => setUsername(e.target.value)}
 							placeholder="Enter your name"
 							className="bg-gray-800 border-gray-700 text-gray-200"
 							autoComplete="name"
 						/>
+						{error.length > 0 && <span className="text-red-600 text-sm mt-6">{error}</span>}
 						<p className="text-sm text-gray-500">
 							This will be displayed on your profile and tasks
 						</p>

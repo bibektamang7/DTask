@@ -35,7 +35,6 @@ type TaskOptionProp = "Todo" | "In Progress" | "Completed";
 const DashboardPage = () => {
 	const { taskData, isLoading: taskLoading } = useTask();
 	const { workspaceData, isLoading } = useWorkspace();
-	console.log(isLoading);
 	const workspaceMembers = useSelector(
 		(state: RootState) => state.Workspaces.workspace.members
 	);
@@ -399,7 +398,7 @@ const DashboardPage = () => {
 																			alt={assignee.user.username}
 																		/>
 																		<AvatarFallback>
-																			{assignee.user.username.charAt(0)}
+																			{assignee.user?.username.charAt(0)}
 																		</AvatarFallback>
 																	</Avatar>
 																)
@@ -522,7 +521,7 @@ const DashboardPage = () => {
 												alt={member.user.username}
 											/>
 											<AvatarFallback>
-												{member.user.username.charAt(0)}
+												{member.user?.username.charAt(0)}
 											</AvatarFallback>
 										</Avatar>
 										<div className="text-sm">{member.user.username}</div>
