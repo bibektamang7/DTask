@@ -194,7 +194,7 @@ const userSignIn = asyncHandler(async (req, res) => {
 	if (!updateUser) {
 		throw new ApiError(500, "Failed to login");
 	}
-	const frontendUrl = `http://localhost:5173/oauth-success?token=${accessToken}&userId=${user._id}`;
+	const frontendUrl = `${process.env.AUTH_SUCCESS}/oauth-success?token=${accessToken}&userId=${user._id}`;
 	res.redirect(`${frontendUrl}`);
 });
 
