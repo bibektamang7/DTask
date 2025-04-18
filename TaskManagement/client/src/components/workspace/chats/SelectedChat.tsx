@@ -37,7 +37,7 @@ const SelectedChat: React.FC<SelectedChatProps> = ({
 		if (files.length > 0) {
 			files.forEach((file) => formData.append("chatFiles", file));
 		}
-		const response = await handleSendMessage(formData);
+		await handleSendMessage(formData);
 	};
 	useEffect(() => {
 		return () => {
@@ -63,7 +63,8 @@ const SelectedChat: React.FC<SelectedChatProps> = ({
 							files.map((file) => (
 								<div
 									key={file.name}
-									className="relative w-16 h-12">
+									className="relative w-16 h-12"
+								>
 									<span
 										onClick={() =>
 											setFiles((prev) =>
@@ -72,7 +73,8 @@ const SelectedChat: React.FC<SelectedChatProps> = ({
 												)
 											)
 										}
-										className="absolute right-0 -top-2 text-xs hover:cursor-pointer hover:scale-110">
+										className="absolute right-0 -top-2 text-xs hover:cursor-pointer hover:scale-110"
+									>
 										x
 									</span>
 									<img
