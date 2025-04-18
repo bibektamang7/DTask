@@ -296,7 +296,6 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 					}
 				)
 			);
-			console.log(attachment);
 			dispatch(
 				taskApi.util.updateQueryData(
 					"getTask",
@@ -396,7 +395,6 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 		if (!socket) return;
 		socket.onmessage = (event) => {
 			const message = JSON.parse(event.data.toString());
-			console.log(message, "this is socket provider");
 			switch (message.type) {
 				case TaskEvent.COMMENT_DELETED:
 					onCommentDelete(message.data.taskId, message.data.commentId);

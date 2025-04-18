@@ -5,6 +5,7 @@ import { Link } from "react-router";
 // import { useRegisterWithGoogleMutation } from "@/redux/services/authApi";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/customs/useAuth";
+import { toast } from "@/hooks/use-toast";
 
 const Login = () => {
 	const [isRemember, setIsRemember] = useState<boolean>(false);
@@ -30,7 +31,11 @@ const Login = () => {
 
 			// const resposne = await loginWithGoogle({}).unwrap();
 		} catch (error) {
-			console.log("something went wrong");
+			toast({
+				title: "Something went wrong",
+				description: "Please try again",
+				variant: "destructive"
+			})
 		}
 	};
 	useEffect(() => {

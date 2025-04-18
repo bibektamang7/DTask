@@ -36,7 +36,6 @@ const CreateWorkspace = () => {
 			}).unwrap();
 			setSearchedUser(userResponse.data);
 		} catch (error: any) {
-			console.log(error);
 			toast({
 				title: error.data.error,
 			});

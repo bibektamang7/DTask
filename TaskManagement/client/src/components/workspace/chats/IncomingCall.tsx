@@ -16,7 +16,6 @@ interface IncomingCallProps {
 
 const IncomingCall: React.FC<IncomingCallProps> = React.memo(
 	({ callDetails, onAccept, onDecline }) => {
-		console.log(callDetails, "tis in incoming call");
 		const callFrom = callDetails.callFrom;
 		const workpsaceMembers = JSON.parse(
 			localStorage.getItem("workspaceMembers")!

@@ -96,7 +96,6 @@ const BoardView = () => {
 				prev.map((task) => {
 					if (task._id === draggedTask._id) {
 						const newTask = { ...task, status };
-						console.log(newTask);
 						return newTask;
 					}
 					return task;

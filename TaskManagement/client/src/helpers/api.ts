@@ -16,7 +16,6 @@ export const workspaceLoader = async () => {
 				workspaceApi.endpoints.getWorkspace.initiate({ token, workspaceId })
 			)
 			.unwrap();
-		console.log(workspaceResult);
 
 		localStorage.setItem(
 			"workspaceMembers",
@@ -38,7 +37,6 @@ export const workspaceLoader = async () => {
 		if (workspaceResult.error || taskResult.error) return redirect("/login");
 		return workspaceResult.data;
 	} catch (error: any) {
-		console.log(error);
 
 		toast({
 			title: error.data.error,

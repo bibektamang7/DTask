@@ -13,7 +13,6 @@ const useTask = () => {
 		token: token,
 		workspaceId: workspaceId,
 	});
-	console.log("twice");
 	return { taskData: data?.data, isLoading };
 };
 export { useTask };

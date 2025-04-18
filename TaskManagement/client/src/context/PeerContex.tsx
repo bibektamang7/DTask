@@ -201,7 +201,6 @@ const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
 				}
 			};
 			pc.onnegotiationneeded = async () => {
-				console.log("negotiation need in answer");
 				const offer = await pc.createOffer();
 				await pc.setLocalDescription(offer);
 				socket.send(
@@ -267,9 +266,6 @@ const PeerProvider: React.FC<{ children: React.ReactNode }> = ({
 		[peersRef.current]
 	);
 
-	useEffect(() => {
-		console.log(remoteStreams, "this is remote sterams");
-	}, [remoteStreams]);
 	return (
 		<PeerContext.Provider
 			value={{

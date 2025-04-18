@@ -108,7 +108,6 @@ const ToolbarPlugin = ({
 				taskEditorData: JSON.stringify(editor.getEditorState()),
 			});
 			if (response) {
-				console.log("ueta");
 				setPrevEditorState(editor.getEditorState());
 			}
 		}
@@ -179,7 +178,6 @@ const ToolbarPlugin = ({
 	const formatCode = useCallback(() => {
 		editor.update(() => {
 			const selection = $getSelection();
-			console.log(selection);
 			if ($isRangeSelection(selection)) {
 				if (selection.isCollapsed()) {
 					$setBlocksType(selection, () => new CodeNode());

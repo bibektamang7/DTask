@@ -42,8 +42,6 @@ const MyTodo = () => {
 			const admin = workspace.members.find(
 				(member) => member.user._id === workspace.owner._id
 			);
-			console.log(admin);
-
 			setTodos(admin?.todos || []);
 		}
 	}, [workspace]);

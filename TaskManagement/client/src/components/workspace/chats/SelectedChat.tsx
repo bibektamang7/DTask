@@ -38,7 +38,6 @@ const SelectedChat: React.FC<SelectedChatProps> = ({
 			files.forEach((file) => formData.append("chatFiles", file));
 		}
 		const response = await handleSendMessage(formData);
-		console.log(response);
 	};
 	useEffect(() => {
 		return () => {

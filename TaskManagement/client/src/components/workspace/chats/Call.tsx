@@ -44,7 +44,6 @@ const Call: React.FC<CallProps> = ({ callType, callFrom, onHangUp }) => {
 
 	const cleanupMedia = async () => {
 		localStream?.getTracks().forEach((track) => {
-			console.log(track, "this is tarac to be colose");
 			track.stop();
 			if (localStream) {
 				localStream.removeTrack(track);
@@ -159,7 +158,6 @@ const Call: React.FC<CallProps> = ({ callType, callFrom, onHangUp }) => {
 	};
 
 	const handleUserLeft = (userId: string) => {
-		console.log("user left what to do");
 		setRemoteStreams((prev) =>
 			prev.filter((stream) => stream.userId !== userId)
 		);

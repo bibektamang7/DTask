@@ -27,7 +27,6 @@ const MembersContent = () => {
 	const { handleAddMember } = useAddMember();
 
 	const handleSendInvitation = async () => {
-		console.log(selectedRole);
 		await handleAddMember({
 			member: {
 				userId: searchedUser?._id,

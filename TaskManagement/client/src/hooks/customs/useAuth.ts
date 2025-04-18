@@ -17,7 +17,6 @@ export const useAuth = () => {
 			localStorage.setItem("currentUser", data.user._id);
 			localStorage.setItem("token", data.token);
 			if (!data.user.username) {
-				console.log("yeta set user name aayo")
 				navigate("/set-username");
 			} else {
 				navigate("/w");
