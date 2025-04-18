@@ -17,8 +17,8 @@ const userSchema = new Schema<User>(
 	{
 		username: {
 			type: String,
-			index: true,
-			unique: true,
+			// index: true,
+			// unique: true,
 		},
 		googleId: {
 			type: String,
@@ -38,6 +38,7 @@ const userSchema = new Schema<User>(
 			required: function () {
 				return !this.googleId;
 			},
+			index: true
 		},
 		password: {
 			type: String,

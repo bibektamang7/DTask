@@ -39,6 +39,7 @@ const TaskLayout = lazy(
 // import TaskLayout from "./components/workspace/tasks/TaskLayout";
 const ContainerLayout = lazy(() => import("@/components/ContainerLayout"));
 // import ContainerLayout from "./components/ContainerLayout";
+import OuthSuccess from "./pages/OuthSuccess";
 
 import {
 	chatsLoader,
@@ -168,6 +169,10 @@ const router = createBrowserRouter(
 			<Route
 				path="set-username"
 				element={<SetUsername />}
+			/>
+			<Route
+				path="/oauth-success"
+				element={<OuthSuccess />}
 			/>
 			<Route
 				path="*"

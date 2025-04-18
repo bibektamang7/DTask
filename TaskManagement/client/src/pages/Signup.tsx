@@ -26,6 +26,17 @@ const Signup = () => {
 	});
 	const [register, { isLoading }] = useRegisterUserMutation();
 
+	const handleSignupWithGoogle = () => {
+		try {
+			window.location.href = import.meta.env.VITE_GOOGLE_CONSOLE;
+		} catch (error) {
+			toast({
+				title: "Something went wrong",
+				description: "Please try again",
+				variant: "destructive",
+			});
+		}
+	};
 	const handleRegister = async (data: { email: string; password: string }) => {
 		try {
 			const response = await register(data).unwrap();
@@ -122,7 +133,10 @@ const Signup = () => {
 								</form>
 							</FormProvider>
 							<div>
-								<Button className="w-full py-5 bg-gray-900 text-white border-2 border-slate-500 my-4 hover:bg-slate-700">
+								<Button
+									onClick={handleSignupWithGoogle}
+									className="w-full py-5 bg-gray-900 text-white border-2 border-slate-500 my-4 hover:bg-slate-700"
+								>
 									<img
 										width={20}
 										height={20}
