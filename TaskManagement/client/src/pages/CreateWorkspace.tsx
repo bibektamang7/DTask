@@ -18,7 +18,7 @@ import { toast } from "@/hooks/use-toast";
 import { useCreateWorkspace } from "@/hooks/customs/useCreateWorkspace";
 
 const CreateWorkspace = () => {
-	const token = localStorage.getItem("token");
+	const { value: token } = JSON.parse(localStorage.getItem("token")!);
 	const [workspaceName, setWorkspaceName] = useState("");
 	const [searchEmail, setSearchEmail] = useState<string>("");
 	const [getUser] = useLazyGetUsersByEmailQuery();

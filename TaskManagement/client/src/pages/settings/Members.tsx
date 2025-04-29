@@ -13,7 +13,7 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 
 const MembersContent = () => {
-	const token = localStorage.getItem("token");
+	const { value: token } = JSON.parse(localStorage.getItem("token")!);
 	const workspaceMembers = useSelector(
 		(state: RootState) => state.Workspaces.workspace.members
 	);

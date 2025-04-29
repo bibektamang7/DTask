@@ -8,9 +8,13 @@ const ContainerLayout: React.FC<{ children: React.ReactNode }> = ({
 }) => {
 	// const location = useLocation();
 	const token = localStorage.getItem("token");
-	if (!token) return <Navigate to={"/login"} />;
-	// const isAuthenticated =
-	// if (!isAuthenticated) <Navigate to={"/login"} />;
+
+	if (!token) {
+		return <Navigate to={`/login`} />;
+	} else {
+		const item = JSON.parse(token);
+		if (Date.now() > item.expiry) return <Navigate to={`/login`} />;
+	}
 	return (
 		<SocketProvider>
 			<PeerProvider>{children}</PeerProvider>

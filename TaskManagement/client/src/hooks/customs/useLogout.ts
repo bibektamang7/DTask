@@ -2,7 +2,7 @@ import { useLogoutUserMutation } from "@/redux/services/authApi";
 import { toast } from "../use-toast";
 
 const useLogout = () => {
-	const token = localStorage.getItem("token");
+	const { value: token } = JSON.parse(localStorage.getItem("token")!);
 
 	const [makeLogout, { isLoading }] = useLogoutUserMutation();
 	const handleLogout = async () => {

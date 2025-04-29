@@ -20,7 +20,7 @@ export const useSocket = () => useContext(SocketContext);
 const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 	const [socket, setSocket] = useState<WebSocket | null>(null);
 	const dispatch = useDispatch<AppDispatch>();
-	const token = localStorage.getItem("token");
+	const { value: token } = JSON.parse(localStorage.getItem("token")!);
 	const workspaceId = localStorage.getItem("workspace");
 
 	const onStatusChange = useCallback(

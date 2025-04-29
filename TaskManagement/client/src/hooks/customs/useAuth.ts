@@ -15,7 +15,14 @@ export const useAuth = () => {
 			});
 			const { data } = response;
 			localStorage.setItem("currentUser", data.user._id);
-			localStorage.setItem("token", data.token);
+
+			localStorage.setItem(
+				"token",
+				JSON.stringify({
+					value: data.token,
+					expiry: Date.now() + 7 * 24 * 60 * 60 * 1000,
+				})
+			);
 			if (!data.user.username) {
 				navigate("/set-username");
 			} else {

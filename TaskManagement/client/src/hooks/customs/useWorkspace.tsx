@@ -6,7 +6,7 @@ import { setWorkspace } from "@/redux/features/workspaceSlice";
 export const useWorkspace = () => {
 	const dispatch = useDispatch();
 	const workspaceId = localStorage.getItem("workspace");
-	const token = localStorage.getItem("token");
+	const { value: token } = JSON.parse(localStorage.getItem("token")!);
 	const { data, isLoading } = useGetWorkspaceQuery({ token, workspaceId });
 	useEffect(() => {
 		if (data) {

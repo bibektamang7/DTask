@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 
 const useSetUsername = () => {
 	const navigate = useNavigate();
-	const token = localStorage.getItem("token");
+	const { value: token } = JSON.parse(localStorage.getItem("token")!);
 	const [setUsername, { isLoading: setUsernameLoading }] =
 		useSetUsernameMutation();
 	const handleSetUsername = async (username: string) => {

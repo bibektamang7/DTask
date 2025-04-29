@@ -10,7 +10,6 @@ import {
 	userLoginWithEmailAndPasswordSchema,
 } from "../helpers/validation";
 import bcrypt from "bcryptjs";
-import mongoose from "mongoose";
 
 import { createClient } from "redis";
 
@@ -29,7 +28,7 @@ const decryptPassword = async (password: string, savedPassword: string) => {
 
 const generateAccessAndRefreshToken = (id: string) => {
 	const accessToken = jwt.sign({ _id: id }, process.env.ACCESS_TOKEN_SECRET!, {
-		expiresIn: "1h",
+		expiresIn: "7d",
 	});
 
 	const refreshToken = jwt.sign(
