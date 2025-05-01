@@ -41,7 +41,6 @@ export const chatApi = createApi({
 				body: messageInfo,
 				credentials: "include",
 			}),
-			invalidatesTags: ["Message"],
 		}),
 		deleteMessage: builder.mutation({
 			query: ({ workspaceId, chatId, messageId }) => ({

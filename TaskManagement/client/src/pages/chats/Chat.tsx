@@ -6,7 +6,6 @@ import { ChatSchema, MessageSchema } from "@/types/chat";
 import NewChatForm from "@/components/workspace/chats/NewChatForm";
 import { useDispatch } from "react-redux";
 import { useGetChatMessageQuery } from "@/redux/services/chatApi";
-import { useSocket } from "@/context/SocketContex";
 import { ChatEvent } from "@/constants";
 import ChatRoomList from "@/components/workspace/chats/ChatRoomList";
 import { AppDispatch } from "@/redux/store";
@@ -32,7 +31,6 @@ const WorkspaceChat = () => {
 	const [showMobileChatList, setShowMobileChatList] = useState(true);
 
 	const [messageInput, setMessageInput] = useState<string>("");
-	const socket = useSocket();
 
 	const [selectedChat, setSelectedChat] = useState<ChatSchema | null>(null);
 	const [messages, setMessages] = useState<MessageSchema[]>([]);
@@ -59,6 +57,7 @@ const WorkspaceChat = () => {
 	const onMessageReceived = useCallback(
 		(event: CustomEvent<{ message: MessageSchema }>) => {
 			if (event.detail.message.chat === selectedChat?._id) {
+				alert(selectedChat);
 				setMessages((prev) => [...prev, event.detail.message]);
 			}
 
@@ -72,7 +71,7 @@ const WorkspaceChat = () => {
 					.sort((a) => (a._id === event.detail.message.chat ? -1 : 1))
 			);
 		},
-		[]
+		[selectedChat, chats]
 	);
 
 	const onNewChat = useCallback((event: CustomEvent<{ chat: ChatSchema }>) => {
@@ -90,7 +89,7 @@ const WorkspaceChat = () => {
 				}
 			}
 		},
-		[]
+		[selectedChat, chats, messages]
 	);
 	const onChatMemberAdded = useCallback(
 		(event: CustomEvent<{ chatId: string; member: WorkspaceMember }>) => {
@@ -121,7 +120,7 @@ const WorkspaceChat = () => {
 				return prev;
 			});
 		},
-		[]
+		[selectedChat, chats]
 	);
 	const onChatMemberRemoved = useCallback(
 		(event: CustomEvent<{ chatId: string; memberId: string }>) => {
@@ -155,8 +154,24 @@ const WorkspaceChat = () => {
 				return prev;
 			});
 		},
-		[]
+		[chats, selectedChat]
 	);
+
+	const deleteChat = useCallback(
+		(event: CustomEvent<{ chatId: string }>) => {
+			if (event.detail.chatId === selectedChat?._id) {
+				setSelectedChat(null);
+			}
+			setChats((prev) =>
+				prev.filter((chat) => chat._id !== event.detail.chatId)
+			);
+		},
+		[chats]
+	);
+
+	useEffect(() => {
+		if (fetchedMessage) setMessages(fetchedMessage.data);
+	}, [fetchedMessage]);
 
 	useEffect(() => {
 		const localCurrentChat = JSON.parse(localStorage.getItem("currentChat")!);
@@ -164,16 +179,7 @@ const WorkspaceChat = () => {
 			setSelectedChat(localCurrentChat);
 		}
 	}, []);
-	useEffect(() => {
-		if (fetchedMessage) setMessages(fetchedMessage.data);
-	}, [fetchedMessage]);
 
-	const deleteChat = useCallback((event: CustomEvent<{ chatId: string }>) => {
-		if (event.detail.chatId === selectedChat?._id) {
-			setSelectedChat(null);
-		}
-		setChats((prev) => prev.filter((chat) => chat._id !== event.detail.chatId));
-	}, []);
 	useEffect(() => {
 		window.addEventListener(
 			ChatEvent.ADD_MEMBER,

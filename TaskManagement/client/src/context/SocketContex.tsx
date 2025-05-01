@@ -368,7 +368,6 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 			dispatch(
 				taskApi.util.updateQueryData(
 					"getTasks",
-
 					{
 						workspaceId,
 						token,
@@ -395,6 +394,7 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 		if (!socket) return;
 		socket.onmessage = (event) => {
 			const message = JSON.parse(event.data.toString());
+			alert("jsdfksdjkfskjfkl")
 			switch (message.type) {
 				case TaskEvent.COMMENT_DELETED:
 					onCommentDelete(message.data.taskId, message.data.commentId);
@@ -480,12 +480,6 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 						})
 					);
 					break;
-			}
-		};
-
-		return () => {
-			if (socket) {
-				socket.onmessage = null;
 			}
 		};
 	}, [socket]);

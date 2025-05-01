@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { format } from "date-fns";
 import {
 	Search,
@@ -88,11 +88,19 @@ const ListView = () => {
 		}
 	};
 
+	const addNewTask = useCallback((event: CustomEvent<{ task: Task }>) => {
+		setTasks((prev) => [...prev, event.detail.task]);
+	}, []);
+
 	useEffect(() => {
 		if (taskData) {
 			setTasks(taskData);
 		}
 	}, [taskData]);
+
+	useEffect(() => {
+		window.addEventListener("newTask", addNewTask as EventListener);
+	}, []);
 
 	if (isLoading) {
 		return <Loader />;

@@ -19,6 +19,7 @@ const useSendMessage = (chatId: string) => {
 				description: "Please try again",
 				variant: "destructive",
 			});
+			return null
 		}
 	};
 	return { handleSendMessage, sendMessageLoading };
