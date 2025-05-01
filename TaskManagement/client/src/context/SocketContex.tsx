@@ -1,4 +1,4 @@
-import { TaskEvent } from "@/constants";
+import { ChatEvent, TaskEvent } from "@/constants";
 import { taskApi } from "@/redux/services/taskApi";
 import { AppDispatch } from "@/redux/store";
 import { Attachment, Comment, Status, Task } from "@/types/task";
@@ -427,6 +427,58 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 					break;
 				case TaskEvent.NEW_COMMENT:
 					onNewCommentAdded(message.data.taskId, message.data.comment);
+					break;
+
+				case ChatEvent.NEW_CHAT:
+					window.dispatchEvent(
+						new CustomEvent(ChatEvent.NEW_CHAT, {
+							detail: { chat: message.data.chat },
+						})
+					);
+					break;
+				case ChatEvent.DELETE_CHAT:
+					window.dispatchEvent(
+						new CustomEvent(ChatEvent.DELETE_CHAT, {
+							detail: { chatId: message.data.chatId },
+						})
+					);
+					break;
+				case ChatEvent.ADD_MESSAGE:
+					window.dispatchEvent(
+						new CustomEvent(ChatEvent.ADD_MESSAGE, {
+							detail: { message: message.data.message },
+						})
+					);
+					break;
+				case ChatEvent.DELETE_MESSAGE:
+					window.dispatchEvent(
+						new CustomEvent(ChatEvent.DELETE_MESSAGE, {
+							detail: {
+								chatId: message.chat.chatId,
+								messageId: message.data.messageId,
+							},
+						})
+					);
+					break;
+				case ChatEvent.ADD_MEMBER:
+					window.dispatchEvent(
+						new CustomEvent(ChatEvent.ADD_MEMBER, {
+							detail: {
+								chatId: message.data.chatId,
+								member: message.data.member,
+							},
+						})
+					);
+					break;
+				case ChatEvent.REMOVE_MEMBER:
+					window.dispatchEvent(
+						new CustomEvent(ChatEvent.REMOVE_MEMBER, {
+							detail: {
+								chatId: message.data.chatId,
+								memberId: message.data.memberId,
+							},
+						})
+					);
 					break;
 			}
 		};

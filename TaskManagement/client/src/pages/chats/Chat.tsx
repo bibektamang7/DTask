@@ -56,53 +56,65 @@ const WorkspaceChat = () => {
 		setChats((prev) => prev.filter((chat) => chat._id !== chatId));
 	}, []);
 
-	const onMessageReceived = useCallback((message: MessageSchema) => {
-		if (message.chat === selectedChat?._id) {
-			setMessages((prev) => [...prev, message]);
-		}
-
-		setChats((prev) =>
-			prev
-				.map((chat) =>
-					chat._id === message.chat ? { ...chat, lastMessage: message } : chat
-				)
-				.sort((a) => (a._id === message.chat ? -1 : 1))
-		);
-	}, []);
-
-	const onNewChat = useCallback((chat: ChatSchema) => {
-		setChats((prev) => [chat, ...prev]);
-	}, []);
-
-	const onMessageDelete = useCallback((chatId: string, messageId: string) => {
-		if (chatId === selectedChat?._id) {
-			selectedChat.messages.filter((message) => message._id !== messageId);
-			if (selectedChat.lastMessage._id === messageId) {
-				selectedChat.lastMessage.content = "Messsage Deleted";
+	const onMessageReceived = useCallback(
+		(event: CustomEvent<{ message: MessageSchema }>) => {
+			if (event.detail.message.chat === selectedChat?._id) {
+				setMessages((prev) => [...prev, event.detail.message]);
 			}
-		}
+
+			setChats((prev) =>
+				prev
+					.map((chat) =>
+						chat._id === event.detail.message.chat
+							? { ...chat, lastMessage: event.detail.message }
+							: chat
+					)
+					.sort((a) => (a._id === event.detail.message.chat ? -1 : 1))
+			);
+		},
+		[]
+	);
+
+	const onNewChat = useCallback((event: CustomEvent<{ chat: ChatSchema }>) => {
+		setChats((prev) => [event.detail.chat, ...prev]);
 	}, []);
+
+	const onMessageDelete = useCallback(
+		(event: CustomEvent<{ chatId: string; messageId: string }>) => {
+			if (event.detail.chatId === selectedChat?._id) {
+				selectedChat.messages.filter(
+					(message) => message._id !== event.detail.messageId
+				);
+				if (selectedChat.lastMessage._id === event.detail.messageId) {
+					selectedChat.lastMessage.content = "Messsage Deleted";
+				}
+			}
+		},
+		[]
+	);
 	const onChatMemberAdded = useCallback(
-		(chatId: string, member: WorkspaceMember) => {
+		(event: CustomEvent<{ chatId: string; member: WorkspaceMember }>) => {
 			dispatch(
 				workspaceApi.util.updateQueryData(
 					"getWorkspace",
 					undefined,
 					(draft: Workspace) => {
-						draft.members.push(member);
+						draft.members.push(event.detail.member);
 					}
 				)
 			);
-			if (selectedChat?._id === chatId) {
-				selectedChat.members.push(member._id);
+			if (selectedChat?._id === event.detail.chatId) {
+				selectedChat.members.push(event.detail.member._id);
 			}
 			setChats((prev) => {
-				const index = prev.findIndex((chat) => chat._id === chatId);
+				const index = prev.findIndex(
+					(chat) => chat._id === event.detail.chatId
+				);
 				if (index !== -1) {
 					const updatedChats = [...prev];
 					updatedChats[index] = {
 						...prev[index],
-						members: [...prev[index].members, member._id],
+						members: [...prev[index].members, event.detail.member._id],
 					};
 					return updatedChats;
 				}
@@ -112,26 +124,30 @@ const WorkspaceChat = () => {
 		[]
 	);
 	const onChatMemberRemoved = useCallback(
-		(chatId: string, memberId: string) => {
+		(event: CustomEvent<{ chatId: string; memberId: string }>) => {
 			dispatch(
 				workspaceApi.util.updateQueryData(
 					"getWorkspace",
 					undefined,
 					(draft: Workspace) => {
 						draft.members = draft.members.filter(
-							(member) => member._id === memberId
+							(member) => member._id === event.detail.memberId
 						);
 					}
 				)
 			);
 			setChats((prev) => {
-				const index = prev.findIndex((chat) => chat._id === chatId);
+				const index = prev.findIndex(
+					(chat) => chat._id === event.detail.chatId
+				);
 				if (index !== -1) {
 					const updatedChats = [...prev];
 					updatedChats[index] = {
 						...prev[index],
 						members: [
-							...prev[index].members.filter((member) => member === memberId),
+							...prev[index].members.filter(
+								(member) => member === event.detail.memberId
+							),
 						],
 					};
 					return updatedChats;
@@ -152,38 +168,59 @@ const WorkspaceChat = () => {
 		if (fetchedMessage) setMessages(fetchedMessage.data);
 	}, [fetchedMessage]);
 
+	const deleteChat = useCallback((event: CustomEvent<{ chatId: string }>) => {
+		if (event.detail.chatId === selectedChat?._id) {
+			setSelectedChat(null);
+		}
+		setChats((prev) => prev.filter((chat) => chat._id !== event.detail.chatId));
+	}, []);
 	useEffect(() => {
-		if (!socket) return;
+		window.addEventListener(
+			ChatEvent.ADD_MEMBER,
+			onChatMemberAdded as EventListener
+		);
+		window.addEventListener(ChatEvent.NEW_CHAT, onNewChat as EventListener);
+		window.addEventListener(ChatEvent.DELETE_CHAT, deleteChat as EventListener);
+		window.addEventListener(
+			ChatEvent.ADD_MESSAGE,
+			onMessageReceived as EventListener
+		);
+		window.addEventListener(
+			ChatEvent.DELETE_MESSAGE,
+			onMessageDelete as EventListener
+		);
+		window.addEventListener(
+			ChatEvent.REMOVE_MEMBER,
+			onChatMemberRemoved as EventListener
+		);
 
-		socket.onmessage = (event) => {
-			const message = JSON.parse(event.data);
-			switch (message.type) {
-				case ChatEvent.NEW_CHAT:
-					onNewChat(message.data.chat);
-					break;
-				case ChatEvent.DELETE_CHAT:
-					onChatDelete(message.data.chatId);
-					break;
-				case ChatEvent.ADD_MESSAGE:
-					onMessageReceived(message.data.message);
-					break;
-				case ChatEvent.DELETE_MESSAGE:
-					onMessageDelete(message.data.chatId, message.data.messageId);
-					break;
-				case ChatEvent.ADD_MEMBER:
-					onChatMemberAdded(message.data.chatId, message.data.member);
-					break;
-				case ChatEvent.REMOVE_MEMBER:
-					onChatMemberRemoved(message.data.chatId, message.data.memberId);
-					break;
-			}
-		};
 		return () => {
-			if (socket) {
-				socket.onmessage = null;
-			}
+			window.removeEventListener(
+				ChatEvent.ADD_MEMBER,
+				onChatMemberAdded as EventListener
+			);
+			window.removeEventListener(
+				ChatEvent.NEW_CHAT,
+				onNewChat as EventListener
+			);
+			window.removeEventListener(
+				ChatEvent.DELETE_CHAT,
+				deleteChat as EventListener
+			);
+			window.removeEventListener(
+				ChatEvent.ADD_MESSAGE,
+				onMessageReceived as EventListener
+			);
+			window.removeEventListener(
+				ChatEvent.DELETE_MESSAGE,
+				onMessageDelete as EventListener
+			);
+			window.removeEventListener(
+				ChatEvent.REMOVE_MEMBER,
+				onChatMemberRemoved as EventListener
+			);
 		};
-	}, [socket]);
+	}, []);
 
 	return (
 		<>
