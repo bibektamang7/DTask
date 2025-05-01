@@ -6,7 +6,6 @@ import { Navigate } from "react-router";
 const ContainerLayout: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
-	// const location = useLocation();
 	const token = localStorage.getItem("token");
 
 	if (!token) {

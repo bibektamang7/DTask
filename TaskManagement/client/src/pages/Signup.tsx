@@ -45,7 +45,10 @@ const Signup = () => {
 			localStorage.setItem("currentUser", response.data.user._id);
 			localStorage.setItem(
 				"token",
-				JSON.stringify({ value: response.data.token, expiry: Date.now() })
+				JSON.stringify({
+					value: response.data.token,
+					expiry: Date.now() + 7 * 24 * 60 * 60 * 1000,
+				})
 			);
 			if (!response.data.user.username) {
 				navigate("/set-username");
@@ -77,7 +80,8 @@ const Signup = () => {
 							<FormProvider {...form}>
 								<form
 									onSubmit={form.handleSubmit(handleRegister)}
-									className="flex flex-col gap-4">
+									className="flex flex-col gap-4"
+								>
 									<FormField
 										control={form.control}
 										name="email"
@@ -128,7 +132,8 @@ const Signup = () => {
 									<Button
 										type="submit"
 										disabled={isLoading}
-										className={cn("w-full mt-4 py-5")}>
+										className={cn("w-full mt-4 py-5")}
+									>
 										{isLoading ? <LoaderComponent /> : "Get Started"}
 									</Button>
 								</form>
@@ -136,7 +141,8 @@ const Signup = () => {
 							<div>
 								<Button
 									onClick={handleSignupWithGoogle}
-									className="w-full py-5 bg-gray-900 text-white border-2 border-slate-500 my-4 hover:bg-slate-700">
+									className="w-full py-5 bg-gray-900 text-white border-2 border-slate-500 my-4 hover:bg-slate-700"
+								>
 									<img
 										width={20}
 										height={20}
@@ -152,7 +158,8 @@ const Signup = () => {
 							Already have an account?
 							<Link
 								className="text-white font-normal"
-								to={`/login`}>
+								to={`/login`}
+							>
 								{" "}
 								Login
 							</Link>

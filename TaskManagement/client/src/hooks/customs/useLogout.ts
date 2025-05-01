@@ -1,8 +1,10 @@
 import { useLogoutUserMutation } from "@/redux/services/authApi";
 import { toast } from "../use-toast";
+import { useNavigate } from "react-router";
 
 const useLogout = () => {
 	const { value: token } = JSON.parse(localStorage.getItem("token")!);
+	const navigate = useNavigate();
 
 	const [makeLogout, { isLoading }] = useLogoutUserMutation();
 	const handleLogout = async () => {
@@ -10,10 +12,10 @@ const useLogout = () => {
 			await makeLogout({ token }).unwrap();
 			localStorage.removeItem("token");
 			localStorage.removeItem("workspace");
-			window.location.href = "/";
 			toast({
 				title: "Logout Successfull",
 			});
+			navigate("/");
 		} catch (error: any) {
 			toast({
 				title: "Failed to logout",
