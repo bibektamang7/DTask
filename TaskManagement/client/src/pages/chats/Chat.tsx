@@ -177,7 +177,15 @@ const WorkspaceChat = () => {
 		if (localCurrentChat) {
 			setSelectedChat(localCurrentChat);
 		}
+	}, []);
 
+	useEffect(() => {
+		if (selectedChat) {
+			localStorage.setItem("currentChat", JSON.stringify(selectedChat));
+		}
+	}, [selectedChat]);
+
+	useEffect(() => {
 		window.addEventListener(
 			ChatEvent.ADD_MEMBER,
 			onChatMemberAdded as EventListener
@@ -224,8 +232,8 @@ const WorkspaceChat = () => {
 			);
 		};
 	}, [
+		onNewChat,
 		onMessageReceived,
-		onChatMemberAdded,
 		onMessageDelete,
 		deleteChat,
 		onChatMemberAdded,
