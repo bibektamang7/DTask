@@ -1,4 +1,4 @@
-import { User, userManager } from "../../user";
+import { userManager } from "../../user";
 import { workspaceTaskEvent } from "../../constants";
 // import { Task } from "./task";
 
@@ -18,7 +18,6 @@ import { socketClient } from "../../helpers/redisConnection";
 function taskSocketBroadcaster(type: string, data: any) {
 	const message = JSON.parse(data.toString());
 	const members = message.members;
-	console.log(message);
 	const wrokspaceMembers = members
 		.map((member: { _id: string }) => userManager.getOnlineUser(member._id))
 		.filter(Boolean); // Removes undefined/null values
@@ -33,8 +32,6 @@ function taskSocketBroadcaster(type: string, data: any) {
 }
 
 socketClient.subscribe("taskCreated", (data) => {
-	console.log("task created");
-
 	taskSocketBroadcaster(workspaceTaskEvent.NEW_TASK_ADDED, data);
 });
 

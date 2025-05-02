@@ -27,9 +27,8 @@ wss.on("connection", function connection(ws: WebSocket, req) {
 	ws.on("error", console.error);
 
 	try {
-		// console.log(req.headers["sec-websocket-protocol"]);
-		const token =
-			req.headers["sec-websocket-protocol"] || req.headers.authorization;
+		const url = new URL(req.url || "", `http://${req.headers.host}`);
+		const token = url.searchParams.get("token");
 		if (!token) {
 			ws.close(1008, "Unauthorized");
 			return;
@@ -182,7 +181,6 @@ class CallManager {
 				})
 			);
 		} else if (message.type === "nego-needed") {
-			console.log("mego is need is ana what goin on");
 			const offer = message.data.offer;
 			const reciever = message.data.to;
 			const sender = message.data.from;

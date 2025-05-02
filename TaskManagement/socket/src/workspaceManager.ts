@@ -31,7 +31,6 @@ socketClient.subscribe("workspaceCreated", (data) => {
 });
 
 socketClient.subscribe("workspaceDeleted", (data) => {
-	console.log(data);
 	workspaceSocketBroadcaster("workspace-deleted", data);
 });
 

@@ -1,9 +1,8 @@
-import { User, userManager } from "../../user";
+import { userManager } from "../../user";
 import { workspaceChatEvent } from "../../constants";
 import { socketBroadcast } from "../../helpers";
 
 import { socketClient } from "../../helpers/redisConnection";
-import { Chat } from "./chat";
 
 function chatSocketBroadcaster(type: string, data: any) {
 	const message = JSON.parse(data.toString());
@@ -20,7 +19,7 @@ function chatSocketBroadcaster(type: string, data: any) {
 				...message,
 			},
 		}),
-		message.userId
+		message.sender
 	);
 }
 
@@ -91,7 +90,7 @@ socketClient.subscribe("removeMember", (data) => {
 // 	}
 // 	removeUserFromAllChats(user: User) {
 // 		const chats = this.userChatMapping.get(user.userId);
-		
+
 // 	}
 // }
 // export const chatManager = ChatManager.getInstance();
