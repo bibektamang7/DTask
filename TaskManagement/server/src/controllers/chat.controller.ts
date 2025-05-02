@@ -404,6 +404,7 @@ const sendMessage = asyncHandler(async (req, res) => {
 				chatId: updatedChat._id,
 				message: chatMessage[0],
 				members,
+				sender: req.member._id,
 			})
 		);
 		res
