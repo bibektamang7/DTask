@@ -57,7 +57,6 @@ const WorkspaceChat = () => {
 	const onMessageReceived = useCallback(
 		(event: CustomEvent<{ message: MessageSchema }>) => {
 			if (event.detail.message.chat === selectedChat?._id) {
-				alert(selectedChat);
 				setMessages((prev) => [...prev, event.detail.message]);
 			}
 
@@ -71,7 +70,7 @@ const WorkspaceChat = () => {
 					.sort((a) => (a._id === event.detail.message.chat ? -1 : 1))
 			);
 		},
-		[selectedChat, chats]
+		[selectedChat]
 	);
 
 	const onNewChat = useCallback((event: CustomEvent<{ chat: ChatSchema }>) => {
@@ -178,9 +177,7 @@ const WorkspaceChat = () => {
 		if (localCurrentChat) {
 			setSelectedChat(localCurrentChat);
 		}
-	}, []);
 
-	useEffect(() => {
 		window.addEventListener(
 			ChatEvent.ADD_MEMBER,
 			onChatMemberAdded as EventListener
@@ -226,7 +223,14 @@ const WorkspaceChat = () => {
 				onChatMemberRemoved as EventListener
 			);
 		};
-	}, []);
+	}, [
+		onMessageReceived,
+		onChatMemberAdded,
+		onMessageDelete,
+		deleteChat,
+		onChatMemberAdded,
+		onChatMemberRemoved,
+	]);
 
 	return (
 		<>
@@ -258,6 +262,7 @@ const WorkspaceChat = () => {
 							onDeleteChat={onChatDelete}
 							currentMember={currentMember!}
 							messages={messages}
+							setMessages={setMessages}
 							selectedChat={selectedChat}
 							setShowMobileChatList={setShowMobileChatList}
 							files={files}
@@ -299,6 +304,7 @@ const WorkspaceChat = () => {
 
 					{selectedChat ? (
 						<SelectedChat
+							setMessages={setMessages}
 							onDeleteChat={onChatDelete}
 							currentMember={currentMember!}
 							messages={messages}

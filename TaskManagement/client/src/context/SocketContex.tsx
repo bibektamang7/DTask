@@ -7,7 +7,7 @@ import {
 	useCallback,
 	useContext,
 	useEffect,
-	useState,
+	useRef,
 } from "react";
 import { useDispatch } from "react-redux";
 
@@ -18,7 +18,7 @@ const SocketContext = createContext<WebSocket | null>(null);
 export const useSocket = () => useContext(SocketContext);
 
 const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-	const [socket, setSocket] = useState<WebSocket | null>(null);
+	const socketRef = useRef<WebSocket | null>(null);
 	const dispatch = useDispatch<AppDispatch>();
 	const { value: token } = JSON.parse(localStorage.getItem("token")!);
 	const workspaceId = localStorage.getItem("workspace");
@@ -383,18 +383,17 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 	);
 
 	useEffect(() => {
-		const newSocket = new WebSocket(SOCKET_URL, token!);
-		setSocket(newSocket);
-		return () => {
-			newSocket.close();
-		};
-	}, []);
+		const newSocket = new WebSocket(`${SOCKET_URL}?token=${token}`);
 
-	useEffect(() => {
-		if (!socket) return;
-		socket.onmessage = (event) => {
+		newSocket.onclose = (e) => {
+			console.log("socket closed", e);
+		};
+
+		newSocket.onerror = (error) => {
+			console.log("something went wront", error);
+		};
+		newSocket.onmessage = function (event) {
 			const message = JSON.parse(event.data.toString());
-			alert("jsdfksdjkfskjfkl")
 			switch (message.type) {
 				case TaskEvent.COMMENT_DELETED:
 					onCommentDelete(message.data.taskId, message.data.commentId);
@@ -482,10 +481,16 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 					break;
 			}
 		};
-	}, [socket]);
+		socketRef.current = newSocket;
+		return () => {
+			newSocket.close();
+		};
+	}, []);
 
 	return (
-		<SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
+		<SocketContext.Provider value={socketRef.current}>
+			{children}
+		</SocketContext.Provider>
 	);
 };
 

@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatSchema } from "@/types/chat";
+import React from "react";
 
 interface ChatRoomListProps {
 	chats: ChatSchema[];
@@ -56,9 +57,7 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
 					</div>
 				))
 			) : (
-				<div className="text-sm text-center mt-[100%]">
-					No chats yet.
-				</div>
+				<div className="text-sm text-center mt-[100%]">No chats yet.</div>
 			)}
 		</ScrollArea>
 	);

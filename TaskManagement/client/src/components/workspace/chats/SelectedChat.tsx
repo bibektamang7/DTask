@@ -1,7 +1,7 @@
 import { useSendMessage } from "@/hooks/customs/useSendMessage";
 import { ChatSchema, MessageSchema } from "@/types/chat";
 import { WorkspaceMember } from "@/types/workspace";
-import { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import ChatHeader from "./ChatHeader";
 import ChatMessages from "./ChatMessages";
 import { Paperclip, SendHorizonal } from "lucide-react";
@@ -18,6 +18,7 @@ interface SelectedChatProps {
 	setFiles: React.Dispatch<React.SetStateAction<File[]>>;
 	messageInput: string;
 	setMessageInput: React.Dispatch<React.SetStateAction<string>>;
+	setMessages: React.Dispatch<React.SetStateAction<MessageSchema[]>>;
 }
 const SelectedChat: React.FC<SelectedChatProps> = ({
 	selectedChat,
@@ -29,8 +30,8 @@ const SelectedChat: React.FC<SelectedChatProps> = ({
 	messageInput,
 	setMessageInput,
 	onDeleteChat,
+	setMessages,
 }) => {
-	const [messageList, setMessageList] = useState<MessageSchema[]>([]);
 	const { handleSendMessage } = useSendMessage(selectedChat._id);
 	const handleMessageSend = async () => {
 		const formData = new FormData();
@@ -40,7 +41,7 @@ const SelectedChat: React.FC<SelectedChatProps> = ({
 		}
 		const response = await handleSendMessage(formData);
 		if (response) {
-			setMessageList((prev) => [...prev, response]);
+			setMessages((prev) => [...prev, response]);
 		}
 	};
 	useEffect(() => {
@@ -48,10 +49,6 @@ const SelectedChat: React.FC<SelectedChatProps> = ({
 			files.forEach((file) => URL.revokeObjectURL(String(file)));
 		};
 	}, [files]);
-
-	useEffect(() => {
-		setMessageList(messages);
-	}, [messages]);
 
 	return (
 		<div className="flex-1 flex flex-col max-h-screen">
@@ -62,7 +59,7 @@ const SelectedChat: React.FC<SelectedChatProps> = ({
 			/>
 			<ChatMessages
 				currentMember={currentMember!}
-				messages={messageList}
+				messages={messages}
 			/>
 			<div className="p-4 border-t border-border flex flex-col gap-4">
 				{files.length > 0 && (
