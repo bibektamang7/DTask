@@ -365,7 +365,6 @@ const updateTask = asyncHandler(async (req, res) => {
 				taskActivities: notification._id,
 			},
 		});
-		console.log("error here");
 		const taskMemberId = new Set(
 			task.assignees.map((member) => member._id.toString())
 		);
@@ -730,7 +729,6 @@ const deleteAttachmentFromTask = asyncHandler(async (req, res) => {
 
 // comments handlers
 const createComment = asyncHandler(async (req, res) => {
-	console.log("yeta asko rehexa");
 	const { taskId } = req.params;
 	const parsedData = createCommentSchema.safeParse(req.body);
 	if (!parsedData.success) {

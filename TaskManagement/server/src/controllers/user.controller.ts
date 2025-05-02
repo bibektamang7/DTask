@@ -173,7 +173,6 @@ const userLoginWithEmailAndPassword = asyncHandler(async (req, res) => {
 });
 
 const userSignIn = asyncHandler(async (req, res) => {
-	console.log("this is user signin", req.user);
 	const user = req.user as User;
 	const { accessToken, refreshToken } = generateAccessAndRefreshToken(
 		user._id.toString()

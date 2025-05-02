@@ -285,7 +285,6 @@ const getWorkspace = asyncHandler(async (req, res) => {
 		? { _id: new mongoose.Types.ObjectId(workspaceId.toString()) }
 		: { owner: userId };
 
-	console.log(matchCondition);
 	const workspace = await WorkspaceModel.aggregate([
 		{
 			$match: matchCondition,
@@ -354,7 +353,6 @@ const getWorkspace = asyncHandler(async (req, res) => {
 			},
 		},
 	]);
-	console.log(workspace.length);
 
 	if (workspace.length < 1) {
 		throw new ApiError(404, "Workspace not found");
