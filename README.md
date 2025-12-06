@@ -17,6 +17,8 @@ Donezo is a powerful and intuitive task management system built to help individu
 
 ---
 
+### The live URL isn't working because MongoDB automatically shuts down inactive clusters.
+
 ## ️ Screenshots
 
 ![Dashboard](./assets/home.png)
