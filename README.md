@@ -21,18 +21,31 @@ Donezo is a powerful and intuitive task management system built to help individu
 
 ![Dashboard](./assets/home.png)
 
+![Dashboard](./assets/dashboard.png)
+
 ## 🚀 Installation
 
 Follow the steps below to run the project locally:
 
+### Note: Setup mongoDB and Redis with docker and Environment variables before running
+
 ```bash
 # 1. Clone the repository
 git clone https://github.com/bibektamang7/DTask.git
-cd DTask 
+cd DTask
 
-# 2. Install dependencies
+# 2. Install client dependencies
+cd client
 npm install
-
-# 3. Run the development server
 npm run dev
+
+# 3. Install server dependencies
+cd client
+npm install
+npm run start
+
+#4. Install socker dependencies
+cd socket
+npm install
+npm run start
 ```
