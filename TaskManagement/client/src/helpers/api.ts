@@ -6,7 +6,12 @@ import { taskApi } from "@/redux/services/taskApi";
 import { chatApi } from "@/redux/services/chatApi";
 
 export const workspaceLoader = async () => {
-	const { value: token } = JSON.parse(localStorage.getItem("token")!);
+	const tokenData = localStorage.getItem("token");
+	if (!tokenData) {
+		return [];
+	}
+	const { value: token } = JSON.parse(tokenData);
+	alert(token);
 	const workspaceId = localStorage.getItem("workspace");
 	if (!token) return redirect("/login");
 
@@ -45,7 +50,11 @@ export const workspaceLoader = async () => {
 	}
 };
 export const taskLoader = async () => {
-	const { value: token } = JSON.parse(localStorage.getItem("token")!);
+	const tokenData = localStorage.getItem("token")!;
+	if (!tokenData) {
+		return [];
+	}
+	const { value: token } = JSON.parse(tokenData);
 	const workspaceId = localStorage.getItem("workspace");
 	if (!token) return redirect("/login");
 

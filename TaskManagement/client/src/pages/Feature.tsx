@@ -42,40 +42,44 @@ const Feature = () => (
 				<div className="container px-4 md:px-6">
 					<Tabs
 						defaultValue="tasks"
-						className="w-full">
+						className="w-full"
+					>
 						<div className="flex justify-center mb-8">
 							<TabsList className="grid w-full max-w-md grid-cols-3">
 								<TabsTrigger
 									value="tasks"
-									className="data-[state=active]:bg-black data-[state=active]:text-white">
+									className="data-[state=active]:bg-black data-[state=active]:text-white"
+								>
 									<CheckSquare className="h-4 w-4 mr-2" />
 									Tasks
 								</TabsTrigger>
 								<TabsTrigger
 									value="chat"
-									className="data-[state=active]:bg-black data-[state=active]:text-white">
+									className="data-[state=active]:bg-black data-[state=active]:text-white"
+								>
 									<MessageSquare className="h-4 w-4 mr-2" />
 									Chat
 								</TabsTrigger>
 								<TabsTrigger
 									value="notifications"
-									className="data-[state=active]:bg-black data-[state=active]:text-white">
+									className="data-[state=active]:bg-black data-[state=active]:text-white"
+								>
 									<Bell className="h-4 w-4 mr-2" />
 									Notifications
 								</TabsTrigger>
 							</TabsList>
 						</div>
 
-						{/* Tasks Feature */}
 						<TabsContent
 							value="tasks"
-							className="mt-0">
+							className="mt-0"
+						>
 							<div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
 								<div className="space-y-4">
 									<h2 className="text-3xl font-bold tracking-tighter">
 										Intuitive Task Management
 									</h2>
-									<p className="text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+									<p className="text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed py-2 bg-black">
 										Create, assign, and track tasks with ease. Our intuitive
 										interface makes it simple to organize work and keep projects
 										on track.
@@ -104,8 +108,8 @@ const Feature = () => (
 										</li>
 									</ul>
 								</div>
-								<div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
-									<div className="p-2 bg-gray-50 border-b border-gray-200 flex items-center">
+								<div className="rounded-lg border border-gray-200 bg-black shadow-sm overflow-hidden">
+									<div className="p-2 bg-black border-b border-gray-200 flex items-center">
 										<div className="flex space-x-1">
 											<div className="h-3 w-3 rounded-full bg-gray-300"></div>
 											<div className="h-3 w-3 rounded-full bg-gray-300"></div>
@@ -122,20 +126,22 @@ const Feature = () => (
 												<Button
 													variant="outline"
 													size="sm"
-													className="h-8">
+													className="h-8"
+												>
 													<Search className="h-4 w-4 mr-1" />
 													Filter
 												</Button>
 												<Button
 													size="sm"
-													className="h-8 bg-black text-white hover:bg-gray-800">
+													className="h-8 bg-black text-white hover:bg-gray-800"
+												>
 													+ New Task
 												</Button>
 											</div>
 										</div>
 										<div className="grid grid-cols-3 gap-4">
 											<div className="space-y-2">
-												<div className="bg-gray-100 p-2 rounded-md font-medium text-sm">
+												<div className="bg-gray-100 text-black p-2 rounded-md font-medium text-sm">
 													To Do (3)
 												</div>
 												<Card className="border-l-4 border-l-gray-400">
@@ -152,7 +158,7 @@ const Feature = () => (
 															<CheckSquare className="h-3 w-3 mr-1" />
 															<span>0/3</span>
 														</div>
-														<div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+														<div className="h-6 w-6 rounded-full flex items-center justify-center text-xs">
 															JD
 														</div>
 													</CardFooter>
@@ -171,14 +177,14 @@ const Feature = () => (
 															<Calendar className="h-3 w-3 mr-1" />
 															<span>Tomorrow</span>
 														</div>
-														<div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+														<div className="h-6 w-6 rounded-full flex items-center justify-center text-xs">
 															AS
 														</div>
 													</CardFooter>
 												</Card>
 											</div>
 											<div className="space-y-2">
-												<div className="bg-gray-100 p-2 rounded-md font-medium text-sm">
+												<div className="bg-gray-100 text-black p-2 rounded-md font-medium text-sm">
 													In Progress (2)
 												</div>
 												<Card className="border-l-4 border-l-yellow-400">
@@ -195,7 +201,7 @@ const Feature = () => (
 															<CheckSquare className="h-3 w-3 mr-1" />
 															<span>2/5</span>
 														</div>
-														<div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+														<div className="h-6 w-6 rounded-full flex items-center justify-center text-xs">
 															TK
 														</div>
 													</CardFooter>
@@ -212,13 +218,10 @@ const Feature = () => (
 													<CardFooter className="p-3 pt-0 flex justify-between">
 														<div className="flex items-center text-xs text-gray-500">
 															<Users className="h-3 w-3 mr-1" />
-															<span>2 assignees</span>
+															<span>1 assignees</span>
 														</div>
 														<div className="flex -space-x-1">
-															<div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
-																RM
-															</div>
-															<div className="h-6 w-6 rounded-full bg-gray-300 flex items-center justify-center text-xs">
+															<div className="h-6 w-6 rounded-full  flex items-center justify-center text-xs">
 																JL
 															</div>
 														</div>
@@ -226,7 +229,7 @@ const Feature = () => (
 												</Card>
 											</div>
 											<div className="space-y-2">
-												<div className="bg-gray-100 p-2 rounded-md font-medium text-sm">
+												<div className="bg-gray-100 text-black p-2 rounded-md font-medium text-sm">
 													Completed (2)
 												</div>
 												<Card className="border-l-4 border-l-green-400 opacity-75">
@@ -243,7 +246,7 @@ const Feature = () => (
 															<CheckSquare className="h-3 w-3 mr-1" />
 															<span>5/5</span>
 														</div>
-														<div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+														<div className="h-6 w-6 rounded-full flex items-center justify-center text-xs">
 															MJ
 														</div>
 													</CardFooter>
@@ -262,7 +265,7 @@ const Feature = () => (
 															<Users className="h-3 w-3 mr-1" />
 															<span>Team</span>
 														</div>
-														<div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+														<div className="h-6 w-6 rounded-full flex items-center justify-center text-xs">
 															+3
 														</div>
 													</CardFooter>
@@ -274,10 +277,10 @@ const Feature = () => (
 							</div>
 						</TabsContent>
 
-						{/* Chat Feature */}
 						<TabsContent
 							value="chat"
-							className="mt-0">
+							className="mt-0"
+						>
 							<div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
 								<div className="space-y-4">
 									<h2 className="text-3xl font-bold tracking-tighter">
@@ -322,14 +325,15 @@ const Feature = () => (
 										<Button
 											variant="ghost"
 											size="sm"
-											className="h-8 w-8 p-0">
+											className="h-8 w-8 p-0"
+										>
 											<Search className="h-4 w-4" />
 										</Button>
 									</div>
 									<div className="p-4 h-[350px] flex flex-col">
 										<div className="flex-1 space-y-4 overflow-y-auto">
 											<div className="flex gap-2">
-												<div className="h-8 w-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center text-xs">
+												<div className="h-8 w-8 rounded-full text-black flex-shrink-0 flex items-center justify-center text-xs">
 													JD
 												</div>
 												<div>
@@ -418,7 +422,8 @@ const Feature = () => (
 														stroke="currentColor"
 														strokeWidth="2"
 														strokeLinecap="round"
-														strokeLinejoin="round">
+														strokeLinejoin="round"
+													>
 														<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
 														<path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
 													</svg>
@@ -434,7 +439,8 @@ const Feature = () => (
 													stroke="currentColor"
 													strokeWidth="2"
 													strokeLinecap="round"
-													strokeLinejoin="round">
+													strokeLinejoin="round"
+												>
 													<path d="m22 2-7 20-4-9-9-4Z"></path>
 													<path d="M22 2 11 13"></path>
 												</svg>
@@ -448,7 +454,8 @@ const Feature = () => (
 						{/* Notifications Feature */}
 						<TabsContent
 							value="notifications"
-							className="mt-0">
+							className="mt-0"
+						>
 							<div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
 								<div className="space-y-4">
 									<h2 className="text-3xl font-bold tracking-tighter">
@@ -484,13 +491,15 @@ const Feature = () => (
 											<Button
 												variant="outline"
 												size="sm"
-												className="h-8">
+												className="h-8"
+											>
 												Mark all as read
 											</Button>
 											<Button
 												variant="ghost"
 												size="sm"
-												className="h-8 w-8 p-0">
+												className="h-8 w-8 p-0"
+											>
 												<svg
 													xmlns="http://www.w3.org/2000/svg"
 													width="18"
@@ -500,19 +509,23 @@ const Feature = () => (
 													stroke="currentColor"
 													strokeWidth="2"
 													strokeLinecap="round"
-													strokeLinejoin="round">
+													strokeLinejoin="round"
+												>
 													<circle
 														cx="12"
 														cy="12"
-														r="1"></circle>
+														r="1"
+													></circle>
 													<circle
 														cx="19"
 														cy="12"
-														r="1"></circle>
+														r="1"
+													></circle>
 													<circle
 														cx="5"
 														cy="12"
-														r="1"></circle>
+														r="1"
+													></circle>
 												</svg>
 											</Button>
 										</div>
@@ -604,7 +617,8 @@ const Feature = () => (
 														stroke="currentColor"
 														strokeWidth="2"
 														strokeLinecap="round"
-														strokeLinejoin="round">
+														strokeLinejoin="round"
+													>
 														<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
 														<polyline points="14 2 14 8 20 8"></polyline>
 													</svg>
@@ -653,7 +667,8 @@ const Feature = () => (
 								<Link to="/">
 									<Button
 										variant="outline"
-										className="border-white text-white hover:bg-white/10">
+										className="border-white text-white hover:bg-white/10"
+									>
 										Request a demo
 									</Button>
 								</Link>
